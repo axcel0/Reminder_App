@@ -1,3 +1,7 @@
 <resources>
-    <string name="app_name">My Application</string>
+    <string name="app_name">Reminder App</string>
+    <string name="action_create">create reminder</string>
+    <string name="apply">Apply</string>
+    <string name="select_date_and_time">Select Date and Time</string>
+    <string name="title">Title</string>
 </resources>

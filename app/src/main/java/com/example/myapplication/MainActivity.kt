@@ -1,38 +1,55 @@
 package com.example.myapplication
 
+import android.content.Context
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.AttributeSet
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
 import android.widget.Button
 import android.widget.DatePicker
 import android.widget.TextView
 import android.widget.TimePicker
+import com.example.myapplication.databinding.ActivityMainBinding
 import com.google.android.material.textfield.TextInputEditText
+import java.sql.Time
+import java.util.Calendar
+import java.util.Date
 
 class MainActivity : AppCompatActivity() {
+    private lateinit var binding: ActivityMainBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        val title = findViewById<TextInputEditText>(R.id.title)
-        val datePicker =  findViewById<DatePicker>(R.id.datePicker)
-        val timePicker =  findViewById<TimePicker>(R.id.timePicker)
-        val textView2 = findViewById<TextView>(R.id.textView2)
-        val applyButton = findViewById<Button>(R.id.applyButton)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        setSupportActionBar(binding.toolbar)
 
-//    //bind date and time into textView
-//        textView2.setOnClickListener {
-//            val date = "${datePicker.dayOfMonth}/${datePicker.month+1}/${datePicker.year}"
-//            val time = "${timePicker.hour}:${timePicker.minute}"
-//            val dateTime = "$date $time"
-//            textView2.text = dateTime
-//        }
-        //get data from text input from title
-        val titleText = title.editableText.toString()
+        supportActionBar?.title = "Reminders"
 
-        //set applyButton to save data
-        applyButton.setOnClickListener {
-            val reminder = Reminder(title = titleText, date = datePicker, time = timePicker, textView2 = textView2)
-            reminder.schedule()
+
+    }
+
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_main, menu)
+        return true
+    }
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId){
+            R.id.action_create -> {
+                openCreateActivity()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
         }
+    }
+    private fun openCreateActivity(){
+        val intent = Intent(this, CreateActivity::class.java)
+        startActivity(intent)
     }
 
 

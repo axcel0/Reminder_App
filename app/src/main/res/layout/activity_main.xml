@@ -7,61 +7,20 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <com.google.android.material.textfield.TextInputLayout
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/app_bar_layout"
         android:layout_width="match_parent"
-        android:layout_height="626dp">
+        android:layout_height="wrap_content"
+        android:fitsSystemWindows="true"
+        >
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/title"
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Title" />
+            android:layout_height="60dp"
+            app:layout_scrollFlags="enterAlways|noScroll"
+            />
 
-        <TextView
-            android:id="@+id/textView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Select Date and Time"
-            android:textAlignment="center"
-            android:textSize="20sp" />
-
-        <TextView
-            android:id="@+id/textView2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="click to show date and time"
-            android:textAlignment="center"
-            android:textSize="20sp" />
-
-        <DatePicker
-            android:id="@+id/datePicker"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:calendarViewShown="false"
-            android:datePickerMode="spinner" />
-
-        <TimePicker
-            android:id="@+id/timePicker"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:timePickerMode="spinner" />
-
-        <Button
-            android:id="@+id/applyButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:text="Apply" />
-
-        <!--        <androidx.appcompat.widget.Toolbar-->
-        <!--            android:id="@+id/toolbar"-->
-        <!--            android:layout_width="match_parent"-->
-        <!--            android:layout_height="?attr/actionBarSize"-->
-        <!--            android:background="@color/colorPrimary"-->
-        <!--            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"-->
-        <!--            app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />-->
-    </com.google.android.material.textfield.TextInputLayout>
+    </com.google.android.material.appbar.AppBarLayout>
 
 </LinearLayout>
