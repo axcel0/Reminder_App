@@ -8,7 +8,6 @@ import java.sql.Time
 import java.text.SimpleDateFormat
 import java.util.Date
 
-
 class Reminder(title: String, date: Date, time: Time) {
     var title: String
     var date: Date
@@ -20,6 +19,7 @@ class Reminder(title: String, date: Date, time: Time) {
         this.time = time
 
     }
+
 //make fun schedule
     fun schedule(textView2: TextView) {
         //get data from text input from title
@@ -33,4 +33,5 @@ class Reminder(title: String, date: Date, time: Time) {
             textView2.text = "$titleText $dateTime"
         }
     }
+
 }
