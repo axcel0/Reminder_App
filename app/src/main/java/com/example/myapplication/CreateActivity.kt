@@ -6,14 +6,18 @@ import android.widget.Button
 import android.widget.DatePicker
 import android.widget.TextView
 import android.widget.TimePicker
+import com.example.myapplication.databinding.ActivityCreateBinding
 import com.google.android.material.textfield.TextInputEditText
 import java.sql.Time
 import java.util.Date
 
 class CreateActivity : AppCompatActivity() {
+    private lateinit var binding: ActivityCreateBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_create)
+        binding = ActivityCreateBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         val title = findViewById<TextInputEditText>(R.id.title)
         val datePicker =  findViewById<DatePicker>(R.id.datePicker)
         val timePicker =  findViewById<TimePicker>(R.id.timePicker)
