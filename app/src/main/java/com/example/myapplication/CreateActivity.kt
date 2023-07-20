@@ -58,6 +58,7 @@ class CreateActivity : AppCompatActivity() {
             Toast.makeText(this, "Data saved", Toast.LENGTH_SHORT).show()
 
         }
+        var cek =0
         //make function to load data
         fun loadData(){
             //check if data is filled or empty
@@ -71,15 +72,25 @@ class CreateActivity : AppCompatActivity() {
                 //load time
                 timePicker.hour = savedInt
                 timePicker.minute = savedInt
+                cek = 0
             }
             //if data is empty, show toast
+            else if(cek == 1){
+                title.text = savedString
+                //load time
+                timePicker.hour = savedInt
+                timePicker.minute = savedInt
+                Toast.makeText(this, "data saved", Toast.LENGTH_SHORT).show()
+            }
             else{
                 Toast.makeText(this, "No data saved", Toast.LENGTH_SHORT).show()
             }
 
 
-        }
 
+        }
+        //load data
+        loadData()
 
         //set applyButton to save data
         applyButton.setOnClickListener {
@@ -89,6 +100,7 @@ class CreateActivity : AppCompatActivity() {
             val reminder = Reminder(title = titleText, date = date, time = time)
             saveData()
             reminder.schedule(textView2)
+            cek = 1;
 
         }
 
