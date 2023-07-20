@@ -60,13 +60,26 @@ class CreateActivity : AppCompatActivity() {
         }
         //make function to load data
         fun loadData(){
+            //check if data is filled or empty
             val sharedPreferences = getSharedPreferences("sharedPrefs", MODE_PRIVATE)
             val savedString = sharedPreferences.getString("STRING_KEY", null)
             val savedInt = sharedPreferences.getInt("INT_KEY", 0)
-            title.setText(savedString)
-            datePicker.updateDate(savedInt, savedInt, savedInt)
-            timePicker.hour = savedInt
-            timePicker.minute = savedInt
+
+            //if data is filled, load data
+            if (savedString != null){
+                title.setText(savedString)
+                datePicker.year = savedInt
+                datePicker.month = savedInt
+                datePicker.dayOfMonth = savedInt
+                timePicker.hour = savedInt
+                timePicker.minute = savedInt
+            }
+            //if data is empty, show toast
+            else{
+                Toast.makeText(this, "No data saved", Toast.LENGTH_SHORT).show()
+            }
+
+
         }
 
 
@@ -76,9 +89,8 @@ class CreateActivity : AppCompatActivity() {
             val date = Date(datePicker.year-1900, datePicker.month, datePicker.dayOfMonth)
             val time = Time(timePicker.hour, timePicker.minute, 0)
             val reminder = Reminder(title = titleText, date = date, time = time)
-            reminder.schedule(textView2)
             saveData()
-            loadData()
+            reminder.schedule(textView2)
 
         }
 
