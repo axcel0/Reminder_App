@@ -17,7 +17,6 @@ import com.google.android.material.textfield.TextInputEditText
 import java.sql.Time
 import java.util.Calendar
 import java.util.Date
-
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
 
@@ -31,6 +30,8 @@ class MainActivity : AppCompatActivity() {
         supportActionBar!!.title = "Reminders"
 
     }
+    //make function to save data using apply button
+
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)

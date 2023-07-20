@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
+    id 'kotlin-kapt'
 }
 
 android {
@@ -24,14 +25,14 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
     buildFeatures {
         viewBinding true
     }
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = '17'
     }
 }
 
@@ -57,6 +58,15 @@ dependencies {
     annotationProcessor 'com.github.bumptech.glide:compiler:4.12.0'
     //add room dependencies
     implementation 'androidx.room:room-runtime:2.5.2'
+    implementation 'androidx.room:room-rxjava3:2.5.2'
+    implementation 'androidx.room:room-ktx:2.5.2'
+    implementation 'androidx.room:room-paging:2.5.2'
+    kapt 'androidx.room:room-compiler:2.5.2'
+    //add lifecycle dependencies
+    implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
+    //add lifecycle compiler
+    annotationProcessor 'androidx.lifecycle:lifecycle-compiler:2.6.1'
+
 
 
 }

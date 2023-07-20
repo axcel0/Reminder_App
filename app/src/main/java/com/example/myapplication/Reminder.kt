@@ -26,7 +26,7 @@ class Reminder(title: String, date: Date, time: Time) {
         val titleText = title
         //bind date and time into textView
         textView2.setOnClickListener {
-            val date = SimpleDateFormat("dd/MM/y").format(date)
+            val date = SimpleDateFormat("dd/MM/yyyy").format(date)
             val time = SimpleDateFormat("HH:mm").format(time)
             val dateTime = "$date $time"
             //set textView2 to show date and time and title
