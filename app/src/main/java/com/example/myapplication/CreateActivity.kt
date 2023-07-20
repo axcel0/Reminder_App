@@ -68,9 +68,7 @@ class CreateActivity : AppCompatActivity() {
             //if data is filled, load data
             if (savedString != null){
                 title.setText(savedString)
-                datePicker.year = savedInt
-                datePicker.month = savedInt
-                datePicker.dayOfMonth = savedInt
+                //load time
                 timePicker.hour = savedInt
                 timePicker.minute = savedInt
             }
