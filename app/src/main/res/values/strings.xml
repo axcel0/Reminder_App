@@ -4,4 +4,6 @@
     <string name="apply">Apply</string>
     <string name="select_date_and_time">Select Date and Time</string>
     <string name="title">Title</string>
+    <string name="cancel">Cancel</string>
+    <string name="save" >Save</string>
 </resources>

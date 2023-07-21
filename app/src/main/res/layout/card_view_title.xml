@@ -26,16 +26,16 @@
         android:background="@drawable/gradient_title_cardview"
         android:padding="10dp">
 
-<!--        <TextView-->
-<!--            android:id="@+id/tv_date_updated"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:text="@string/last_updated"-->
-<!--            android:textSize="11sp"-->
-<!--            android:textColor="@color/gray"-->
-<!--            app:layout_constraintEnd_toEndOf="parent"-->
-<!--            app:layout_constraintBottom_toTopOf="@+id/tv_title_language"-->
-<!--            />-->
+        <TextView
+            android:id="@+id/tv_date_added"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Date Added"
+            android:textSize="11sp"
+            android:textColor="@color/gray"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/tv_title_name"
+            />
 
 <!--        <TextView-->
 <!--            android:id="@+id/tv_title_language"-->
