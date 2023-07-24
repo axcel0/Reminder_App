@@ -61,7 +61,7 @@ class MainActivity : AppCompatActivity() {
 
         supportActionBar!!.title = "Reminders"
 
-        recyclerView = binding!!.recyclerView
+        recyclerView = binding.recyclerView
         adapter = ReminderAdapter(reminderList)
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(this)

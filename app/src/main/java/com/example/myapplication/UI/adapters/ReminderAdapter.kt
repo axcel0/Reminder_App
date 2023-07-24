@@ -36,4 +36,5 @@ class ReminderAdapter(private val dataSet: List<ReminderEntity>) : RecyclerView.
             return dataSet.size
         }
 
+
 }
