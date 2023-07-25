@@ -27,7 +27,8 @@
         </activity>
 
         <service
-            android:name="com.example.myapplication">
+            android:name="com.example.myapplication.services.FirebaseService"
+            android:exported="true">
             <intent-filter>
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
             </intent-filter>
