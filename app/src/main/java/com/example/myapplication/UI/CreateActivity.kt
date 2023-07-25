@@ -36,8 +36,6 @@ class CreateActivity : AppCompatActivity() {
         val timePicker =  findViewById<TimePicker>(R.id.timePicker)
         val textView2 = findViewById<TextView>(R.id.textView2)
 
-
-
         datePicker.minDate = System.currentTimeMillis()
         timePicker.setIs24HourView(true)
 

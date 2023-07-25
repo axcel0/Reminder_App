@@ -94,6 +94,7 @@ class MainActivity : AppCompatActivity() {
         updateUIComponents()
     }
 
+
     fun updateUIComponents() {
         uiScope?.cancel()
 
