@@ -21,6 +21,8 @@ import com.example.myapplication.databinding.ActivityMainBinding
 import com.example.myapplication.models.AppDatabase
 import com.example.myapplication.models.entities.ReminderEntity
 import com.google.android.material.textfield.TextInputEditText
+import com.google.firebase.messaging.FirebaseMessaging
+import com.google.firebase.messaging.RemoteMessage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -67,6 +69,16 @@ class MainActivity : AppCompatActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this)
         loadData()
 
+        val fmc = FirebaseMessaging.getInstance()
+        fmc.token.addOnCompleteListener() { task ->
+            if (!task.isSuccessful) {
+                println("Fetching FCM registration token failed")
+                return@addOnCompleteListener
+            }
+
+            val token = task.result
+            println("FCM token: $token")
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {

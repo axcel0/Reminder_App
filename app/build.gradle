@@ -68,13 +68,12 @@ dependencies {
     //add lifecycle dependencies
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
     //add lifecycle compiler
-    annotationProcessor 'androidx.lifecycle:lifecycle-compiler:2.6.1'
+//    annotationProcessor 'androidx.lifecycle:lifecycle-compiler:2.6.1'
     //add firebase messaging
     implementation 'com.google.firebase:firebase-messaging:23.2.0'
     //add firebase analytics
     implementation 'com.google.firebase:firebase-analytics:21.3.0'
-    //add firebase crashlytics
-    implementation 'com.google.firebase:firebase-crashlytics:18.4.0'
+    implementation(platform("com.google.firebase:firebase-bom:32.2.0"))
 
 
 
