@@ -56,6 +56,8 @@ class FirebaseService: FirebaseMessagingService() {
         Log.d("FirebaseService", "showNotification.notificationManager: $notificationManager")
         notificationManager.notify(0, notificationBuilder.build())
     }
+    //show notification from firebase message
+
 
 
 }

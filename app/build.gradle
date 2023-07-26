@@ -1,8 +1,8 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
-    id 'kotlin-kapt'
     id 'com.google.gms.google-services'
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -61,10 +61,10 @@ dependencies {
     annotationProcessor 'com.github.bumptech.glide:compiler:4.12.0'
     //add room dependencies
     implementation 'androidx.room:room-runtime:2.5.2'
+    ksp("androidx.room:room-compiler:2.5.2")
     implementation 'androidx.room:room-rxjava3:2.5.2'
     implementation 'androidx.room:room-ktx:2.5.2'
     implementation 'androidx.room:room-paging:2.5.2'
-    kapt 'androidx.room:room-compiler:2.5.2'
     //add lifecycle dependencies
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
     //add lifecycle compiler
@@ -74,6 +74,10 @@ dependencies {
     //add firebase analytics
     implementation 'com.google.firebase:firebase-analytics:21.3.0'
     implementation(platform("com.google.firebase:firebase-bom:32.2.0"))
+    implementation(platform("com.google.firebase:firebase-bom:32.2.0"))
+    //add ksp
+//    implementation "com.google.devtools.ksp:symbol-processing-api:1.9.0-1.0.12"
+    ksp "com.google.devtools.ksp:symbol-processing:1.9.0-1.0.12"
 
 
 
