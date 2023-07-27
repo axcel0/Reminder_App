@@ -42,22 +42,21 @@ class FirebaseService: FirebaseMessagingService() {
             intent,
             PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE
         )
+
         Log.d("FirebaseService", "showNotification.pendingIntent: $pendingIntent")
 
         val notificationBuilder = NotificationCompat.Builder(this)
-            .setSmallIcon(R.drawable.ic_launcher_background)
+            .setSmallIcon(R.mipmap.reminder_icon)
             .setContentTitle(title)
             .setContentText(body)
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
         Log.d("FirebaseService", "showNotification.notificationBuilder: $notificationBuilder")
 
+
         val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         Log.d("FirebaseService", "showNotification.notificationManager: $notificationManager")
         notificationManager.notify(0, notificationBuilder.build())
     }
-    //show notification from firebase message
-
-
 
 }
