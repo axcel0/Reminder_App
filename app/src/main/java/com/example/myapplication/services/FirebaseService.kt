@@ -57,6 +57,8 @@ class FirebaseService: FirebaseMessagingService() {
         val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         Log.d("FirebaseService", "showNotification.notificationManager: $notificationManager")
         notificationManager.notify(0, notificationBuilder.build())
+
     }
+
 
 }
