@@ -2,6 +2,7 @@ package com.example.myapplication.UI
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.AttributeSet
@@ -12,6 +13,7 @@ import android.widget.Button
 import android.widget.DatePicker
 import android.widget.TextView
 import android.widget.TimePicker
+import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
@@ -42,7 +44,7 @@ class MainActivity : AppCompatActivity() {
 
 
     companion object {
-        var db: AppDatabase? = null
+        private var db: AppDatabase? = null
         fun getDatabase(context: Context): AppDatabase {
             if (db == null) {
                 db = Room.databaseBuilder(
@@ -68,7 +70,7 @@ class MainActivity : AppCompatActivity() {
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(this)
         loadData()
-
+        requestNotificationPermissions()
         val fmc = FirebaseMessaging.getInstance()
         fmc.token.addOnCompleteListener() { task ->
             if (!task.isSuccessful) {
@@ -105,7 +107,11 @@ class MainActivity : AppCompatActivity() {
         reminderList = getDatabase(this).reminderDao().getReminders()
         updateUIComponents()
     }
-
+    private fun requestNotificationPermissions() {
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 1)
+        }
+    }
 
     fun updateUIComponents() {
         uiScope?.cancel()
