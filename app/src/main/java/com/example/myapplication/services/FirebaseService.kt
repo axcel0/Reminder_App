@@ -31,7 +31,7 @@ class FirebaseService: FirebaseMessagingService() {
 
     private fun showNotification(title: String?, body: String?) {
         Log.d("FirebaseService", "showNotification: $title, $body")
-
+        val channelId = "com.example.myapplication"
         val intent = Intent(this, MainActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         Log.d("FirebaseService", "showNotification.intent: $intent")
