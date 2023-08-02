@@ -74,8 +74,9 @@ class MainActivity : AppCompatActivity() {
         val fmc = FirebaseMessaging.getInstance()
         fmc.token.addOnCompleteListener() { task ->
             if (!task.isSuccessful) {
-                println("Fetching FCM registration token failed")
-                return@addOnCompleteListener
+                println("Fetching FCM registration token failed").also{
+                    return@addOnCompleteListener
+                }
             }
 
             val token = task.result
@@ -104,9 +105,16 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun loadData() {
-        reminderList = getDatabase(this).reminderDao().getReminders()
-        updateUIComponents()
+        reminderList = getDatabase(this).reminderDao().getReminders().also{
+            updateUIComponents()
+        }
     }
+    //delete reminder
+//    private fun deleteReminder(reminder: ReminderEntity) {
+//        getDatabase(this).reminderDao().deleteReminder().also {
+//            loadData()
+//        }
+//    }
     private fun requestNotificationPermissions() {
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 1)
