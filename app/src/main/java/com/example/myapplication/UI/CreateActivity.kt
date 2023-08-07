@@ -28,7 +28,6 @@ class CreateActivity : AppCompatActivity() {
         setContentView(R.layout.activity_create)
         binding = ActivityCreateBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
         db = MainActivity.getDatabase(this)
 
         val title = findViewById<TextInputEditText>(R.id.title)
@@ -36,35 +35,26 @@ class CreateActivity : AppCompatActivity() {
         val timePicker =  findViewById<TimePicker>(R.id.timePicker)
         val textView2 = findViewById<TextView>(R.id.textView2)
 
-        datePicker.minDate = System.currentTimeMillis()
-        timePicker.setIs24HourView(true)
-
+        datePicker.minDate = System.currentTimeMillis().also { timePicker.setIs24HourView(true) }
 
         //set applyButton to save data
         binding.saveButton.setOnClickListener {
             val titleText = title.text.toString()
             val date = LocalDateTime.of(datePicker.year, datePicker.month+1, datePicker.dayOfMonth, timePicker.hour, timePicker.minute, 0)
-
             val zoneId = ZoneId.systemDefault()
             val epoch = date.atZone(zoneId).toEpochSecond()
-
-
             val reminderEntity = ReminderEntity(reminderName = titleText, dateAdded = epoch)
-
-            db.reminderDao().insertReminder(reminderEntity)
-            Toast.makeText(this, "Reminder added", Toast.LENGTH_SHORT).show()
-
-            //refresh the list
-            val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
-            finish()
-
+            db.reminderDao().insertReminder(reminderEntity).also {
+                Toast.makeText(this, "Reminder added", Toast.LENGTH_SHORT).show()
+            }.run {
+                //refresh the list
+                startActivity(Intent(this@CreateActivity, MainActivity::class.java)).also { finish() }
+            }
         }
 
         binding.cancelButton.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
-            finish()
+            startActivity(intent).also { finish() }
         }
 
     }

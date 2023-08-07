@@ -6,4 +6,15 @@
             android:icon="@drawable/ic_add"
             android:title="@string/action_create"
             app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_search"
+        android:title="Search"
+        android:icon="@drawable/ic_search"
+        app:showAsAction="ifRoom|collapseActionView"
+        app:actionViewClass="android.widget.SearchView" />
+    <item
+        android:id="@+id/delete_all"
+        android:title="Delete All"
+        android:icon="@drawable/ic_delete"
+        app:showAsAction="ifRoom" />
 </menu>

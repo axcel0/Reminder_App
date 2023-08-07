@@ -13,6 +13,7 @@ import android.widget.Button
 import android.widget.DatePicker
 import android.widget.TextView
 import android.widget.TimePicker
+import androidx.appcompat.widget.SearchView
 import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -62,15 +63,19 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
-
+        menuInflater.inflate(R.menu.menu_main, binding.toolbar.menu)
         supportActionBar!!.title = "Reminders"
 
         recyclerView = binding.recyclerView
         adapter = ReminderAdapter(reminderList)
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(this)
-        loadData()
-        requestNotificationPermissions()
+
+//        binding.toolbar.deleteAll.setOnClickListener {
+//
+//        }
+
+        loadData().also { requestNotificationPermissions() }
         val fmc = FirebaseMessaging.getInstance()
         fmc.token.addOnCompleteListener() { task ->
             if (!task.isSuccessful) {
@@ -82,6 +87,15 @@ class MainActivity : AppCompatActivity() {
             val token = task.result
             println("FCM token: $token")
         }
+    }
+
+    override fun onResume() {
+        super.onResume().also { loadData() }
+    }
+    private fun searchReminder(reminderName: String) {
+        val reminderDao = getDatabase(this).reminderDao()
+        reminderList = reminderDao.searchReminder(reminderName)
+        updateUIComponents()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -110,18 +124,19 @@ class MainActivity : AppCompatActivity() {
         }
     }
     //delete reminder
-//    private fun deleteReminder(reminder: ReminderEntity) {
-//        getDatabase(this).reminderDao().deleteReminder().also {
-//            loadData()
-//        }
-//    }
+    private fun deleteReminder(reminderId: Long) {
+        val reminderDao = getDatabase(this).reminderDao()
+        reminderDao.deleteReminder(reminderId).also { loadData() }
+    }
+    //search reminder by title
+
     private fun requestNotificationPermissions() {
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 1)
         }
     }
 
-    fun updateUIComponents() {
+    private fun updateUIComponents() {
         uiScope?.cancel()
 
         uiScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
