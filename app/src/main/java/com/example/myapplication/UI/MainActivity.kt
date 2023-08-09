@@ -70,10 +70,19 @@ class MainActivity : AppCompatActivity() {
         adapter = ReminderAdapter(reminderList)
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(this)
+        //make 90hz refresh rate for recyclerview kotlin
+        recyclerView.setHasFixedSize(true) //recyclerview size is fixed
 
-//        binding.toolbar.deleteAll.setOnClickListener {
-//
-//        }
+
+        binding.toolbar.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                R.id.action_create -> {
+                    openCreateActivity()
+                    true
+                }
+                else -> super.onOptionsItemSelected(item)
+            }
+        }
 
         loadData().also { requestNotificationPermissions() }
         val fmc = FirebaseMessaging.getInstance()
@@ -87,10 +96,6 @@ class MainActivity : AppCompatActivity() {
             val token = task.result
             println("FCM token: $token")
         }
-    }
-
-    override fun onResume() {
-        super.onResume().also { loadData() }
     }
     private fun searchReminder(reminderName: String) {
         val reminderDao = getDatabase(this).reminderDao()
