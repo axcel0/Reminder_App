@@ -52,6 +52,7 @@ class CreateActivity : AppCompatActivity() {
             }
         }
 
+
         binding.cancelButton.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)
             startActivity(intent).also { finish() }

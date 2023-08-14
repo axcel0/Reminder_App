@@ -10,19 +10,22 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.example.myapplication.R
 import com.example.myapplication.UI.MainActivity
+import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import com.google.firebase.messaging.ktx.messaging
+import kotlinx.coroutines.tasks.await
 
 class FirebaseService: FirebaseMessagingService() {
     override fun onNewToken(token: String) {
         super.onNewToken(token)
         Log.d("bapakmu", "Refreshed token: $token")
-
+        sendRegistrationToServer(token)
     }
 
     class MyReminderReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            val notificationManager = context?.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val notificationManager = context?.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
             val notification = NotificationCompat.Builder(context, "myChannelId")
                 .setContentTitle("My Notification")
                 .setContentText("This is my notification")
@@ -34,6 +37,7 @@ class FirebaseService: FirebaseMessagingService() {
     }
 
 
+//    val tokenStored = preferences.getString("deviceToken", "")
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
         println("FirebaseService.onMessageReceived: $remoteMessage")
@@ -76,6 +80,16 @@ class FirebaseService: FirebaseMessagingService() {
         notificationManager.notify(0, notificationBuilder.build())
 
     }
+   //make function to send token alongside the timestamp of reminder title
+    private fun sendRegistrationToServer(token: String) {
+       val deviceToken = hashMapOf(
+           "token" to token,
+//           "timestamp" to FieldValue.serverTimestamp(),
+//           Firebase.firestore.collection("fcmTokens").document("myuserid")
+//               .set(deviceToken)
+       )
+   }
+
 
 
 }

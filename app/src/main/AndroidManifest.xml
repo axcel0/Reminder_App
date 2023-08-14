@@ -16,6 +16,15 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MyApplication"
         >
+<!--        <receiver-->
+<!--            android:name=".AlarmReceiver"-->
+<!--            android:exported="false">-->
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.BOOT_COMPLETED" />-->
+<!--                &lt;!&ndash; Add more actions if needed &ndash;&gt;-->
+<!--            </intent-filter>-->
+<!--        </receiver>-->
+
         <activity
             android:name=".UI.CreateActivity"
             android:exported="false" />
@@ -30,9 +39,9 @@
             </intent-filter>
         </activity>
         <service
-
             android:name=".services.FirebaseService"
-            android:exported="true">
+            android:exported="false"
+            android:permission="TODO">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT"/>
             </intent-filter>

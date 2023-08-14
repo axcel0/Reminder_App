@@ -3,6 +3,7 @@ package com.example.myapplication.UI
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.AttributeSet
@@ -42,7 +43,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: ReminderAdapter
-
+//    private String CHANNEL_ID = "CHANNEL 1"
 
     companion object {
         private var db: AppDatabase? = null
@@ -60,19 +61,25 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
         menuInflater.inflate(R.menu.menu_main, binding.toolbar.menu)
         supportActionBar!!.title = "Reminders"
-
         recyclerView = binding.recyclerView
         adapter = ReminderAdapter(reminderList)
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(this)
-        //make 90hz refresh rate for recyclerview kotlin
         recyclerView.setHasFixedSize(true) //recyclerview size is fixed
 
+//        selectionTracker.addObserver(object : SelectionTracker.SelectionObserver<Long>() {
+//            override fun onSelectionChanged() {
+//                super.onSelectionChanged()
+//                val selectedCount = selectionTracker.selection.size()
+//                deleteAllMenuItem.isVisible = selectedCount > 0
+//            }
+//        })
 
         binding.toolbar.setOnMenuItemClickListener { item ->
             when (item.itemId) {
@@ -83,8 +90,44 @@ class MainActivity : AppCompatActivity() {
                 else -> super.onOptionsItemSelected(item)
             }
         }
-
         loadData().also { requestNotificationPermissions() }
+        binding.toolbar.menu.findItem(R.id.action_delete_all).setOnMenuItemClickListener {
+            deleteAllReminders()
+            true
+        }
+        binding.toolbar.menu.findItem(R.id.action_search).setOnMenuItemClickListener {
+            val searchView = it.actionView as SearchView
+            searchView.queryHint = "Search reminder by title"
+            searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+                override fun onQueryTextSubmit(query: String?): Boolean {
+                    searchReminder(query!!)
+                    return true
+                }
+
+                override fun onQueryTextChange(newText: String?): Boolean {
+                    searchReminder(newText!!)
+                    return true
+                }
+            })
+            true
+        }
+
+
+        //set on search listener
+//        val searchItem = binding.toolbar.menu.findItem(R.id.action_search)
+//        val searchView = searchItem.actionView as SearchView
+//        searchView.queryHint = "Search reminder by title"
+//        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+//            override fun onQueryTextSubmit(query: String?): Boolean {
+//                searchReminder(query!!)
+//                return true
+//            }
+//
+//            override fun onQueryTextChange(newText: String?): Boolean {
+//                searchReminder(newText!!)
+//                return true
+//            }
+//        })
         val fmc = FirebaseMessaging.getInstance()
         fmc.token.addOnCompleteListener() { task ->
             if (!task.isSuccessful) {
@@ -96,12 +139,44 @@ class MainActivity : AppCompatActivity() {
             val token = task.result
             println("FCM token: $token")
         }
+
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            fmc.subscribeToTopic("all").addOnCompleteListener { task ->
+                if(task.isSuccessful){
+                    println("Subscribed to topic: all")
+                }
+//                String Channel_ID = "CHANNEL 1"
+//                CharSequence name = "Reminder Notification"
+//                String description = "This is a reminder"
+//                int importance = NotificationManager.IMPORTANCE_DEFAULT
+//                NotificationChannel channel = new NotificationChannel(Channel_ID, name, importance)
+//                channel.setDescription(description)
+//                NotificationManager notificationManager = getSystemService(NotificationManager.class)
+//                notificationManager.createNotificationChannel(channel)
+
+
+            }
+
+        }
     }
+    //search reminder by title
     private fun searchReminder(reminderName: String) {
         val reminderDao = getDatabase(this).reminderDao()
         reminderList = reminderDao.searchReminder(reminderName)
         updateUIComponents()
     }
+    //delete reminder
+    private fun deleteReminder(reminderId: Long) {
+        val reminderDao = getDatabase(this).reminderDao()
+        reminderDao.deleteReminder(reminderId).also { loadData() }
+    }
+    //delete all reminders
+    private fun deleteAllReminders() {
+        val reminderDao = getDatabase(this).reminderDao()
+        reminderDao.deleteAllReminders().also { loadData() }
+    }
+    //set on click listener to delete button in xml
+
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
@@ -128,11 +203,7 @@ class MainActivity : AppCompatActivity() {
             updateUIComponents()
         }
     }
-    //delete reminder
-    private fun deleteReminder(reminderId: Long) {
-        val reminderDao = getDatabase(this).reminderDao()
-        reminderDao.deleteReminder(reminderId).also { loadData() }
-    }
+
     //search reminder by title
 
     private fun requestNotificationPermissions() {

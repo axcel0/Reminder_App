@@ -22,15 +22,15 @@ interface ReminderDao {
     @Query("DELETE FROM reminders WHERE id = :id")
     fun deleteReminder(id: Long)
 
-
+    //delete all items in the table
     @Query("DELETE FROM reminders")
-    fun deleteAll()
+    fun deleteAllReminders()
 
     @Query("UPDATE reminders SET reminderName = :reminderName, dateAdded = :dateAdded WHERE id = :id")
     fun updateReminder(id: Long, reminderName: String, dateAdded: Long)
 
-    @Query("SELECT * FROM reminders WHERE reminderName LIKE '%' || :searchQuery || '%'")
-    fun searchReminder(searchQuery: String): List<ReminderEntity>
-
+    //search reminder by title
+    @Query("SELECT * FROM reminders WHERE reminderName LIKE '%' || :reminderName || '%'")
+    fun searchReminder(reminderName: String): List<ReminderEntity>
 
 }
