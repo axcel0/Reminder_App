@@ -7,6 +7,7 @@ import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.AttributeSet
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -75,65 +76,8 @@ class MainActivity : AppCompatActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.setHasFixedSize(true) //recyclerview size is fixed
 
-//        selectionTracker.addObserver(object : SelectionTracker.SelectionObserver<Long>() {
-//            override fun onSelectionChanged() {
-//                super.onSelectionChanged()
-//                val selectedCount = selectionTracker.selection.size()
-//                deleteAllMenuItem.isVisible = selectedCount > 0
-//            }
-//        })
-
-        binding.toolbar.setOnMenuItemClickListener { item ->
-            when (item.itemId) {
-                R.id.action_create -> {
-                    openCreateActivity()
-                    true
-                }
-                else -> super.onOptionsItemSelected(item)
-            }
-        }
         loadData().also { requestNotificationPermissions() }
 
-        binding.toolbar.menu.findItem(R.id.action_search).setOnMenuItemClickListener {
-            val searchView = it.actionView as SearchView
-            searchView.queryHint = "Search reminder by title"
-            searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-                override fun onQueryTextSubmit(query: String?): Boolean {
-                    searchReminder(query!!)
-                    return true
-                }
-
-                override fun onQueryTextChange(newText: String?): Boolean {
-                    searchReminder(newText!!)
-                    return true
-                }
-
-            })
-            true
-        }
-        val deleteAllMenuItem = binding.toolbar.menu.findItem(R.id.action_delete_all)
-        deleteAllMenuItem.setOnMenuItemClickListener {
-            deleteAllReminders()
-            true
-        }
-
-
-
-        //set on search listener
-//        val searchItem = binding.toolbar.menu.findItem(R.id.action_search)
-//        val searchView = searchItem.actionView as SearchView
-//        searchView.queryHint = "Search reminder by title"
-//        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-//            override fun onQueryTextSubmit(query: String?): Boolean {
-//                searchReminder(query!!)
-//                return true
-//            }
-//
-//            override fun onQueryTextChange(newText: String?): Boolean {
-//                searchReminder(newText!!)
-//                return true
-//            }
-//        })
         val fmc = FirebaseMessaging.getInstance()
         fmc.token.addOnCompleteListener() { task ->
             if (!task.isSuccessful) {
@@ -147,16 +91,6 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(baseContext, "FCM token: $token", Toast.LENGTH_SHORT).show()
 
         }
-        //subscribe to topic
-        fmc.subscribeToTopic("all").addOnCompleteListener { task ->
-            if(task.isSuccessful){
-                println("Subscribed to topic: all")
-            }else{
-                println("Failed to subscribe to topic: all")
-            }
-
-        }
-
 
 
     }
@@ -171,6 +105,21 @@ class MainActivity : AppCompatActivity() {
         return when (item.itemId){
             R.id.action_create -> {
                 openCreateActivity()
+                true
+            }
+            R.id.action_search -> {
+                val searchView = item.actionView as SearchView
+                searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+                    override fun onQueryTextSubmit(query: String?): Boolean {
+                        searchReminder(query)
+                        return true
+                    }
+
+                    override fun onQueryTextChange(newText: String?): Boolean {
+                        searchReminder(newText)
+                        return true
+                    }
+                })
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -189,10 +138,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
     //search reminder by title
-    private fun searchReminder(reminderName: String) {
+    private fun searchReminder(reminderName: String?) {
         val reminderDao = getDatabase(this).reminderDao()
-        reminderList = reminderDao.searchReminder(reminderName)
-        updateUIComponents()
+        reminderList = reminderDao.searchReminder(reminderName!!).also {
+            updateUIComponents()
+        }
     }
     //delete reminder
     private fun deleteReminder(reminderId: Long) {
