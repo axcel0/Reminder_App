@@ -10,6 +10,7 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.view.MotionEvent
 import android.view.View
 import android.widget.Button
 import android.widget.DatePicker
@@ -75,7 +76,29 @@ class MainActivity : AppCompatActivity() {
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.setHasFixedSize(true) //recyclerview size is fixed
-
+        //select reminder from recyclerview
+//        addOnItemTouchListener(object : RecyclerView.OnItemTouchListener {
+//            override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {
+//                val child = rv.findChildViewUnder(e.x, e.y)
+//                if (child != null && gestureDetector.onTouchEvent(e)) {
+//                    val position = rv.getChildAdapterPosition(child)
+//                    val reminder = adapter.holdReminder(position)
+//                    val intent = Intent(this@MainActivity, CreateActivity::class.java)
+//                    intent.putExtra("reminder", reminder)
+//                    startActivity(intent)
+//                    return true
+//                }
+//                return false
+//            }
+//
+//            override fun onTouchEvent(rv: RecyclerView, e: MotionEvent) {
+//                Log.d("MainActivity", "onTouchEvent: $e")
+//            }
+//
+//            override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {
+//                Log.d("MainActivity", "onRequestDisallowInterceptTouchEvent: $disallowIntercept")
+//            }
+//        })
         loadData().also { requestNotificationPermissions() }
 
         val fmc = FirebaseMessaging.getInstance()
