@@ -5,6 +5,7 @@ import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.media.RingtoneManager
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
@@ -65,6 +66,9 @@ class FirebaseService: FirebaseMessagingService() {
         )
 
         Log.d("FirebaseService", "showNotification.pendingIntent: $pendingIntent")
+        val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+        Log.d("FirebaseService", "showNotification.defaultSoundUri: $defaultSoundUri")
+
 
         val notificationBuilder = NotificationCompat.Builder(this)
             .setSmallIcon(R.mipmap.reminder_icon)
@@ -75,21 +79,19 @@ class FirebaseService: FirebaseMessagingService() {
         Log.d("FirebaseService", "showNotification.notificationBuilder: $notificationBuilder")
 
 
-        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         Log.d("FirebaseService", "showNotification.notificationManager: $notificationManager")
         notificationManager.notify(0, notificationBuilder.build())
 
+
     }
-   //make function to send token alongside the timestamp of reminder title
+   //make function to send token to server
     private fun sendRegistrationToServer(token: String) {
-       val deviceToken = hashMapOf(
-           "token" to token,
-//           "timestamp" to FieldValue.serverTimestamp(),
-//           Firebase.firestore.collection("fcmTokens").document("myuserid")
-//               .set(deviceToken)
-       )
+        val preferences = getSharedPreferences("SHARED_PREF", MODE_PRIVATE)
+        val editor = preferences.edit()
+        editor.putString("deviceToken", token)
+        editor.apply()
+        Log.d("FirebaseService", "sendRegistrationToServer: $token")
    }
-
-
 
 }

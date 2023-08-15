@@ -33,7 +33,6 @@ class CreateActivity : AppCompatActivity() {
         val title = findViewById<TextInputEditText>(R.id.title)
         val datePicker =  findViewById<DatePicker>(R.id.datePicker)
         val timePicker =  findViewById<TimePicker>(R.id.timePicker)
-        val textView2 = findViewById<TextView>(R.id.textView2)
 
         datePicker.minDate = System.currentTimeMillis().also { timePicker.setIs24HourView(true) }
 
@@ -51,12 +50,12 @@ class CreateActivity : AppCompatActivity() {
                 startActivity(Intent(this@CreateActivity, MainActivity::class.java)).also { finish() }
             }
         }
-
-
+        //set cancelButton to go back to MainActivity
         binding.cancelButton.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)
             startActivity(intent).also { finish() }
         }
+
 
     }
 }

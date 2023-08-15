@@ -35,6 +35,17 @@ class ReminderAdapter(private val dataSet: List<ReminderEntity>) : RecyclerView.
         override fun getItemCount(): Int {
             return dataSet.size
         }
-
+    //add hold function to select reminder
+    fun holdReminder(position: Int): ReminderEntity {
+        return dataSet[position]
+    }
+    //add delete function to delete selected items
+    fun deleteReminder(position: Int) {
+        dataSet.drop(position).also { notifyItemRemoved(position) }
+    }
+    //add search function to search for reminders
+    fun searchReminder(reminderName: String) {
+        dataSet.filter { it.reminderName.contains(reminderName) }.also { notifyDataSetChanged() }
+    }
 
 }

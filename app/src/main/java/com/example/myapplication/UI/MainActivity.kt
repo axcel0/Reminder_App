@@ -14,6 +14,7 @@ import android.widget.Button
 import android.widget.DatePicker
 import android.widget.TextView
 import android.widget.TimePicker
+import android.widget.Toast
 import androidx.appcompat.widget.SearchView
 import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -58,6 +59,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -91,10 +93,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
         loadData().also { requestNotificationPermissions() }
-        binding.toolbar.menu.findItem(R.id.action_delete_all).setOnMenuItemClickListener {
-            deleteAllReminders()
-            true
-        }
+
         binding.toolbar.menu.findItem(R.id.action_search).setOnMenuItemClickListener {
             val searchView = it.actionView as SearchView
             searchView.queryHint = "Search reminder by title"
@@ -108,9 +107,16 @@ class MainActivity : AppCompatActivity() {
                     searchReminder(newText!!)
                     return true
                 }
+
             })
             true
         }
+        val deleteAllMenuItem = binding.toolbar.menu.findItem(R.id.action_delete_all)
+        deleteAllMenuItem.setOnMenuItemClickListener {
+            deleteAllReminders()
+            true
+        }
+
 
 
         //set on search listener
@@ -135,28 +141,51 @@ class MainActivity : AppCompatActivity() {
                     return@addOnCompleteListener
                 }
             }
-
             val token = task.result
             println("FCM token: $token")
+            //toast message
+            Toast.makeText(baseContext, "FCM token: $token", Toast.LENGTH_SHORT).show()
+
         }
-
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-            fmc.subscribeToTopic("all").addOnCompleteListener { task ->
-                if(task.isSuccessful){
-                    println("Subscribed to topic: all")
-                }
-//                String Channel_ID = "CHANNEL 1"
-//                CharSequence name = "Reminder Notification"
-//                String description = "This is a reminder"
-//                int importance = NotificationManager.IMPORTANCE_DEFAULT
-//                NotificationChannel channel = new NotificationChannel(Channel_ID, name, importance)
-//                channel.setDescription(description)
-//                NotificationManager notificationManager = getSystemService(NotificationManager.class)
-//                notificationManager.createNotificationChannel(channel)
-
-
+        //subscribe to topic
+        fmc.subscribeToTopic("all").addOnCompleteListener { task ->
+            if(task.isSuccessful){
+                println("Subscribed to topic: all")
+            }else{
+                println("Failed to subscribe to topic: all")
             }
 
+        }
+
+
+
+    }
+
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_main, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId){
+            R.id.action_create -> {
+                openCreateActivity()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+
+    private fun openCreateActivity() {
+        val intent = Intent(this, CreateActivity::class.java)
+        startActivity(intent)
+    }
+
+    private fun loadData() {
+        reminderList = getDatabase(this).reminderDao().getReminders().also{
+            updateUIComponents()
         }
     }
     //search reminder by title
@@ -175,36 +204,6 @@ class MainActivity : AppCompatActivity() {
         val reminderDao = getDatabase(this).reminderDao()
         reminderDao.deleteAllReminders().also { loadData() }
     }
-    //set on click listener to delete button in xml
-
-
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.menu_main, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId){
-            R.id.action_create -> {
-                openCreateActivity()
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
-        }
-    }
-
-    private fun openCreateActivity() {
-        val intent = Intent(this, CreateActivity::class.java)
-        startActivity(intent)
-    }
-
-    private fun loadData() {
-        reminderList = getDatabase(this).reminderDao().getReminders().also{
-            updateUIComponents()
-        }
-    }
-
-    //search reminder by title
 
     private fun requestNotificationPermissions() {
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
@@ -228,6 +227,7 @@ class MainActivity : AppCompatActivity() {
             } catch (e: Exception) {
                 e.printStackTrace()
             }
+
         }
     }
 

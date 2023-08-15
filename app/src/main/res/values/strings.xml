@@ -6,4 +6,6 @@
     <string name="title">Title</string>
     <string name="cancel">Cancel</string>
     <string name="save" >Save</string>
+    <string name="delete_all">Delete All</string>
+    <string name="search">Search</string>
 </resources>

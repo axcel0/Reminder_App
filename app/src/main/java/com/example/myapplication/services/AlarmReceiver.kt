@@ -19,7 +19,13 @@ class AlarmReceiver : BroadcastReceiver() {
             }
             .create()
         alertDialog.show()
-    }
+        //start notification service
+        val service = Intent(context, NotificationService::class.java)
+        service.putExtra("reason", "notification")
+        service.putExtra("timestamp", intent?.getLongExtra("timestamp", 0))
+        service.putExtra("reminderBody", intent?.getStringExtra("reminderBody"))
+        context?.startService(service)
 
+    }
 
 }

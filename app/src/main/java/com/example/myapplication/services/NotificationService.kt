@@ -39,6 +39,7 @@ class NotificationService : IntentService("NotificationService") {
         const val CHANNEL_NAME = "Sample Notification"
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onHandleIntent(intent: Intent?) {
         // Create Channel
         createChannel()
@@ -93,6 +94,7 @@ class NotificationService : IntentService("NotificationService") {
                 .build()
 
             notificationManager.notify(mNotificationId, mNotification)
+
         }
     }
 }
