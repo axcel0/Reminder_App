@@ -21,6 +21,7 @@ class NotificationService : IntentService("NotificationService") {
 
     private fun createChannel() {
         val context = this.applicationContext
+
         val notificationManager =
             context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 

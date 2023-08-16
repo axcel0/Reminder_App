@@ -1,5 +1,6 @@
 package com.example.myapplication.UI
 
+import android.content.ClipData.Item
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -17,6 +18,7 @@ import android.widget.DatePicker
 import android.widget.TextView
 import android.widget.TimePicker
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SearchView
 import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -39,6 +41,7 @@ import kotlinx.coroutines.withContext
 import java.sql.Time
 import java.util.Calendar
 import java.util.Date
+import kotlin.collections.ArrayList
 
 class MainActivity : AppCompatActivity() {
     private var reminderList: List<ReminderEntity> = emptyList()
@@ -49,6 +52,7 @@ class MainActivity : AppCompatActivity() {
 //    private String CHANNEL_ID = "CHANNEL 1"
 
     companion object {
+        var deleteList : ArrayList<String> = ArrayList()
         private var db: AppDatabase? = null
         fun getDatabase(context: Context): AppDatabase {
             if (db == null) {
@@ -71,34 +75,16 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(binding.toolbar)
         menuInflater.inflate(R.menu.menu_main, binding.toolbar.menu)
         supportActionBar!!.title = "Reminders"
+
+
+
+
         recyclerView = binding.recyclerView
         adapter = ReminderAdapter(reminderList)
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.setHasFixedSize(true) //recyclerview size is fixed
-        //select reminder from recyclerview
-//        addOnItemTouchListener(object : RecyclerView.OnItemTouchListener {
-//            override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {
-//                val child = rv.findChildViewUnder(e.x, e.y)
-//                if (child != null && gestureDetector.onTouchEvent(e)) {
-//                    val position = rv.getChildAdapterPosition(child)
-//                    val reminder = adapter.holdReminder(position)
-//                    val intent = Intent(this@MainActivity, CreateActivity::class.java)
-//                    intent.putExtra("reminder", reminder)
-//                    startActivity(intent)
-//                    return true
-//                }
-//                return false
-//            }
-//
-//            override fun onTouchEvent(rv: RecyclerView, e: MotionEvent) {
-//                Log.d("MainActivity", "onTouchEvent: $e")
-//            }
-//
-//            override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {
-//                Log.d("MainActivity", "onRequestDisallowInterceptTouchEvent: $disallowIntercept")
-//            }
-//        })
+
         loadData().also { requestNotificationPermissions() }
 
         val fmc = FirebaseMessaging.getInstance()
@@ -109,9 +95,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             val token = task.result
-            println("FCM token: $token")
-            //toast message
-            Toast.makeText(baseContext, "FCM token: $token", Toast.LENGTH_SHORT).show()
+
 
         }
 
@@ -144,6 +128,38 @@ class MainActivity : AppCompatActivity() {
                     }
                 })
                 true
+            }
+            R.id.action_delete_all -> {
+                val alertDialog = AlertDialog.Builder(this)
+                if (deleteList.size > 0) {
+
+                    alertDialog.setTitle("Delete Selected Reminders")
+                    alertDialog.setMessage("Are you sure you want to delete selected reminders?")
+                    alertDialog.setPositiveButton("Yes") { _, _ ->
+                        deleteList.forEach {
+                            deleteReminder(it.toLong())
+                        }
+                        deleteList.clear()
+                    }
+                    alertDialog.setNegativeButton("No") { _, _ ->
+                        deleteList.clear()
+                    }
+                } else {
+                    //alert dialog to delete all reminders
+                    alertDialog.setTitle("Delete All Reminders")
+                    alertDialog.setMessage("Are you sure you want to delete all reminders?")
+                    alertDialog.setPositiveButton("Yes") { _, _ ->
+                        deleteAllReminders()
+                    }
+                    alertDialog.setNegativeButton("No") { _, _ ->
+
+                    }
+                }
+                alertDialog.show()
+
+
+                true
+
             }
             else -> super.onOptionsItemSelected(item)
         }
