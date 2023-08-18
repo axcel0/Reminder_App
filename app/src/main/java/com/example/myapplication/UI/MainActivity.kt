@@ -76,9 +76,6 @@ class MainActivity : AppCompatActivity() {
         menuInflater.inflate(R.menu.menu_main, binding.toolbar.menu)
         supportActionBar!!.title = "Reminders"
 
-
-
-
         recyclerView = binding.recyclerView
         adapter = ReminderAdapter(reminderList)
         recyclerView.adapter = adapter
@@ -96,10 +93,7 @@ class MainActivity : AppCompatActivity() {
             }
             val token = task.result
 
-
         }
-
-
     }
 
 
@@ -121,7 +115,6 @@ class MainActivity : AppCompatActivity() {
                         searchReminder(query)
                         return true
                     }
-
                     override fun onQueryTextChange(newText: String?): Boolean {
                         searchReminder(newText)
                         return true
@@ -132,14 +125,12 @@ class MainActivity : AppCompatActivity() {
             R.id.action_delete_all -> {
                 val alertDialog = AlertDialog.Builder(this)
                 if (deleteList.size > 0) {
-
                     alertDialog.setTitle("Delete Selected Reminders")
                     alertDialog.setMessage("Are you sure you want to delete selected reminders?")
                     alertDialog.setPositiveButton("Yes") { _, _ ->
                         deleteList.forEach {
                             deleteReminder(it.toLong())
-                        }
-                        deleteList.clear()
+                        }.run { deleteList.clear() }
                     }
                     alertDialog.setNegativeButton("No") { _, _ ->
                         deleteList.clear()
@@ -152,19 +143,14 @@ class MainActivity : AppCompatActivity() {
                         deleteAllReminders()
                     }
                     alertDialog.setNegativeButton("No") { _, _ ->
-
                     }
                 }
                 alertDialog.show()
-
-
                 true
-
             }
             else -> super.onOptionsItemSelected(item)
         }
     }
-
 
     private fun openCreateActivity() {
         val intent = Intent(this, CreateActivity::class.java)
@@ -210,7 +196,6 @@ class MainActivity : AppCompatActivity() {
                 val newAdapter = withContext(Dispatchers.IO) {
                     ReminderAdapter(reminderList)
                 }
-
                 // Update the RecyclerView adapter on the main thread
                 recyclerView.adapter = newAdapter
             } catch (e: Exception) {

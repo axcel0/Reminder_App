@@ -42,27 +42,31 @@ class ReminderAdapter(private val dataSet: List<ReminderEntity>) : RecyclerView.
             }
 
             if (clickedElement != null) {
-                holder.itemView.setBackgroundColor(ContextCompat.getColor(holder.itemView.context, R.color.material_dynamic_primary_light))
+                holder.itemView.setBackgroundColor(ContextCompat.getColor(holder.itemView.context, com.google.android.material.R.color.material_blue_grey_800))
             }
             else {
                 //set background color to blue
-                holder.itemView.setBackgroundColor(ContextCompat.getColor(holder.itemView.context, R.color.material_dynamic_primary_dark))
+                holder.itemView.setBackgroundColor(ContextCompat.getColor(holder.itemView.context, com.google.android.material.R.color.material_deep_teal_200))
             }
 
             holder.itemView.setOnLongClickListener{
                 selectDeleteList(dataSet[position].id)
-                notifyDataSetChanged()
+                notifyItemChanged(position)
                 return@setOnLongClickListener true
             }
 
             holder.itemView.setOnClickListener{
 
                 if (clickedElement != null) {
-                    holder.itemView.setBackgroundColor(holder.itemView.context.resources.getColor(R.color.purple))
+                    holder.itemView.setBackgroundColor(holder.itemView.context.getColor(com.google.android.material.R.color.material_dynamic_neutral70))
                     deleteList.remove(dataSet[position].id.toString())
-                    notifyDataSetChanged()
+                    notifyItemChanged(position)
                 }
-
+                else if(deleteList.size > 0) {
+                    holder.itemView.setBackgroundColor(holder.itemView.context.getColor(com.google.android.material.R.color.material_dynamic_neutral10))
+                    selectDeleteList(dataSet[position].id)
+                    notifyItemChanged(position)
+                }
             }
 
         }
@@ -72,19 +76,7 @@ class ReminderAdapter(private val dataSet: List<ReminderEntity>) : RecyclerView.
     }
 
     override fun getItemCount(): Int {
-            return dataSet.size
-        }
-    //add hold function to select reminder
-    fun holdReminder(position: Int): ReminderEntity {
-        return dataSet[position]
-    }
-    //add delete function to delete selected items
-    fun deleteReminder(position: Int) {
-        dataSet.drop(position).also { notifyItemRemoved(position) }
-    }
-    //add search function to search for reminders
-    fun searchReminder(reminderName: String) {
-        dataSet.filter { it.reminderName.contains(reminderName) }.also { notifyDataSetChanged() }
+        return dataSet.size
     }
 
 }
