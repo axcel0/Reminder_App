@@ -61,20 +61,16 @@ dependencies {
     //glide compiler
     annotationProcessor 'com.github.bumptech.glide:compiler:4.12.0'
     //add room dependencies
-    implementation 'androidx.room:room-runtime:2.5.2'
+    implementation 'androidx.room:room-runtime:2.6.0-alpha03'
     ksp("androidx.room:room-compiler:2.5.2")
-    implementation 'androidx.room:room-rxjava3:2.5.2'
-    implementation 'androidx.room:room-ktx:2.5.2'
-    implementation 'androidx.room:room-paging:2.5.2'
-    //add lifecycle dependencies
-    implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
-    //add lifecycle compiler
-//    annotationProcessor 'androidx.lifecycle:lifecycle-compiler:2.6.1'
+    implementation 'androidx.room:room-rxjava3:2.6.0-alpha03'
+    implementation 'androidx.room:room-ktx:2.6.0-alpha03'
+    implementation 'androidx.room:room-paging:2.6.0-alpha03'
+
     //add firebase messaging
     implementation 'com.google.firebase:firebase-messaging:23.2.1'
     //add firebase analytics
     implementation 'com.google.firebase:firebase-analytics:21.3.0'
-    implementation(platform("com.google.firebase:firebase-bom:32.2.0"))
     implementation(platform("com.google.firebase:firebase-bom:32.2.0"))
     implementation 'com.google.firebase:firebase-analytics-ktx'
     implementation 'com.google.firebase:firebase-messaging-ktx'

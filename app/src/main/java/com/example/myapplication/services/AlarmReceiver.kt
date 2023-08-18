@@ -19,7 +19,7 @@ class AlarmReceiver : BroadcastReceiver() {
             }
             .create()
         alertDialog.show()
-        //start notification service
+        //start notification service when date is reached
         val service = Intent(context, NotificationService::class.java)
         service.putExtra("reason", "notification")
         service.putExtra("timestamp", intent?.getLongExtra("timestamp", 0))
