@@ -155,7 +155,7 @@ class MainActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
-    private fun loadData() {
+    fun loadData() {
         reminderList = getDatabase(this).reminderDao().getReminders().also{
             updateUIComponents()
         }
@@ -176,6 +176,11 @@ class MainActivity : AppCompatActivity() {
     private fun deleteAllReminders() {
         val reminderDao = getDatabase(this).reminderDao()
         reminderDao.deleteAllReminders().also { loadData() }
+    }
+    //update data reminder by id
+    fun updateReminder(reminderId: Long, reminderName: String, dateAdded: Long) {
+        val reminderDao = getDatabase(this).reminderDao()
+        reminderDao.updateReminder(reminderId, reminderName, dateAdded).also { loadData() }
     }
 
     private fun requestNotificationPermissions() {

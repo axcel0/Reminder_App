@@ -67,6 +67,16 @@ class ReminderAdapter(private val dataSet: List<ReminderEntity>) : RecyclerView.
                     selectDeleteList(dataSet[position].id)
                     notifyItemChanged(position)
                 }
+                //else if no items are selected, go to edit activity
+                else {
+                    val context = holder.itemView.context
+                    val intent = android.content.Intent(context, com.example.myapplication.UI.EditActivity::class.java)
+                    intent.putExtra("id", dataSet[position].id)
+                    intent.putExtra("name", dataSet[position].reminderName)
+                    intent.putExtra("added", dataSet[position].dateAdded)
+                    context.startActivity(intent)
+                }
+
             }
 
         }

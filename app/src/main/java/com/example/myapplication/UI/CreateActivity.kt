@@ -50,6 +50,7 @@ class CreateActivity : AppCompatActivity() {
                 startActivity(Intent(this@CreateActivity, MainActivity::class.java)).also { finish() }
             }
         }
+
         //set cancelButton to go back to MainActivity
         binding.cancelButton.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)
