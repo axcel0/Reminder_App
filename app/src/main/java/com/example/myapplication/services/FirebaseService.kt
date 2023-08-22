@@ -50,6 +50,36 @@ class FirebaseService: FirebaseMessagingService() {
 
         showNotification(title, body)
     }
+//    private fun scheduleAlarm(
+//        scheduledTimeString: String?,
+//        title: String?,
+//        message: String?
+//    ) {
+//        val alarmMgr = applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+//        val alarmIntent =
+//            Intent(applicationContext, NotificationBroadcastReceiver::class.java).let { intent ->
+//                intent.putExtra(NOTIFICATION_TITLE, title)
+//                intent.putExtra(NOTIFICATION_MESSAGE, message)
+//                PendingIntent.getBroadcast(applicationContext, 0, intent, 0)
+//            }
+//
+//        // Parse Schedule time
+//        val scheduledTime = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+//            .parse(scheduledTimeString!!)
+//
+//        scheduledTime?.let {
+//            // With set(), it'll set non repeating one time alarm.
+//            alarmMgr.set(
+//                AlarmManager.RTC_WAKEUP,
+//                it.time,
+//                alarmIntent
+//            )
+//        }
+//    }
+//
+//    private fun showNotification(title: String, message: String) {
+//        NotificationUtil(applicationContext).showNotification(title, message)
+//    }
 
     private fun showNotification(title: String?, body: String?) {
         Log.d("FirebaseService", "showNotification: $title, $body")
