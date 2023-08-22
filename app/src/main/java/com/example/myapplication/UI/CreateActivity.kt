@@ -3,6 +3,7 @@ package com.example.myapplication.UI
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.DatePicker
 import android.widget.TextView
@@ -17,6 +18,7 @@ import java.sql.Time
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
+import java.util.Calendar
 import java.util.Date
 
 class CreateActivity : AppCompatActivity() {
@@ -43,11 +45,20 @@ class CreateActivity : AppCompatActivity() {
             val zoneId = ZoneId.systemDefault()
             val epoch = date.atZone(zoneId).toEpochSecond()
             val reminderEntity = ReminderEntity(reminderName = titleText, dateAdded = epoch)
+
+            val calendar = Calendar.getInstance()
+            calendar.set(date.year, date.monthValue-1, date.dayOfMonth, date.hour, date.minute, 0)
+            val time = calendar.timeInMillis
+
             db.reminderDao().insertReminder(reminderEntity).also {
                 Toast.makeText(this, "Reminder added", Toast.LENGTH_SHORT).show()
             }.run {
-                //refresh the list
-                startActivity(Intent(this@CreateActivity, MainActivity::class.java)).also { finish() }
+                val intent = Intent(this@CreateActivity, MainActivity::class.java)
+                intent.putExtra("reminderName", titleText)
+                intent.putExtra("dateAdded", epoch)
+                intent.putExtra("time", time)
+                startActivity(intent).also { finish() }
+
             }
         }
 

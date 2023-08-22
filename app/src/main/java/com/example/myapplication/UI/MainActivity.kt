@@ -1,5 +1,7 @@
 package com.example.myapplication.UI
 
+import android.app.AlarmManager
+import android.app.PendingIntent
 import android.content.ClipData.Item
 import android.content.Context
 import android.content.Intent
@@ -29,6 +31,10 @@ import com.example.myapplication.UI.adapters.ReminderAdapter
 import com.example.myapplication.databinding.ActivityMainBinding
 import com.example.myapplication.models.AppDatabase
 import com.example.myapplication.models.entities.ReminderEntity
+import com.example.myapplication.services.AlarmReceiver
+import com.example.myapplication.services.MESSAGE_EXTRA
+import com.example.myapplication.services.TITLE_EXTRA
+import com.example.myapplication.services.notificationID
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.RemoteMessage
@@ -39,6 +45,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.sql.Time
+import java.time.LocalDateTime
 import java.util.Calendar
 import java.util.Date
 import kotlin.collections.ArrayList
@@ -83,16 +90,75 @@ class MainActivity : AppCompatActivity() {
 
         loadData().also { requestNotificationPermissions() }
 
-        val fmc = FirebaseMessaging.getInstance()
-        fmc.token.addOnCompleteListener() { task ->
-            if (!task.isSuccessful) {
-                println("Fetching FCM registration token failed").also{
-                    return@addOnCompleteListener
-                }
-            }
-            val token = task.result
-
+//        val fcm = FirebaseMessaging.getInstance()
+//        fcm.token.addOnCompleteListener() { task ->
+//            if (!task.isSuccessful) {
+//                println("Fetching FCM registration token failed").also{
+//                    return@addOnCompleteListener
+//                }
+//            }
+//            val token = task.result
+//
+//        }
+//        fcm.subscribeToTopic("reminder").addOnCompleteListener { task ->
+//            if (task.isSuccessful) {
+//                Toast.makeText(this, "Subscribed to reminder", Toast.LENGTH_SHORT).show()
+//            }
+//
+//        }
+        createNotificationChannel()
+        if(intent.hasExtra("reminderName")) {
+            val title = intent.getStringExtra("reminderName")
+            val dateAdded = intent.getLongExtra("dateAdded", 0)
+            val time = intent.getLongExtra("time", 0)
+            Log.d("MainActivity", "onCreate: $title $dateAdded $time")
+            scheduleNotification(ReminderEntity(reminderName = title!!, dateAdded = dateAdded), time)
         }
+    }
+    private fun createNotificationChannel() {
+        val name = "Reminder"
+        val descriptionText = "Reminder"
+        val importance = android.app.NotificationManager.IMPORTANCE_DEFAULT
+        val channel = android.app.NotificationChannel("Reminder", name, importance).apply {
+            description = descriptionText
+        }
+        // Register the channel with the system
+        val notificationManager: android.app.NotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
+        notificationManager.createNotificationChannel(channel)
+    }
+    private fun scheduleNotification(reminder: ReminderEntity, time: Long) {
+        val notificationIntent = Intent(this, AlarmReceiver::class.java)
+        val title = reminder.reminderName
+        //TODO change tile to message
+        val message = reminder.reminderName
+
+        notificationIntent.putExtra(TITLE_EXTRA, title)
+        notificationIntent.putExtra(MESSAGE_EXTRA, message)
+
+
+
+        val pendingIntent = PendingIntent.getBroadcast(applicationContext, notificationID, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+
+        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+
+        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, time, pendingIntent)
+//        showAlert(time, title, message)
+
+//        alarmManager.set(AlarmManager.RTC_WAKEUP, futureInMillis, pendingIntent)
+    }
+    private fun showAlert(time: Long, title: String, message: String) {
+        val date = Date(time)
+        val dateFormat = android.text.format.DateFormat.getLongDateFormat(applicationContext)
+        val timeFormat = android.text.format.DateFormat.getTimeFormat(applicationContext)
+
+        val alertDialog = AlertDialog.Builder(this)
+        alertDialog.setTitle(title)
+        alertDialog.setMessage("Reminder set for ${dateFormat.format(date)} ${timeFormat.format(date)}")
+        alertDialog.setPositiveButton("OK") { _, _ ->
+            val reminderEntity = ReminderEntity(reminderName = title, dateAdded = time)
+        }
+        alertDialog.show()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {

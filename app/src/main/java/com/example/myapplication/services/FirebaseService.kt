@@ -30,7 +30,7 @@ class FirebaseService: FirebaseMessagingService() {
             val notification = NotificationCompat.Builder(context, "myChannelId")
                 .setContentTitle("My Notification")
                 .setContentText("This is my notification")
-                .setSmallIcon(R.mipmap.reminder_icon)
+                .setSmallIcon(R.mipmap.ic_launcher)
                 .build()
             notificationManager.notify(0, notification)
 
@@ -71,7 +71,7 @@ class FirebaseService: FirebaseMessagingService() {
 
 
         val notificationBuilder = NotificationCompat.Builder(this)
-            .setSmallIcon(R.mipmap.reminder_icon)
+            .setSmallIcon(R.mipmap.ic_launcher)
             .setContentTitle(title)
             .setContentText(body)
             .setAutoCancel(true)
@@ -93,5 +93,6 @@ class FirebaseService: FirebaseMessagingService() {
         editor.apply()
         Log.d("FirebaseService", "sendRegistrationToServer: $token")
    }
+
 
 }
