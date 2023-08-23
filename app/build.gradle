@@ -78,8 +78,6 @@ dependencies {
     implementation 'com.google.firebase:firebase-auth:22.1.1'
     //add firebase database
     implementation 'com.google.firebase:firebase-database:20.2.2'
-    //add firebase storage
-    implementation 'com.google.firebase:firebase-storage:20.2.1'
     //add ksp
 //    implementation "com.google.devtools.ksp:symbol-processing-api:1.9.0-1.0.12"
     ksp "com.google.devtools.ksp:symbol-processing:1.9.0-1.0.12"

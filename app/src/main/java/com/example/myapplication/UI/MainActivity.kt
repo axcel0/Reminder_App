@@ -130,7 +130,7 @@ class MainActivity : AppCompatActivity() {
         val notificationIntent = Intent(this, AlarmReceiver::class.java)
         val title = reminder.reminderName
         //TODO change tile to message
-        val message = reminder.reminderName
+        val message = "Don't Forget to do ${reminder.reminderName}"
 
         notificationIntent.putExtra(TITLE_EXTRA, title)
         notificationIntent.putExtra(MESSAGE_EXTRA, message)
