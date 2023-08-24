@@ -30,23 +30,23 @@
             android:id="@+id/tv_date_added"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Date Added"
-            android:textSize="11sp"
-            android:textColor="@color/gray"
+            android:text="@string/date_added"
+            android:textSize="20sp"
+            android:textColor="@color/white"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/tv_time_added"
+            />
+
+        <TextView
+            android:id="@+id/tv_time_added"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/time_added"
+            android:textSize="15sp"
+            android:textColor="@color/white"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toTopOf="@+id/tv_title_name"
             />
-
-<!--        <TextView-->
-<!--            android:id="@+id/tv_title_language"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:text="@string/language"-->
-<!--            android:textSize="15sp"-->
-<!--            android:textColor="@color/white"-->
-<!--            app:layout_constraintEnd_toEndOf="parent"-->
-<!--            app:layout_constraintBottom_toTopOf="@+id/tv_title_name"-->
-<!--            />-->
 
         <TextView
             android:id="@+id/tv_title_name"

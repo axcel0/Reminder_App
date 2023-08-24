@@ -17,6 +17,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.widget.Button
 import android.widget.DatePicker
+import android.widget.Spinner
 import android.widget.TextView
 import android.widget.TimePicker
 import android.widget.Toast
@@ -52,6 +53,7 @@ import kotlin.collections.ArrayList
 
 class MainActivity : AppCompatActivity() {
     private var reminderList: List<ReminderEntity> = emptyList()
+    private var playerList: List<Item> = emptyList()
     private var uiScope: CoroutineScope? = null
     private lateinit var binding: ActivityMainBinding
     private lateinit var recyclerView: RecyclerView
@@ -60,6 +62,7 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         var deleteList : ArrayList<String> = ArrayList()
+        var playerList : ArrayList<Item> = ArrayList()
         private var db: AppDatabase? = null
         fun getDatabase(context: Context): AppDatabase {
             if (db == null) {
@@ -75,7 +78,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
+//        val spinner = findViewById<Spinner>(R.layout.activity_create.id.spinner)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
@@ -129,7 +132,6 @@ class MainActivity : AppCompatActivity() {
     private fun scheduleNotification(reminder: ReminderEntity, time: Long) {
         val notificationIntent = Intent(this, AlarmReceiver::class.java)
         val title = reminder.reminderName
-        //TODO change tile to message
         val message = "Don't Forget to do ${reminder.reminderName}"
 
         notificationIntent.putExtra(TITLE_EXTRA, title)
@@ -147,17 +149,15 @@ class MainActivity : AppCompatActivity() {
 
 //        alarmManager.set(AlarmManager.RTC_WAKEUP, futureInMillis, pendingIntent)
     }
-    private fun showAlert(time: Long, title: String, message: String) {
-        val date = Date(time)
-        val dateFormat = android.text.format.DateFormat.getLongDateFormat(applicationContext)
-        val timeFormat = android.text.format.DateFormat.getTimeFormat(applicationContext)
-
+    //show alert dialog to notify when the reminder time has come
+    private fun showAlert(time: Long, title: String?, message: String?) {
         val alertDialog = AlertDialog.Builder(this)
-        alertDialog.setTitle(title)
-        alertDialog.setMessage("Reminder set for ${dateFormat.format(date)} ${timeFormat.format(date)}")
-        alertDialog.setPositiveButton("OK") { _, _ ->
-            val reminderEntity = ReminderEntity(reminderName = title, dateAdded = time)
-        }
+            .setTitle(title)
+            .setMessage(message)
+            .setPositiveButton("OK") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .create()
         alertDialog.show()
     }
 

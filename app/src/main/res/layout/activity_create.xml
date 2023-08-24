@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true">
 
 <LinearLayout
 
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
@@ -23,7 +23,7 @@
             android:id="@+id/title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/title"
+            android:hint="@string/reminder_name"
             android:maxLines="1"
             android:lines="1"
             android:singleLine="true"
@@ -31,21 +31,6 @@
             />
 
     </com.google.android.material.textfield.TextInputLayout>
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/select_date_and_time"
-        android:textAlignment="center"
-        android:textSize="20sp" />
-
-    <TextView
-        android:id="@+id/textView2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="click to show date and time"
-        android:textAlignment="center"
-        android:textSize="20sp" />
 
     <DatePicker
         android:id="@+id/datePicker"
@@ -53,7 +38,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:calendarViewShown="false"
-        android:datePickerMode="spinner" />
+        android:datePickerMode="spinner"
+        android:layout_marginTop="-25dp"/>
 
     <TimePicker
         android:id="@+id/timePicker"
@@ -61,6 +47,15 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:timePickerMode="spinner" />
+
+
+    <Spinner
+        android:id="@+id/spinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_margin="25dp"
+        />
 
     <Button
         android:id="@+id/save_button"

@@ -24,6 +24,7 @@ class ReminderAdapter(private val dataSet: List<ReminderEntity>) : RecyclerView.
         class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
             val reminderName: TextView = view.findViewById(R.id.tv_title_name)
             val dateAdded: TextView = view.findViewById(R.id.tv_date_added)
+            val timeAdded: TextView = view.findViewById(R.id.tv_time_added)
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -34,8 +35,11 @@ class ReminderAdapter(private val dataSet: List<ReminderEntity>) : RecyclerView.
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             holder.reminderName.text = dataSet[position].reminderName
             val date = LocalDateTime.ofEpochSecond(dataSet[position].dateAdded, 0, ZoneId.systemDefault().rules.getOffset(Date().toInstant()))
-            val dateStr = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm").format(date)
+            //format date to "Month Day, Year"
+            val dateStr = date.format(DateTimeFormatter.ofPattern("EEEE, MMMM d \nyyyy"))
+            val timeStr = date.format(DateTimeFormatter.ofPattern("hh:mm a"))
             holder.dateAdded.text = dateStr
+            holder.timeAdded.text = timeStr
 
             val clickedElement = deleteList.find() {
                 it == dataSet[position].id.toString()
