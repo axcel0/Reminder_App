@@ -4,8 +4,12 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.DatePicker
+import android.widget.Spinner
 import android.widget.TextView
 import android.widget.TimePicker
 import android.widget.Toast
@@ -24,10 +28,25 @@ import java.util.Date
 class CreateActivity : AppCompatActivity() {
     private lateinit var binding: ActivityCreateBinding
     private lateinit var db: AppDatabase
-
+    //make arraylist of playerList
+    val music = arrayOf<Spinner>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_create)
+        val spinner = findViewById<Spinner>(R.id.spinner)
+//        val arrayAdapter = ArrayAdapter.createFromResource(this, R.array.music_array, android.R.layout.simple_spinner_item)
+//        spinner.adapter = arrayAdapter
+//        spinner.onItemSelectedListener = object :
+//            AdapterView.OnItemSelectedListener {
+//            override fun onItemSelected(parent: AdapterView<*>,
+//                                        view: View, position: Int, id: Long) {
+//
+//            }
+//            override fun onNothingSelected(parent: AdapterView<*>) {
+//                // write code to perform some action
+//
+//            }
+//        }
         binding = ActivityCreateBinding.inflate(layoutInflater)
         setContentView(binding.root)
         db = MainActivity.getDatabase(this)

@@ -31,6 +31,7 @@ import com.example.myapplication.R
 import com.example.myapplication.UI.adapters.ReminderAdapter
 import com.example.myapplication.databinding.ActivityMainBinding
 import com.example.myapplication.models.AppDatabase
+import com.example.myapplication.models.entities.AlarmEntity
 import com.example.myapplication.models.entities.ReminderEntity
 import com.example.myapplication.services.AlarmReceiver
 import com.example.myapplication.services.MESSAGE_EXTRA
@@ -53,7 +54,7 @@ import kotlin.collections.ArrayList
 
 class MainActivity : AppCompatActivity() {
     private var reminderList: List<ReminderEntity> = emptyList()
-    private var playerList: List<Item> = emptyList()
+
     private var uiScope: CoroutineScope? = null
     private lateinit var binding: ActivityMainBinding
     private lateinit var recyclerView: RecyclerView
@@ -62,7 +63,6 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         var deleteList : ArrayList<String> = ArrayList()
-        var playerList : ArrayList<Item> = ArrayList()
         private var db: AppDatabase? = null
         fun getDatabase(context: Context): AppDatabase {
             if (db == null) {
@@ -78,7 +78,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-//        val spinner = findViewById<Spinner>(R.layout.activity_create.id.spinner)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)

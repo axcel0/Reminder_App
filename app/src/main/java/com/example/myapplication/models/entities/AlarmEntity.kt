@@ -6,14 +6,15 @@ import androidx.room.Entity
 import androidx.room.Index
 
 @Entity(
-    tableName = "reminders",
+    tableName = "alarm",
     indices = [Index(
-        value = ["reminderName"],
+        value = ["alarmName"],
         unique = true
     )]
 )
-data class ReminderEntity(
+data class AlarmEntity(
     @PrimaryKey(autoGenerate = true) var id: Long = 0,
-    @ColumnInfo(name = "reminderName") val reminderName: String,
+    @ColumnInfo(name = "reminderName") val alarmName: String,
     @ColumnInfo(name = "dateAdded") val dateAdded: Long,
 )
+
