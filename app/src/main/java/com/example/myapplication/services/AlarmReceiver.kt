@@ -22,9 +22,6 @@ const val MESSAGE_EXTRA = "message"
 
 
 class AlarmReceiver : BroadcastReceiver() {
-    //how do i pass the reminder ID to this class? so that i can use it as notificationID and cancel it when the reminder is deleted
-    //change notificationID to reminder ID
-
 
     override fun onReceive(context: Context, intent: Intent?) {
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
