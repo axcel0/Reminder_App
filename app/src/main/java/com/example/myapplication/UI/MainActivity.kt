@@ -2,25 +2,14 @@ package com.example.myapplication.UI
 
 import android.app.AlarmManager
 import android.app.PendingIntent
-import android.content.ClipData.Item
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.AttributeSet
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import android.view.MotionEvent
-import android.view.View
-import android.widget.Button
-import android.widget.DatePicker
-import android.widget.Spinner
-import android.widget.TextView
-import android.widget.TimePicker
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SearchView
 import androidx.core.app.ActivityCompat
@@ -31,25 +20,17 @@ import com.example.myapplication.R
 import com.example.myapplication.UI.adapters.ReminderAdapter
 import com.example.myapplication.databinding.ActivityMainBinding
 import com.example.myapplication.models.AppDatabase
-import com.example.myapplication.models.entities.AlarmEntity
 import com.example.myapplication.models.entities.ReminderEntity
 import com.example.myapplication.services.AlarmReceiver
 import com.example.myapplication.services.MESSAGE_EXTRA
 import com.example.myapplication.services.TITLE_EXTRA
 import com.example.myapplication.services.notificationID
-import com.google.android.material.textfield.TextInputEditText
-import com.google.firebase.messaging.FirebaseMessaging
-import com.google.firebase.messaging.RemoteMessage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.sql.Time
-import java.time.LocalDateTime
-import java.util.Calendar
-import java.util.Date
 import kotlin.collections.ArrayList
 
 class MainActivity : AppCompatActivity() {

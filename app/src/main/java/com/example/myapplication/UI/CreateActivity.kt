@@ -3,14 +3,8 @@ package com.example.myapplication.UI
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
-import android.view.View
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.Button
 import android.widget.DatePicker
 import android.widget.Spinner
-import android.widget.TextView
 import android.widget.TimePicker
 import android.widget.Toast
 import com.example.myapplication.R
@@ -18,12 +12,9 @@ import com.example.myapplication.databinding.ActivityCreateBinding
 import com.example.myapplication.models.AppDatabase
 import com.example.myapplication.models.entities.ReminderEntity
 import com.google.android.material.textfield.TextInputEditText
-import java.sql.Time
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.Calendar
-import java.util.Date
 
 class CreateActivity : AppCompatActivity() {
     private lateinit var binding: ActivityCreateBinding

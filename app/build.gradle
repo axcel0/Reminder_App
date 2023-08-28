@@ -61,11 +61,11 @@ dependencies {
     //glide compiler
     annotationProcessor 'com.github.bumptech.glide:compiler:4.12.0'
     //add room dependencies
-    implementation 'androidx.room:room-runtime:2.6.0-alpha03'
+    implementation 'androidx.room:room-runtime:2.6.0-beta01'
     ksp("androidx.room:room-compiler:2.5.2")
-    implementation 'androidx.room:room-rxjava3:2.6.0-alpha03'
-    implementation 'androidx.room:room-ktx:2.6.0-alpha03'
-    implementation 'androidx.room:room-paging:2.6.0-alpha03'
+    implementation 'androidx.room:room-rxjava3:2.6.0-beta01'
+    implementation 'androidx.room:room-ktx:2.6.0-beta01'
+    implementation 'androidx.room:room-paging:2.6.0-beta01'
 
     //add firebase messaging
     implementation 'com.google.firebase:firebase-messaging:23.2.1'
