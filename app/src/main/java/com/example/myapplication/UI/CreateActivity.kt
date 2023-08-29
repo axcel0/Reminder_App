@@ -34,35 +34,36 @@ class CreateActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setAllAudioFiles()
+//        setAllAudioFiles()
         //make array for spinner to be filled with data from local storage alarm sounds
-        setContentView(R.layout.activity_create)
-        //set spinner
-        val spinner = findViewById<Spinner>(R.id.spinner)
+        binding = ActivityCreateBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
+
         //set spinner to array from audioFiles
-        val spinnerArray = ArrayList<String>()
-        for (i in audioFiles){
-            spinnerArray.add(i.name)
+        val spinnerList = ArrayList<String>()
+
+        getAudioFiles().run {
+            audioFiles = this
         }
-        //add test string data to spinnerArray
-        spinnerArray.add("test1")
-        spinnerArray.add("test2")
-        spinnerArray.add("test3")
+        spinnerList += audioFiles.map { it.name }
 
-        //toast length of spinnerArray
-        Toast.makeText(this, "SpinnerArray length: ${spinnerArray.size}", Toast.LENGTH_SHORT).show()
+        //toast audioFiles size
+        Toast.makeText(this, "audioFiles size: ${audioFiles.size}", Toast.LENGTH_SHORT).show()
 
+        val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, spinnerList)
+        binding.spinner.adapter = adapter
+        //toast selected item
+        binding.spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long){
+                Toast.makeText(this@CreateActivity, "Selected item: ${parent?.getItemAtPosition(position).toString()}", Toast.LENGTH_SHORT).show()
+            }
 
-        //add spinnerArray to spinner
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, spinnerArray)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinner.adapter = adapter
-        //set spinner listener
-        spinner.onItemSelectedListener = this
-        //loop through spinnerArray and add to spinner
-        for (i in spinnerArray){
-            spinner.setSelection(spinnerArray.indexOf(i))
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                //do nothing
+            }
         }
+
 
 
         //check if spinnerArray is empty show toast
@@ -70,10 +71,6 @@ class CreateActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
 //            Toast.makeText(this, "No audio files found", Toast.LENGTH_SHORT).show()
 //        }
 
-
-        //set binding
-        binding = ActivityCreateBinding.inflate(layoutInflater)
-        setContentView(binding.root)
         db = MainActivity.getDatabase(this)
 
         val title = findViewById<TextInputEditText>(R.id.title)
@@ -114,29 +111,65 @@ class CreateActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
     }
 
-    private fun setAllAudioFiles(){
-        val selection = MediaStore.Audio.Media.IS_MUSIC + " != 0"
-        val projection = arrayOf(
-            MediaStore.Audio.Media._ID,
-            MediaStore.Audio.Media.DISPLAY_NAME,
-            MediaStore.Audio.Media.DATA
-        )
-        val sortingList = MediaStore.Audio.Media.DISPLAY_NAME + " ASC"
-        val cursor = contentResolver.query(
-            MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-            projection,
-            selection,
-            null,
-            sortingList
-        )
-        while (cursor!!.moveToNext())
-        {
-            val name = cursor.getString(1)
-            val path = cursor.getString(2)
-            val audioFilesTemp = AudioFiles(path, name)
-            audioFiles.add(audioFilesTemp)
+    private fun editAction(bundle: Bundle?){
+        val bundle : Bundle? = intent.extras
+
+        //bundle data
+        val id = bundle?.getLong("id")
+        val name = bundle?.getString("name")
+        val dateTime = bundle?.getLong("added")
+
+        val title = findViewById<TextInputEditText>(R.id.title)
+        val date =  findViewById<DatePicker>(R.id.datePicker)
+        val time =  findViewById<TimePicker>(R.id.timePicker)
+
+        title.setText(name)
+        //initiate date and time
+        date.minDate = System.currentTimeMillis().also { time.setIs24HourView(true) }
+        time.hour = LocalDateTime.ofEpochSecond(dateTime!!, 0, java.time.ZoneId.systemDefault().rules.getOffset(java.time.Instant.now())).hour
+        time.minute = LocalDateTime.ofEpochSecond(dateTime!!, 0, java.time.ZoneId.systemDefault().rules.getOffset(java.time.Instant.now())).minute
+
+        //save
+
+        binding.saveButton.setOnClickListener {
+            if (id!= null && name != null) {
+                val newTitle = title.text.toString()
+                val newDateTime = LocalDateTime.of(date.year, date.month+1, date.dayOfMonth, time.hour, time.minute, 0)
+                val newDateTimeLong = newDateTime.atZone(java.time.ZoneId.systemDefault()).toEpochSecond()
+                MainActivity().updateReminder(id, newTitle, newDateTimeLong)
+                MainActivity().loadData().run {
+                    //refresh the list
+                    startActivity(Intent(this@CreateActivity, MainActivity::class.java)).also { finish() }
+                }
+            }
+        }
+        //cancel
+        binding.cancelButton.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent).also { finish() }
         }
 
+    }
+    //load audio files from local storage
+    private fun getAudioFiles(): ArrayList<AudioFiles> {
+        val tempAudioList = ArrayList<AudioFiles>()
+        val uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+        val projection = arrayOf(
+            MediaStore.Audio.AudioColumns.DATA,
+            MediaStore.Audio.AudioColumns.TITLE
+        )
+        val cursor = contentResolver.query(uri, projection, null, null, null)
+        if (cursor != null) {
+            while (cursor.moveToNext()) {
+                val path = cursor.getString(0)
+                val name = cursor.getString(1)
+                val audioFiles = AudioFiles(path, name)
+                Log.e("Path: $path", "Name: $name")
+                tempAudioList.add(audioFiles)
+            }
+            cursor.close()
+        }
+        return tempAudioList
     }
 
     override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {

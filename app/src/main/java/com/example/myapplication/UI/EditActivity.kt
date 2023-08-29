@@ -2,6 +2,7 @@ package com.example.myapplication.UI
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.ArrayAdapter
 import android.widget.DatePicker
 import android.widget.TimePicker
 import androidx.appcompat.app.AppCompatActivity
@@ -20,6 +21,15 @@ class EditActivity : AppCompatActivity() {
         setContentView(R.layout.activity_create)
         binding = ActivityCreateBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        val spinnerList = ArrayList<String>()
+        spinnerList.add("spinnerList 1")
+        spinnerList.add("spinnerList 2")
+        spinnerList.add("spinnerList 3")
+        spinnerList.add("spinnerList 4")
+
+        val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, spinnerList)
+        binding.spinner.adapter = adapter
 
         val bundle : Bundle? = intent.extras
 
