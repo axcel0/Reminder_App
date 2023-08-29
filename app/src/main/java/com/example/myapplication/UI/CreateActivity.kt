@@ -4,6 +4,7 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
@@ -28,6 +29,7 @@ class CreateActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
     companion object {
         var audioFiles = ArrayList<AudioFiles>()
+
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,15 +37,41 @@ class CreateActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
         setAllAudioFiles()
         //make array for spinner to be filled with data from local storage alarm sounds
         setContentView(R.layout.activity_create)
-        val spinnerArray = arrayOf("Alarm 1", "Alarm 2", "Alarm 3", "Alarm 4", "Alarm 5")
+        //set spinner
         val spinner = findViewById<Spinner>(R.id.spinner)
-        //set spinner to array
+        //set spinner to array from audioFiles
+        val spinnerArray = ArrayList<String>()
+        for (i in audioFiles){
+            spinnerArray.add(i.name)
+        }
+        //add test string data to spinnerArray
+        spinnerArray.add("test1")
+        spinnerArray.add("test2")
+        spinnerArray.add("test3")
 
-        val spinnerAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, spinnerArray)
-        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        //toast length of spinnerArray
+        Toast.makeText(this, "SpinnerArray length: ${spinnerArray.size}", Toast.LENGTH_SHORT).show()
 
-        spinner.adapter = spinnerAdapter
 
+        //add spinnerArray to spinner
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, spinnerArray)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinner.adapter = adapter
+        //set spinner listener
+        spinner.onItemSelectedListener = this
+        //loop through spinnerArray and add to spinner
+        for (i in spinnerArray){
+            spinner.setSelection(spinnerArray.indexOf(i))
+        }
+
+
+        //check if spinnerArray is empty show toast
+//        if (spinnerArray.isEmpty()){
+//            Toast.makeText(this, "No audio files found", Toast.LENGTH_SHORT).show()
+//        }
+
+
+        //set binding
         binding = ActivityCreateBinding.inflate(layoutInflater)
         setContentView(binding.root)
         db = MainActivity.getDatabase(this)
@@ -86,7 +114,7 @@ class CreateActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
     }
 
-    fun setAllAudioFiles(){
+    private fun setAllAudioFiles(){
         val selection = MediaStore.Audio.Media.IS_MUSIC + " != 0"
         val projection = arrayOf(
             MediaStore.Audio.Media._ID,

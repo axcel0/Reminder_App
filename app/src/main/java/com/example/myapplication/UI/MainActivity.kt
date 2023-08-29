@@ -70,8 +70,12 @@ class MainActivity : AppCompatActivity() {
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.setHasFixedSize(true) //recyclerview size is fixed
+        //load data also request permissions
+        loadData().also {
+            requestNotificationPermissions()
+            requestReadStoragePermissions()
+        }
 
-        loadData().also { requestNotificationPermissions() }
 
 //        val fcm = FirebaseMessaging.getInstance()
 //        fcm.token.addOnCompleteListener() { task ->
@@ -228,12 +232,19 @@ class MainActivity : AppCompatActivity() {
         val reminderDao = getDatabase(this).reminderDao()
         reminderDao.updateReminder(reminderId, reminderName, dateAdded).also { loadData() }
     }
-
+    //permission to post notification
     private fun requestNotificationPermissions() {
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 1)
         }
     }
+    //permission to read media audio
+    private fun requestReadStoragePermissions() {
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.READ_MEDIA_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.READ_MEDIA_AUDIO), 2)
+        }
+    }
+
 
     private fun updateUIComponents() {
         uiScope?.cancel()
