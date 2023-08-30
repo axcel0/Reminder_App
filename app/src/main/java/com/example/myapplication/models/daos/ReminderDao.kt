@@ -31,7 +31,7 @@ interface ReminderDao {
     fun updateReminder(id: Long, reminderName: String, dateAdded: Long)
 
     //search reminder by title
-    @Query("SELECT * FROM reminders WHERE reminderName LIKE '%' || :reminderName || '%'")
+    @Query("SELECT * FROM reminders WHERE reminderName LIKE '%' || :reminderName || '%' ")
     fun searchReminder(reminderName: String): List<ReminderEntity>
 
 }

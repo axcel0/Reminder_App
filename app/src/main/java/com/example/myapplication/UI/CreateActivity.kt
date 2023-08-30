@@ -46,7 +46,7 @@ class CreateActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
         getAudioFiles().run {
             audioFiles = this
         }
-        spinnerList += audioFiles.map { it.name }
+        spinnerList += audioFiles.map { it.audioName }
 
         //toast audioFiles size
         Toast.makeText(this, "audioFiles size: ${audioFiles.size}", Toast.LENGTH_SHORT).show()
@@ -63,14 +63,6 @@ class CreateActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
                 //do nothing
             }
         }
-
-
-
-        //check if spinnerArray is empty show toast
-//        if (spinnerArray.isEmpty()){
-//            Toast.makeText(this, "No audio files found", Toast.LENGTH_SHORT).show()
-//        }
-
         db = MainActivity.getDatabase(this)
 
         val title = findViewById<TextInputEditText>(R.id.title)
@@ -118,24 +110,30 @@ class CreateActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
         val id = bundle?.getLong("id")
         val name = bundle?.getString("name")
         val dateTime = bundle?.getLong("added")
+//        val audio = bundle?.getString("audio")
 
         val title = findViewById<TextInputEditText>(R.id.title)
         val date =  findViewById<DatePicker>(R.id.datePicker)
         val time =  findViewById<TimePicker>(R.id.timePicker)
+//        val audioSpinner = findViewById<Spinner>(R.id.spinner)
 
         title.setText(name)
         //initiate date and time
         date.minDate = System.currentTimeMillis().also { time.setIs24HourView(true) }
-        time.hour = LocalDateTime.ofEpochSecond(dateTime!!, 0, java.time.ZoneId.systemDefault().rules.getOffset(java.time.Instant.now())).hour
-        time.minute = LocalDateTime.ofEpochSecond(dateTime!!, 0, java.time.ZoneId.systemDefault().rules.getOffset(java.time.Instant.now())).minute
-
-        //save
+        time.hour = LocalDateTime.ofEpochSecond(dateTime!!, 0, ZoneId.systemDefault().rules.getOffset(java.time.Instant.now())).hour
+        time.minute = LocalDateTime.ofEpochSecond(dateTime!!, 0, ZoneId.systemDefault().rules.getOffset(java.time.Instant.now())).minute
+        //get selected audio file from spinner list
+//        audioSpinner.onItemSelectedListener = this
 
         binding.saveButton.setOnClickListener {
             if (id!= null && name != null) {
                 val newTitle = title.text.toString()
                 val newDateTime = LocalDateTime.of(date.year, date.month+1, date.dayOfMonth, time.hour, time.minute, 0)
-                val newDateTimeLong = newDateTime.atZone(java.time.ZoneId.systemDefault()).toEpochSecond()
+                val newDateTimeLong = newDateTime.atZone(ZoneId.systemDefault()).toEpochSecond()
+                //save selected audio file from spinner list
+//                val newAudio = audioSpinner.selectedItem.toString()
+
+
                 MainActivity().updateReminder(id, newTitle, newDateTimeLong)
                 MainActivity().loadData().run {
                     //refresh the list

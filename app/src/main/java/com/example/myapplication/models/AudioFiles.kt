@@ -1,3 +1,3 @@
 package com.example.myapplication.models
 
-data class AudioFiles(var path: String, var name: String)
+data class AudioFiles(var path: String, var audioName: String)

@@ -23,10 +23,9 @@ class EditActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         val spinnerList = ArrayList<String>()
-        spinnerList.add("spinnerList 1")
-        spinnerList.add("spinnerList 2")
-        spinnerList.add("spinnerList 3")
-        spinnerList.add("spinnerList 4")
+        //set spinner to array from audioFiles
+        spinnerList += CreateActivity.audioFiles.map { it.audioName }
+
 
         val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, spinnerList)
         binding.spinner.adapter = adapter
