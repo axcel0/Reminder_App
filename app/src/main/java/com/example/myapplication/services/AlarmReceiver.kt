@@ -7,12 +7,13 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.core.app.NotificationCompat
+import androidx.core.os.bundleOf
 import com.example.myapplication.R
 
 //import com.example.myapplication.services.NotificationService
 //TODO change notificationID to reminder ID
 
-const val notificationID = 1
+const val notificationID = 0
 //set notificationID as reminder ID
 
 const val CHANNEL_ID = "Reminder"
@@ -20,10 +21,14 @@ const val TITLE_EXTRA = "title"
 const val MESSAGE_EXTRA = "message"
 
 
-
 class AlarmReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent?) {
+        //set notification ID same as reminder ID so that it can be cancelled when reminder is deleted
+//
+//        val bundle : Bundle? = intent?.extras
+//        val notificationID = bundle?.getLong("id")?.toInt() ?: 0
+
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.mipmap.reminder_icon)
             .setContentTitle(intent?.getStringExtra(TITLE_EXTRA))
@@ -39,6 +44,9 @@ class AlarmReceiver : BroadcastReceiver() {
         service.putExtra("timestamp", intent?.getLongExtra("timestamp", 0))
         service.putExtra("reminderBody", intent?.getStringExtra("reminderBody"))
         context.startService(service)
+
+
+
         //cancel notification when reminder is deleted
         if(intent?.getStringExtra("reason") == "delete"){
             notificationManager.cancel(notificationID)
