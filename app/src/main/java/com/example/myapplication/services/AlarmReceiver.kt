@@ -1,20 +1,16 @@
 package com.example.myapplication.services
 
-import android.app.AlertDialog
 import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.os.Bundle
 import androidx.core.app.NotificationCompat
-import androidx.core.content.ContextCompat
-import androidx.core.os.bundleOf
 import com.example.myapplication.R
 
 //import com.example.myapplication.services.NotificationService
 //TODO change notificationID to reminder ID
 
-const val notificationID = 0
+const val NOTIFICATION_ID = "notificationID"
 //set notificationID as reminder ID
 
 const val CHANNEL_ID = "Reminder"
@@ -32,10 +28,9 @@ class AlarmReceiver : BroadcastReceiver() {
             .setContentText(intent?.getStringExtra(MESSAGE_EXTRA))
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .build()
+
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.notify(notificationID, notification)
-
-
+        notificationManager.notify(intent!!.getIntExtra(NOTIFICATION_ID,0), notification)
     }
 
 }

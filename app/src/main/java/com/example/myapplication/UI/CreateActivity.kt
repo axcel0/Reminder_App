@@ -3,15 +3,12 @@ package com.example.myapplication.UI
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.provider.MediaStore
 import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.DatePicker
-import android.widget.Spinner
 import android.widget.TimePicker
 import android.widget.Toast
 import com.example.myapplication.R
@@ -25,7 +22,7 @@ import java.time.ZoneId
 import java.util.Calendar
 
 
-class CreateActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
+class CreateActivity : AppCompatActivity() {
     private lateinit var binding: ActivityCreateBinding
     private lateinit var db: AppDatabase
 
@@ -53,6 +50,7 @@ class CreateActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
         //toast audioFiles size
         Toast.makeText(this, "audioFiles size: ${audioFiles.size}", Toast.LENGTH_SHORT).show()
 
+
         val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, spinnerList)
         binding.spinner.adapter = adapter
         //toast selected item
@@ -78,8 +76,12 @@ class CreateActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
             val titleText = title.text.toString()
             val date = LocalDateTime.of(datePicker.year, datePicker.month+1, datePicker.dayOfMonth, timePicker.hour, timePicker.minute, 0)
             val zoneId = ZoneId.systemDefault()
+            val selectedRingtone = binding.spinner.selectedItem.toString()
+            //toast selected ringtone
+            Toast.makeText(this, "abcdefg: $selectedRingtone", Toast.LENGTH_SHORT).show()
+
             val epoch = date.atZone(zoneId).toEpochSecond()
-            val reminderEntity = ReminderEntity(reminderName = titleText, dateAdded = epoch)
+            val reminderEntity = ReminderEntity(reminderName = titleText, dateAdded = epoch, ringtoneName = selectedRingtone)
 
             val calendar = Calendar.getInstance()
             calendar.set(date.year, date.monthValue-1, date.dayOfMonth, date.hour, date.minute, 0)
@@ -92,6 +94,7 @@ class CreateActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
                 intent.putExtra("reminderName", titleText)
                 intent.putExtra("dateAdded", epoch)
                 intent.putExtra("time", time)
+                intent.putExtra("ringtoneName", selectedRingtone)
                 startActivity(intent).also { finish() }
 
             }
@@ -104,51 +107,9 @@ class CreateActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
 
     }
-    //edit reminder
-    private fun editAction(bundle: Bundle?){
-        val bundle : Bundle? = intent.extras
 
-        //bundle data
-        val id = bundle?.getLong("id")
-        val name = bundle?.getString("name")
-        val dateTime = bundle?.getLong("added")
-        val title = findViewById<TextInputEditText>(R.id.title)
-        val date =  findViewById<DatePicker>(R.id.datePicker)
-        val time =  findViewById<TimePicker>(R.id.timePicker)
-
-        title.setText(name)
-        //initiate date and time
-        date.minDate = System.currentTimeMillis().also { time.setIs24HourView(true) }
-        time.hour = LocalDateTime.ofEpochSecond(dateTime!!, 0, ZoneId.systemDefault().rules.getOffset(java.time.Instant.now())).hour
-        time.minute = LocalDateTime.ofEpochSecond(dateTime!!, 0, ZoneId.systemDefault().rules.getOffset(java.time.Instant.now())).minute
-        //get selected audio file from spinner list
-//        audioSpinner.onItemSelectedListener = this
-
-        binding.saveButton.setOnClickListener {
-            if (id!= null && name != null) {
-                val newTitle = title.text.toString()
-                val newDateTime = LocalDateTime.of(date.year, date.month+1, date.dayOfMonth, time.hour, time.minute, 0)
-                val newDateTimeLong = newDateTime.atZone(ZoneId.systemDefault()).toEpochSecond()
-                //save selected audio file from spinner list
-//                val newAudio = audioSpinner.selectedItem.toString()
-
-
-                MainActivity().updateReminder(id, newTitle, newDateTimeLong)
-                MainActivity().loadData().run {
-                    //refresh the list
-                    startActivity(Intent(this@CreateActivity, MainActivity::class.java)).also { finish() }
-                }
-            }
-        }
-        //cancel
-        binding.cancelButton.setOnClickListener {
-            val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent).also { finish() }
-        }
-
-    }
     //load audio files from local storage
-    private fun getAudioFiles(): ArrayList<AudioFiles> {
+     private fun getAudioFiles(): ArrayList<AudioFiles> {
         val tempAudioList = ArrayList<AudioFiles>()
         val uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
         val projection = arrayOf(
@@ -169,12 +130,4 @@ class CreateActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
         return tempAudioList
     }
 
-    override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-        Toast.makeText(this,"Selected item: ${p0?.getItemAtPosition(p2).toString()}", Toast.LENGTH_SHORT).show()
-
-    }
-
-    override fun onNothingSelected(p0: AdapterView<*>?) {
-        TODO("Not yet implemented")
-    }
 }

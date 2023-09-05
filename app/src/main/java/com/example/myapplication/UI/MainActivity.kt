@@ -23,8 +23,8 @@ import com.example.myapplication.models.AppDatabase
 import com.example.myapplication.models.entities.ReminderEntity
 import com.example.myapplication.services.AlarmReceiver
 import com.example.myapplication.services.MESSAGE_EXTRA
+import com.example.myapplication.services.NOTIFICATION_ID
 import com.example.myapplication.services.TITLE_EXTRA
-import com.example.myapplication.services.notificationID
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -76,30 +76,14 @@ class MainActivity : AppCompatActivity() {
             requestReadStoragePermissions()
         }
 
-
-//        val fcm = FirebaseMessaging.getInstance()
-//        fcm.token.addOnCompleteListener() { task ->
-//            if (!task.isSuccessful) {
-//                println("Fetching FCM registration token failed").also{
-//                    return@addOnCompleteListener
-//                }
-//            }
-//            val token = task.result
-//
-//        }
-//        fcm.subscribeToTopic("reminder").addOnCompleteListener { task ->
-//            if (task.isSuccessful) {
-//                Toast.makeText(this, "Subscribed to reminder", Toast.LENGTH_SHORT).show()
-//            }
-//
-//        }
         createNotificationChannel()
         if(intent.hasExtra("reminderName")) {
             val title = intent.getStringExtra("reminderName")
             val dateAdded = intent.getLongExtra("dateAdded", 0)
             val time = intent.getLongExtra("time", 0)
+            val ringtoneName = intent.getStringExtra("ringtoneName")
             Log.d("MainActivity", "onCreate: $title $dateAdded $time")
-            scheduleNotification(ReminderEntity(reminderName = title!!, dateAdded = dateAdded), time)
+            scheduleNotification(ReminderEntity(reminderName = title!!, dateAdded = dateAdded, ringtoneName = ringtoneName!!), time)
         }
     }
     private fun createNotificationChannel() {
@@ -115,13 +99,13 @@ class MainActivity : AppCompatActivity() {
     }
     private fun scheduleNotification(reminder: ReminderEntity, time: Long) {
         val notificationIntent = Intent(this, AlarmReceiver::class.java)
+        val notificationID = reminder.id.toInt()
         val title = reminder.reminderName
         val message = "Don't Forget to do ${reminder.reminderName}"
 
+        notificationIntent.putExtra(NOTIFICATION_ID, notificationID)
         notificationIntent.putExtra(TITLE_EXTRA, title)
         notificationIntent.putExtra(MESSAGE_EXTRA, message)
-
-
 
         val pendingIntent = PendingIntent.getBroadcast(applicationContext, notificationID, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
 
@@ -129,20 +113,7 @@ class MainActivity : AppCompatActivity() {
 
 
         alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, time, pendingIntent)
-//        showAlert(time, title, message)
 
-//        alarmManager.set(AlarmManager.RTC_WAKEUP, futureInMillis, pendingIntent)
-    }
-    //show alert dialog to notify when the reminder time has come
-    private fun showAlert(time: Long, title: String?, message: String?) {
-        val alertDialog = AlertDialog.Builder(this)
-            .setTitle(title)
-            .setMessage(message)
-            .setPositiveButton("OK") { dialog, _ ->
-                dialog.dismiss()
-            }
-            .create()
-        alertDialog.show()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -228,9 +199,9 @@ class MainActivity : AppCompatActivity() {
         reminderDao.deleteAllReminders().also { loadData() }
     }
     //update data reminder by id
-    fun updateReminder(reminderId: Long, reminderName: String, dateAdded: Long) {
+    fun updateReminder(reminderId: Long, reminderName: String, dateAdded: Long, ringtoneName: String) {
         val reminderDao = getDatabase(this).reminderDao()
-        reminderDao.updateReminder(reminderId, reminderName, dateAdded).also { loadData() }
+        reminderDao.updateReminder(reminderId, reminderName, dateAdded, ringtoneName).also { loadData() }
     }
     //permission to post notification
     private fun requestNotificationPermissions() {
