@@ -3,6 +3,7 @@ package com.example.myapplication.models.entities
 import androidx.room.ColumnInfo
 import androidx.room.PrimaryKey
 import androidx.room.Entity
+import androidx.room.ForeignKey
 import androidx.room.Index
 
 @Entity(

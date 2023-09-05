@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import com.example.myapplication.R
 
@@ -24,10 +25,6 @@ const val MESSAGE_EXTRA = "message"
 class AlarmReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent?) {
-        //set notification ID same as reminder ID so that it can be cancelled when reminder is deleted
-//
-//        val bundle : Bundle? = intent?.extras
-//        val notificationID = bundle?.getLong("id")?.toInt() ?: 0
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.mipmap.reminder_icon)

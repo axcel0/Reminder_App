@@ -6,9 +6,9 @@ import androidx.room.Entity
 import androidx.room.Index
 
 @Entity(
-    tableName = "alarm",
+    tableName = "ringtone",
     indices = [Index(
-        value = ["alarmName"],
+        value = ["ringtoneName"],
         unique = true
     )]
 )

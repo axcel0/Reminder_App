@@ -3,6 +3,8 @@ package com.example.myapplication.UI
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.provider.MediaStore
 import android.util.Log
 import android.view.View
@@ -102,7 +104,7 @@ class CreateActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
 
     }
-
+    //edit reminder
     private fun editAction(bundle: Bundle?){
         val bundle : Bundle? = intent.extras
 
@@ -110,12 +112,9 @@ class CreateActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
         val id = bundle?.getLong("id")
         val name = bundle?.getString("name")
         val dateTime = bundle?.getLong("added")
-//        val audio = bundle?.getString("audio")
-
         val title = findViewById<TextInputEditText>(R.id.title)
         val date =  findViewById<DatePicker>(R.id.datePicker)
         val time =  findViewById<TimePicker>(R.id.timePicker)
-//        val audioSpinner = findViewById<Spinner>(R.id.spinner)
 
         title.setText(name)
         //initiate date and time
