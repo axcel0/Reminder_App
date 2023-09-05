@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SearchView
 import androidx.core.app.ActivityCompat
@@ -78,12 +79,13 @@ class MainActivity : AppCompatActivity() {
 
         createNotificationChannel()
         if(intent.hasExtra("reminderName")) {
+            val id = intent.getLongExtra("id", 0)
             val title = intent.getStringExtra("reminderName")
             val dateAdded = intent.getLongExtra("dateAdded", 0)
             val time = intent.getLongExtra("time", 0)
             val ringtoneName = intent.getStringExtra("ringtoneName")
             Log.d("MainActivity", "onCreate: $title $dateAdded $time")
-            scheduleNotification(ReminderEntity(reminderName = title!!, dateAdded = dateAdded, ringtoneName = ringtoneName!!), time)
+            scheduleNotification(ReminderEntity(id = id, reminderName = title!!, dateAdded = dateAdded, ringtoneName = ringtoneName!!), time)
         }
     }
     private fun createNotificationChannel() {
@@ -102,7 +104,8 @@ class MainActivity : AppCompatActivity() {
         val notificationID = reminder.id.toInt()
         val title = reminder.reminderName
         val message = "Don't Forget to do ${reminder.reminderName}"
-
+        //toast notificationID
+        Toast.makeText(this, "notificationID: $notificationID", Toast.LENGTH_SHORT).show()
         notificationIntent.putExtra(NOTIFICATION_ID, notificationID)
         notificationIntent.putExtra(TITLE_EXTRA, title)
         notificationIntent.putExtra(MESSAGE_EXTRA, message)

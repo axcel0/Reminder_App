@@ -77,8 +77,6 @@ class CreateActivity : AppCompatActivity() {
             val date = LocalDateTime.of(datePicker.year, datePicker.month+1, datePicker.dayOfMonth, timePicker.hour, timePicker.minute, 0)
             val zoneId = ZoneId.systemDefault()
             val selectedRingtone = binding.spinner.selectedItem.toString()
-            //toast selected ringtone
-            Toast.makeText(this, "abcdefg: $selectedRingtone", Toast.LENGTH_SHORT).show()
 
             val epoch = date.atZone(zoneId).toEpochSecond()
             val reminderEntity = ReminderEntity(reminderName = titleText, dateAdded = epoch, ringtoneName = selectedRingtone)
@@ -91,6 +89,7 @@ class CreateActivity : AppCompatActivity() {
                 Toast.makeText(this, "Reminder added", Toast.LENGTH_SHORT).show()
             }.run {
                 val intent = Intent(this@CreateActivity, MainActivity::class.java)
+                intent.putExtra("id", this)
                 intent.putExtra("reminderName", titleText)
                 intent.putExtra("dateAdded", epoch)
                 intent.putExtra("time", time)
