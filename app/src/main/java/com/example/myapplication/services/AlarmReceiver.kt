@@ -4,8 +4,10 @@ import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import androidx.core.app.AlarmManagerCompat
 import androidx.core.app.NotificationCompat
 import com.example.myapplication.R
+import com.example.myapplication.UI.EditActivity
 
 //import com.example.myapplication.services.NotificationService
 //TODO change notificationID to reminder ID
@@ -31,6 +33,7 @@ class AlarmReceiver : BroadcastReceiver() {
 
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.notify(intent!!.getIntExtra(NOTIFICATION_ID,0), notification)
+
     }
 
 }

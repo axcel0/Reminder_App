@@ -196,6 +196,7 @@ class MainActivity : AppCompatActivity() {
         val reminderDao = getDatabase(this).reminderDao()
         reminderDao.deleteReminder(reminderId).also { loadData() }
     }
+
     //delete all reminders
     private fun deleteAllReminders() {
         val reminderDao = getDatabase(this).reminderDao()
@@ -218,6 +219,8 @@ class MainActivity : AppCompatActivity() {
             ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.READ_MEDIA_AUDIO), 2)
         }
     }
+
+
 
 
     private fun updateUIComponents() {
