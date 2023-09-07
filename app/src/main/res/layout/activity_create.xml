@@ -29,6 +29,7 @@
             android:hint="@string/reminder_name"
             android:maxLines="1"
             android:lines="1"
+            android:maxLength="20"
             android:singleLine="true"
             android:inputType="text|textCapSentences"
             />

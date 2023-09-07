@@ -8,25 +8,21 @@ import androidx.core.app.NotificationCompat
 import java.util.Calendar
 
 class AlarmService{
-
-    //set alarm
+    //make alarm service
     fun setAlarm(context: Context, calendar: Calendar, id: Long, reminderBody: String) {
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = Intent(context, AlarmReceiver::class.java)
         intent.putExtra("id", id)
         intent.putExtra("reminderBody", reminderBody)
-        val pendingIntent = PendingIntent.getBroadcast(context, id.toInt(), intent,
-            PendingIntent.FLAG_IMMUTABLE)
-        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val pendingIntent = PendingIntent.getBroadcast(context, id.toInt(), intent, 0)
         alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent)
     }
-    //cancel alarm
+    //cancel alarm service
     fun cancelAlarm(context: Context, id: Long) {
-        val intent = Intent(context, AlarmReceiver::class.java)
-        val pendingIntent = PendingIntent.getBroadcast(context, id.toInt(), intent,
-            PendingIntent.FLAG_IMMUTABLE)
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val intent = Intent(context, AlarmReceiver::class.java)
+        val pendingIntent = PendingIntent.getBroadcast(context, id.toInt(), intent, 0)
         alarmManager.cancel(pendingIntent)
-
     }
 
 }

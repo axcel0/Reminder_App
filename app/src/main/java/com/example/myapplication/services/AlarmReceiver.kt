@@ -1,20 +1,17 @@
 package com.example.myapplication.services
 
+import android.app.AlarmManager
+import android.app.AlarmManager.OnAlarmListener
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import androidx.core.app.AlarmManagerCompat
 import androidx.core.app.NotificationCompat
 import com.example.myapplication.R
-import com.example.myapplication.UI.EditActivity
-
-//import com.example.myapplication.services.NotificationService
-//TODO change notificationID to reminder ID
+import java.util.Calendar
 
 const val NOTIFICATION_ID = "notificationID"
-//set notificationID as reminder ID
-
 const val CHANNEL_ID = "Reminder"
 const val TITLE_EXTRA = "title"
 const val MESSAGE_EXTRA = "message"
@@ -22,7 +19,7 @@ const val MESSAGE_EXTRA = "message"
 
 class AlarmReceiver : BroadcastReceiver() {
 
-    override fun onReceive(context: Context, intent: Intent?) {
+    override fun onReceive(context: Context, intent: Intent? ) {
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.mipmap.reminder_icon)

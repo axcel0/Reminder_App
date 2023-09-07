@@ -11,6 +11,7 @@ import android.widget.ArrayAdapter
 import android.widget.DatePicker
 import android.widget.TimePicker
 import android.widget.Toast
+import androidx.core.widget.addTextChangedListener
 import com.example.myapplication.R
 import com.example.myapplication.databinding.ActivityCreateBinding
 import com.example.myapplication.models.AppDatabase
@@ -70,8 +71,34 @@ class CreateActivity : AppCompatActivity() {
         val timePicker =  findViewById<TimePicker>(R.id.timePicker)
 
         datePicker.minDate = System.currentTimeMillis().also { timePicker.setIs24HourView(true) }
+        //disable savebutton before checking
+        binding.saveButton.isEnabled = false
+       //if user close keyboard, check if there any same title
+        //use addtextchangedlistener to check if there any same title as soon as user type
+        title.addTextChangedListener {
+            if (checkSameTitle(title.text.toString())) {
+                Toast.makeText(this, "Reminder with same title already exist", Toast.LENGTH_SHORT).show()
+                //disable saveButton if there any same title
+                binding.saveButton.isEnabled = false
+            }else if (title.text.toString() == "") {
+                Toast.makeText(this, "Title cannot be empty", Toast.LENGTH_SHORT).show()
+                //disable saveButton if title is empty
+                binding.saveButton.isEnabled = false
+            }else if (title.text.toString().length > 20) {
+                Toast.makeText(
+                    this,
+                    "Title cannot be more than 20 characters",
+                    Toast.LENGTH_SHORT
+                ).show()
+                //disable saveButton if title is more than 20 characters
+                binding.saveButton.isEnabled = false
+            }//check if there is no same title, enable saveButton
+            else if (!checkSameTitle(title.text.toString()) && title.text.toString() != "" && title.text.toString().length <= 20) {
+                binding.saveButton.isEnabled = true
+            }
+        }
 
-        //set applyButton to save data
+        //set saveButton to save data
         binding.saveButton.setOnClickListener {
             val titleText = title.text.toString()
             val date = LocalDateTime.of(datePicker.year, datePicker.month+1, datePicker.dayOfMonth, timePicker.hour, timePicker.minute, 0)
@@ -105,6 +132,16 @@ class CreateActivity : AppCompatActivity() {
         }
 
 
+    }
+    //make function to check if there any same title in database
+    private fun checkSameTitle(title: String): Boolean {
+        val reminderList = db.reminderDao().getReminders()
+        for (reminder in reminderList) {
+            if (reminder.reminderName == title) {
+                return true
+            }
+        }
+        return false
     }
 
     //load audio files from local storage
