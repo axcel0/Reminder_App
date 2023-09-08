@@ -71,7 +71,7 @@ class CreateActivity : AppCompatActivity() {
         val timePicker =  findViewById<TimePicker>(R.id.timePicker)
 
         datePicker.minDate = System.currentTimeMillis().also { timePicker.setIs24HourView(true) }
-        //disable savebutton before checking
+        //disable save button before checking
         binding.saveButton.isEnabled = false
        //if user close keyboard, check if there any same title
         //use addtextchangedlistener to check if there any same title as soon as user type
@@ -134,7 +134,7 @@ class CreateActivity : AppCompatActivity() {
 
     }
     //make function to check if there any same title in database
-    private fun checkSameTitle(title: String): Boolean {
+    fun checkSameTitle(title: String): Boolean {
         val reminderList = db.reminderDao().getReminders()
         for (reminder in reminderList) {
             if (reminder.reminderName == title) {

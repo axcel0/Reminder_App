@@ -7,7 +7,9 @@ import android.util.Log
 import android.widget.ArrayAdapter
 import android.widget.DatePicker
 import android.widget.TimePicker
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.widget.addTextChangedListener
 import com.example.myapplication.R
 import com.example.myapplication.databinding.ActivityCreateBinding
 import com.example.myapplication.models.AudioFiles
@@ -63,8 +65,31 @@ class EditActivity : AppCompatActivity() {
         //set spinner to ringtoneName
         val spinnerPosition = adapter.getPosition(ringtoneName)
         binding.spinner.setSelection(spinnerPosition)
-
-        //save
+        //if user close keyboard, check if there any same title
+        //use addtextchangedlistener to check if there any same title as soon as user type
+        title.addTextChangedListener {
+            if (CreateActivity().checkSameTitle(title.text.toString())) {
+                Toast.makeText(this, "Reminder with same title already exist", Toast.LENGTH_SHORT).show()
+                //disable saveButton if there any same title
+                binding.saveButton.isEnabled = false
+            }else if (title.text.toString() == "") {
+                Toast.makeText(this, "Title cannot be empty", Toast.LENGTH_SHORT).show()
+                //disable saveButton if title is empty
+                binding.saveButton.isEnabled = false
+            }else if (title.text.toString().length > 20) {
+                Toast.makeText(
+                    this,
+                    "Title cannot be more than 20 characters",
+                    Toast.LENGTH_SHORT
+                ).show()
+                //disable saveButton if title is more than 20 characters
+                binding.saveButton.isEnabled = false
+            }//check if there is no same title, enable saveButton
+            else if (!CreateActivity().checkSameTitle(title.text.toString()) && title.text.toString() != "" && title.text.toString().length <= 20) {
+                binding.saveButton.isEnabled = true
+            }
+        }
+        //save data to database
         binding.saveButton.setOnClickListener {
             if (id!= null && name != null) {
                 val newTitle = title.text.toString()
