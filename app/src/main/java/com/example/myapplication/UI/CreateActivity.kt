@@ -130,6 +130,9 @@ class CreateActivity : AppCompatActivity() {
             val intent = Intent(this, MainActivity::class.java)
             startActivity(intent).also { finish() }
         }
+        //on back pressed, go back to MainActivity
+
+
 
 
     }
