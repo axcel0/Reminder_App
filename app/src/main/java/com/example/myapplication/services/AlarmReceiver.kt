@@ -22,6 +22,12 @@ class AlarmReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent? ) {
 
+        Intent (context, AlarmService::class.java).also {
+            it.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            val pendingIntent = PendingIntent.getActivity(context, 0, it,
+                PendingIntent.FLAG_IMMUTABLE)
+        }
+        context.startActivity(Intent(context, AlarmService::class.java))
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.mipmap.reminder_icon)
             .setContentTitle(intent?.getStringExtra(TITLE_EXTRA))

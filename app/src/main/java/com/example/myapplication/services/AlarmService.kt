@@ -28,6 +28,9 @@ class AlarmService: BroadcastReceiver(){
 
         )
         notificationManager.createNotificationChannel(channel)
-
+    }
+    fun alarmIntent(context: Context): PendingIntent {
+        val intent = Intent(context, AlarmService::class.java)
+        return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
     }
 }
