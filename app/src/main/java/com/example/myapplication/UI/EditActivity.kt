@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.addTextChangedListener
 import com.example.myapplication.R
 import com.example.myapplication.databinding.ActivityCreateBinding
+import com.example.myapplication.models.AppDatabase
 import com.example.myapplication.models.AudioFiles
 import com.google.android.material.textfield.TextInputEditText
 import java.time.LocalDateTime
@@ -20,7 +21,7 @@ import java.time.LocalDateTime
 class EditActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityCreateBinding
-
+    private lateinit var db: AppDatabase
     companion object {
         var audioFiles = ArrayList<AudioFiles>()
     }
@@ -52,6 +53,8 @@ class EditActivity : AppCompatActivity() {
         val dateTime = bundle?.getLong("added")
         val ringtoneName = bundle?.getString("ringtoneName")
 
+
+        db = MainActivity.getDatabase(this)
         val title = findViewById<TextInputEditText>(R.id.title)
         val date =  findViewById<DatePicker>(R.id.datePicker)
         val time =  findViewById<TimePicker>(R.id.timePicker)
@@ -65,10 +68,11 @@ class EditActivity : AppCompatActivity() {
         //set spinner to ringtoneName
         val spinnerPosition = adapter.getPosition(ringtoneName)
         binding.spinner.setSelection(spinnerPosition)
+        binding.saveButton.isEnabled = false
         //if user close keyboard, check if there any same title
         //use addtextchangedlistener to check if there any same title as soon as user type
         title.addTextChangedListener {
-            if (CreateActivity().checkSameTitle(title.text.toString())) {
+            if (checkSameTitle(title.text.toString())) {
                 Toast.makeText(this, "Reminder with same title already exist", Toast.LENGTH_SHORT).show()
                 //disable saveButton if there any same title
                 binding.saveButton.isEnabled = false
@@ -85,7 +89,7 @@ class EditActivity : AppCompatActivity() {
                 //disable saveButton if title is more than 20 characters
                 binding.saveButton.isEnabled = false
             }//check if there is no same title, enable saveButton
-            else if (!CreateActivity().checkSameTitle(title.text.toString()) && title.text.toString() != "" && title.text.toString().length <= 20) {
+            else if (!checkSameTitle(title.text.toString()) && title.text.toString() != "" && title.text.toString().length <= 20) {
                 binding.saveButton.isEnabled = true
             }
         }
@@ -102,6 +106,7 @@ class EditActivity : AppCompatActivity() {
                     startActivity(Intent(this@EditActivity, MainActivity::class.java)).also { finish() }
                 }
             }
+
         }
         //cancel
         binding.cancelButton.setOnClickListener {
@@ -111,6 +116,17 @@ class EditActivity : AppCompatActivity() {
 
 
     }
+
+    private fun checkSameTitle(title: String): Boolean {
+        val reminderList = db.reminderDao().getReminders()
+        for (reminder in reminderList) {
+            if (reminder.reminderName == title) {
+                return true
+            }
+        }
+        return false
+    }
+
     private fun getAudioFiles(): ArrayList<AudioFiles> {
         val tempAudioList = ArrayList<AudioFiles>()
         val uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI

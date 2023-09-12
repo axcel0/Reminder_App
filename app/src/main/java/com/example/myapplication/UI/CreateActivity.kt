@@ -130,14 +130,10 @@ class CreateActivity : AppCompatActivity() {
             val intent = Intent(this, MainActivity::class.java)
             startActivity(intent).also { finish() }
         }
-        //on back pressed, go back to MainActivity
-
-
-
 
     }
     //make function to check if there any same title in database
-    fun checkSameTitle(title: String): Boolean {
+    private fun checkSameTitle(title: String): Boolean {
         val reminderList = db.reminderDao().getReminders()
         for (reminder in reminderList) {
             if (reminder.reminderName == title) {
