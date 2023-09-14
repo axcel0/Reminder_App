@@ -73,7 +73,7 @@ class CreateActivity : AppCompatActivity() {
         datePicker.minDate = System.currentTimeMillis().also { timePicker.setIs24HourView(true) }
         //disable save button before checking
         binding.saveButton.isEnabled = false
-       //if user close keyboard, check if there any same title
+        //if user close keyboard, check if there any same title
         //use addtextchangedlistener to check if there any same title as soon as user type
         title.addTextChangedListener {
             if (checkSameTitle(title.text.toString())) {
@@ -144,7 +144,7 @@ class CreateActivity : AppCompatActivity() {
     }
 
     //load audio files from local storage
-     private fun getAudioFiles(): ArrayList<AudioFiles> {
+    private fun getAudioFiles(): ArrayList<AudioFiles> {
         val tempAudioList = ArrayList<AudioFiles>()
         val uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
         val projection = arrayOf(
