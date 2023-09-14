@@ -81,15 +81,11 @@ class EditActivity : AppCompatActivity() {
                 //disable saveButton if title is empty
                 binding.saveButton.isEnabled = false
             }else if (title.text.toString().length > 20) {
-                Toast.makeText(
-                    this,
-                    "Title cannot be more than 20 characters",
-                    Toast.LENGTH_SHORT
-                ).show()
+                Toast.makeText(this, "Title cannot be more than 20 characters", Toast.LENGTH_SHORT).show()
                 //disable saveButton if title is more than 20 characters
                 binding.saveButton.isEnabled = false
             }//check if there is no same title, enable saveButton
-            else if (!checkSameTitle(title.text.toString()) && title.text.toString() != "" && title.text.toString().length <= 20) {
+            else {
                 binding.saveButton.isEnabled = true
             }
         }

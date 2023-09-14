@@ -23,7 +23,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MyApplication" >
         <activity
-            android:name=".activity_wakeup"
+            android:name=".UI.WakeupActivity"
             android:exported="false" />
 
         <receiver
