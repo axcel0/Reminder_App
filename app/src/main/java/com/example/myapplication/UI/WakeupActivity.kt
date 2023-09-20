@@ -71,10 +71,8 @@ class WakeupActivity : AppCompatActivity(){
         }
 
         val label = if (isAlarmReminder) {
-            if (reminder!!.reminderName.isEmpty()) {
+            reminder!!.reminderName.ifEmpty {
                 "Saya Alarm"
-            } else {
-                reminder!!.reminderName
             }
         } else {
             "Saya Timer"
@@ -104,78 +102,9 @@ class WakeupActivity : AppCompatActivity(){
 
     @SuppressLint("ClickableViewAccessibility")
     private fun setupAlarmButtons() {
-        binding.reminderStop.visibility = View.GONE
-        binding.reminderDraggableBackground.startAnimation(AnimationUtils.loadAnimation(this, R.anim.pulsing_animation))
-//        binding.reminderDraggableBackground.applyColorFilter(getProperPrimaryColor())
-
-//        binding.reminderDismiss.applyColorFilter(textColor)
-//        binding.reminderDraggable.applyColorFilter(textColor)
-//        binding.reminderSnooze.applyColorFilter(textColor)
-
-        var minDragX = 0f
-        var maxDragX = 0f
-        var initialDraggableX = 0f
-
-//        binding.reminderDismiss.onGlobalLayout {
-//            minDragX = binding.reminderSnooze.left.toFloat()
-//            maxDragX = binding.reminderDismiss.left.toFloat()
-//            initialDraggableX = binding.reminderDraggable.left.toFloat()
-//        }
-
-        binding.reminderDraggable.setOnTouchListener { v, event ->
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    dragDownX = event.x
-                    binding.reminderDraggableBackground.animate().alpha(0f)
-                }
-
-                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                    dragDownX = 0f
-                    if (!didVibrate) {
-                        binding.reminderDraggable.animate().x(initialDraggableX).withEndAction {
-                            binding.reminderDraggableBackground.animate().alpha(0.2f)
-                        }
-
-                        binding.reminderGuide.animate().alpha(1f).start()
-                        swipeGuideFadeHandler.removeCallbacksAndMessages(null)
-                        swipeGuideFadeHandler.postDelayed({
-                            binding.reminderGuide.animate().alpha(0f).start()
-                        }, 2000L)
-                    }
-                }
-
-                MotionEvent.ACTION_MOVE -> {
-                    binding.reminderDraggable.x = Math.min(maxDragX, Math.max(minDragX, event.rawX - dragDownX))
-                    if (binding.reminderDraggable.x >= maxDragX - 50f) {
-                        if (!didVibrate) {
-                            binding.reminderDraggable.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING)
-//                            binding.reminderDraggable.performHapticFeedback()
-                            didVibrate = true
-                            finishActivity()
-                        }
-
-//                        if (isOreoPlus()) {
-//                            notificationManager.cancelAll()
-//                        }
-                        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                        notificationManager.cancelAll()
-                    } else if (binding.reminderDraggable.x <= minDragX + 50f) {
-                        if (!didVibrate) {
-                            binding.reminderDraggable.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING)
-//                            binding.reminderDraggable.performHapticFeedback()
-                            didVibrate = true
-                            snoozeAlarm()
-                        }
-
-                        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                        notificationManager.cancelAll()
-//                        if (isOreoPlus()) {
-//                            notificationManager.cancelAll()
-//                        }
-                    }
-                }
-            }
-            true
+        //make stop button
+        binding.reminderStop.setOnClickListener {
+            finishActivity()
         }
     }
 
