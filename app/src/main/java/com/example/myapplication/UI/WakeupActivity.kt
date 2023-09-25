@@ -6,6 +6,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.MediaPlayer
 import android.net.Uri
@@ -20,6 +21,7 @@ import android.view.View
 import android.view.WindowManager
 import android.view.animation.AnimationUtils
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.getSystemService
 import com.example.myapplication.R
 import com.example.myapplication.databinding.ActivityMainBinding
 import com.example.myapplication.databinding.ActivityWakeupBinding
@@ -121,29 +123,32 @@ class WakeupActivity : AppCompatActivity(){
 
     private fun setupEffects() {
         audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        initialAlarmVolume = audioManager?.getStreamVolume(AudioManager.STREAM_ALARM) ?: 7
+        initialAlarmVolume = audioManager?.getStreamVolume(AudioManager.STREAM_ALARM) ?: 0
 
-//        val doVibrate = alarm?.vibrate ?: config.timerVibrate
-//        if (doVibrate && isOreoPlus()) {
             val pattern = LongArray(2) { 500 }
             vibrationHandler.postDelayed({
-                vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-                vibrator?.vibrate(VibrationEffect.createWaveform(pattern, 0))
-            }, 500)
-//        }
+                val vibratorManager = this.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+                val vibrator = vibratorManager.defaultVibrator;
+                vibrator.vibrate(pattern, 0)
 
-//        val soundUri = if (alarm != null) {
-//            alarm!!.soundUri
-//        } else {
-//            config.timerSoundUri
-//        }
+            }, 500)
+        //get sound uri from selected song
+        val soundUri = Uri.parse("android.resource://com.example.myapplication/raw/reminder_sound")
+
 
 //        if (soundUri != SILENT) {
             try {
                 mediaPlayer = MediaPlayer().apply {
-                    setAudioStreamType(AudioManager.STREAM_ALARM)
-                    // TODO: Axel, ini harusnya diubah jadi soundUri
-//                    setDataSource(this@WakeupActivity, Uri.parse(soundUri))
+                    setWakeMode(applicationContext, PowerManager.PARTIAL_WAKE_LOCK)
+                    setAudioAttributes(
+                        AudioAttributes.Builder()
+                            .setUsage(AudioAttributes.USAGE_ALARM)
+                            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                            .build()
+                    )
+                    //set content uri from audio selected
+                    setDataSource(this@WakeupActivity, Uri.parse("android.resource://com.example.myapplication/raw/reminder_sound"))
+
                     isLooping = true
                     prepare()
                     start()
@@ -200,9 +205,9 @@ class WakeupActivity : AppCompatActivity(){
     }
 
     private fun destroyEffects() {
-//        if (config.increaseVolumeGradually) {
-//            resetVolumeToInitialValue()
-//        }
+        if (isAlarmReminder) {
+            resetVolumeToInitialValue()
+        }
 
         mediaPlayer?.stop()
         mediaPlayer?.release()
@@ -271,14 +276,14 @@ class WakeupActivity : AppCompatActivity(){
     private fun showOverLockscreen() {
         window.addFlags(
             WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or
-                    WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD or
-                    WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
-                    WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+                    WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON or
+                    WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON or
+                    WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+
         )
 
-//        if (isOreoMr1Plus()) {
             setShowWhenLocked(true)
             setTurnScreenOn(true)
-//        }
+
     }
 }

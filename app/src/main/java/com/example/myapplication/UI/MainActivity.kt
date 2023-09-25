@@ -142,7 +142,8 @@ class MainActivity : AppCompatActivity() {
                         searchReminder(newText)
                         return true
                     }
-                })
+                }
+                )
                 true
             }
             R.id.action_delete_all -> {
