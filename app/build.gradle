@@ -76,7 +76,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-analytics-ktx'
     implementation 'com.google.firebase:firebase-messaging-ktx'
     //add firebase auth
-    implementation 'com.google.firebase:firebase-auth:22.1.1'
+    implementation 'com.google.firebase:firebase-auth:22.1.2'
     //add firebase database
     implementation 'com.google.firebase:firebase-database:20.2.2'
     //add ksp

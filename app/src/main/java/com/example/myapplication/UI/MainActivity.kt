@@ -26,6 +26,7 @@ import com.example.myapplication.services.AlarmReceiver
 import com.example.myapplication.services.MESSAGE_EXTRA
 import com.example.myapplication.services.NOTIFICATION_ID
 import com.example.myapplication.services.TITLE_EXTRA
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -145,7 +146,9 @@ class MainActivity : AppCompatActivity() {
                 true
             }
             R.id.action_delete_all -> {
-                val alertDialog = AlertDialog.Builder(this)
+                val alertDialog = MaterialAlertDialogBuilder(this)
+                    .setTitle("Delete All Reminders")
+                    .setMessage("Are you sure you want to delete all reminders?")
                 if (deleteList.size > 0) {
                     alertDialog.setTitle("Delete Selected Reminders")
                     alertDialog.setMessage("Are you sure you want to delete selected reminders?")
@@ -170,6 +173,8 @@ class MainActivity : AppCompatActivity() {
                 alertDialog.show()
                 true
             }
+            //use material design
+
             else -> super.onOptionsItemSelected(item)
         }
     }
