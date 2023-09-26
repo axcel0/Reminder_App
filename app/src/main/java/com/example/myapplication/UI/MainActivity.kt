@@ -156,10 +156,10 @@ class MainActivity : AppCompatActivity() {
                     alertDialog.setPositiveButton("Yes") { _, _ ->
                         deleteList.forEach {
                             deleteReminder(it.toLong())
-                        }.run { deleteList.clear() }
+                        }
                     }
                     alertDialog.setNegativeButton("No") { _, _ ->
-                        deleteList.clear()
+
                     }
                 } else {
                     //alert dialog to delete all reminders

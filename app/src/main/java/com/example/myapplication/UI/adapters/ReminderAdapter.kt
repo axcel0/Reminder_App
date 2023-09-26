@@ -42,7 +42,10 @@ class ReminderAdapter(private val dataSet: List<ReminderEntity>) : RecyclerView.
             holder.timeAdded.text = timeStr
 
             val clickedElement = deleteList.find() {
-                it == dataSet[position].id.toString()
+                if (it == dataSet[position].id.toString()) {
+                    return@find true
+                }
+                return@find false
             }
 
             if (clickedElement != null) {
@@ -54,8 +57,16 @@ class ReminderAdapter(private val dataSet: List<ReminderEntity>) : RecyclerView.
             }
 
             holder.itemView.setOnLongClickListener{
-                selectDeleteList(dataSet[position].id)
-                notifyItemChanged(position)
+                if (clickedElement != null) {
+                    holder.itemView.setBackgroundColor(holder.itemView.context.getColor(com.google.android.material.R.color.material_dynamic_neutral70))
+                    deleteList.remove(dataSet[position].id.toString())
+                    notifyItemChanged(position)
+                }
+                else {
+                    holder.itemView.setBackgroundColor(holder.itemView.context.getColor(com.google.android.material.R.color.material_dynamic_neutral10))
+                    selectDeleteList(dataSet[position].id)
+                    notifyItemChanged(position)
+                }
                 return@setOnLongClickListener true
             }
 

@@ -133,7 +133,7 @@ class WakeupActivity : AppCompatActivity(){
 
             }, 500)
         //get sound uri from selected song
-        val soundUri = Uri.parse("android.resource://com.example.myapplication/raw/reminder_sound")
+//        val soundUri = Uri.parse("android.resource://com.example.myapplication/raw/reminder_sound")
 
 
 //        if (soundUri != SILENT) {
