@@ -156,9 +156,12 @@ class MainActivity : AppCompatActivity() {
                     alertDialog.setPositiveButton("Yes") { _, _ ->
                         deleteList.forEach {
                             deleteReminder(it.toLong())
+                            deleteList = ArrayList()
                         }
                     }
                     alertDialog.setNegativeButton("No") { _, _ ->
+                        //set deleteList to empty
+                        deleteList = ArrayList()
 
                     }
                 } else {
@@ -169,9 +172,11 @@ class MainActivity : AppCompatActivity() {
                         deleteAllReminders()
                     }
                     alertDialog.setNegativeButton("No") { _, _ ->
+                        deleteList = ArrayList()
                     }
                 }
                 alertDialog.show()
+                //notify adapter
                 true
             }
             //use material design

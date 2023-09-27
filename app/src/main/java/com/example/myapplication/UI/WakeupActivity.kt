@@ -38,7 +38,7 @@ class WakeupActivity : AppCompatActivity(){
 
     private val increaseVolumeHandler = Handler(Looper.getMainLooper())
     private val maxReminderDurationHandler = Handler(Looper.getMainLooper())
-    private val swipeGuideFadeHandler = Handler()
+    private val swipeGuideFadeHandler = Handler(Looper.getMainLooper())
     private val vibrationHandler = Handler(Looper.getMainLooper())
     private var isAlarmReminder = false
     private var didVibrate = false
@@ -80,7 +80,7 @@ class WakeupActivity : AppCompatActivity(){
             "Saya Timer"
         }
 
-        binding.reminderTitle.text = "Sek yang lalu"
+        binding.reminderTitle.text = label
 //        binding.reminderText.text = if (isAlarmReminder) getFormattedTime(getPassedSeconds(), false, false) else getString(R.string.time_expired)
 
 //        val maxDuration = if (isAlarmReminder) config.alarmMaxReminderSecs else config.timerMaxReminderSecs
@@ -102,22 +102,26 @@ class WakeupActivity : AppCompatActivity(){
         }
     }
 
-    @SuppressLint("ClickableViewAccessibility")
     private fun setupAlarmButtons() {
         //make stop button
         binding.reminderStop.setOnClickListener {
-            finishActivity()
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent).also { finish() }
         }
     }
 
     private fun setupTimerButtons() {
-//        binding.reminderStop.background = resources.getColoredDrawableWithColor(R.drawable.circle_background_filled, getProperPrimaryColor())
-        arrayOf(binding.reminderSnooze, binding.reminderDraggableBackground, binding.reminderDraggable, binding.reminderDismiss).forEach {
-//            it.beGone()
+
+        arrayOf(binding.reminderSnooze, binding.reminderDraggableBackground, binding.reminderDraggable, binding.reminderDismiss).forEach { _ ->
+            binding.reminderSnooze.visibility = View.GONE
+            binding.reminderDraggableBackground.visibility = View.GONE
+            binding.reminderDraggable.visibility = View.GONE
+            binding.reminderDismiss.visibility = View.GONE
         }
 
         binding.reminderStop.setOnClickListener {
-            finishActivity()
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent).also { finish() }
         }
     }
 
@@ -128,7 +132,7 @@ class WakeupActivity : AppCompatActivity(){
             val pattern = LongArray(2) { 500 }
             vibrationHandler.postDelayed({
                 val vibratorManager = this.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-                val vibrator = vibratorManager.defaultVibrator;
+                val vibrator = vibratorManager.defaultVibrator
                 vibrator.vibrate(pattern, 0)
 
             }, 500)
@@ -157,10 +161,11 @@ class WakeupActivity : AppCompatActivity(){
 //                if (config.increaseVolumeGradually) {
                     scheduleVolumeIncrease(MIN_ALARM_VOLUME_FOR_INCREASING_ALARMS.toFloat(), initialAlarmVolume!!.toFloat(), 0)
 //                }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
             }
 //        }
     }
+    //set on click listener for snooze button
 
     private fun scheduleVolumeIncrease(lastVolume: Float, maxVolume: Float, delay: Long) {
         increaseVolumeHandler.postDelayed({
@@ -198,22 +203,20 @@ class WakeupActivity : AppCompatActivity(){
         vibrationHandler.removeCallbacksAndMessages(null)
         if (!finished) {
             finishActivity()
-//            notificationManager.cancel(ALARM_NOTIF_ID)
+            AlarmReceiver().cancel(reminder!!.id.toString())
         } else {
             destroyEffects()
         }
     }
 
     private fun destroyEffects() {
-        if (isAlarmReminder) {
-            resetVolumeToInitialValue()
+        resetVolumeToInitialValue()
+        mediaPlayer?.apply {
+            stop()
+            release()
         }
-
-        mediaPlayer?.stop()
-        mediaPlayer?.release()
-        mediaPlayer = null
         vibrator?.cancel()
-        vibrator = null
+
     }
 
     private fun snoozeAlarm(overrideSnoozeDuration: Int? = null) {
@@ -259,12 +262,13 @@ class WakeupActivity : AppCompatActivity(){
         finished = true
         destroyEffects()
         finish()
-        overridePendingTransition(0, 0)
+//        overrideActivityTransition()
     }
     private fun cancelAlarmClock(reminderEntity: ReminderEntity) {
         val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
         alarmManager.cancel(getAlarmIntent(reminderEntity))
-//        alarmManager.cancel(getEarlyAlarmDismissalIntent(reminderEntity))
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.cancel(reminderEntity.id.toInt())
     }
 
     private fun getAlarmIntent(reminderEntity: ReminderEntity): PendingIntent {

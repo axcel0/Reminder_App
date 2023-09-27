@@ -38,4 +38,11 @@ class AlarmReceiver : BroadcastReceiver() {
         }
     }
 
+    fun cancel(notificationId: String) {
+            val intent = Intent("cancelAlarm")
+            intent.putExtra(NOTIFICATION_ID, notificationId)
+
+        }
+
+
 }
