@@ -133,17 +133,19 @@ class MainActivity : AppCompatActivity() {
             }
             R.id.action_search -> {
                 val searchView = item.actionView as SearchView
+                searchView.queryHint = "Search Reminder"
                 searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
                     override fun onQueryTextSubmit(query: String?): Boolean {
                         searchReminder(query)
                         return true
                     }
+
                     override fun onQueryTextChange(newText: String?): Boolean {
                         searchReminder(newText)
                         return true
                     }
-                }
-                )
+
+                })
                 true
             }
             R.id.action_delete_all -> {
@@ -164,16 +166,24 @@ class MainActivity : AppCompatActivity() {
                         deleteList = ArrayList()
 
                     }
-                } else {
-                    //alert dialog to delete all reminders
-                    alertDialog.setTitle("Delete All Reminders")
-                    alertDialog.setMessage("Are you sure you want to delete all reminders?")
-                    alertDialog.setPositiveButton("Yes") { _, _ ->
-                        deleteAllReminders()
-                    }
-                    alertDialog.setNegativeButton("No") { _, _ ->
-                        deleteList = ArrayList()
-                    }
+                }
+                else {
+                   if(reminderList.isEmpty()) {
+                       alertDialog.setMessage("There is no reminder to delete")
+                       alertDialog.setPositiveButton("Ok") { _, _ ->
+
+                       }
+                   }else {
+                       //alert dialog to delete all reminders
+                       alertDialog.setTitle("Delete All Reminders")
+                       alertDialog.setMessage("Are you sure you want to delete all reminders?")
+                       alertDialog.setPositiveButton("Yes") { _, _ ->
+                           deleteAllReminders()
+                       }
+                       alertDialog.setNegativeButton("No") { _, _ ->
+                           deleteList = ArrayList()
+                       }
+                   }
                 }
                 alertDialog.show()
                 //notify adapter
