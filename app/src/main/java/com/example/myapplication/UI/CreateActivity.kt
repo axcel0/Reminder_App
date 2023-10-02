@@ -68,8 +68,8 @@ class CreateActivity : AppCompatActivity() {
                 //toast selected item path
                 Toast.makeText(this@CreateActivity, "Selected item path: $path", Toast.LENGTH_SHORT).show()
                 //play audio from selected path whenever user select item
-//                val mediaPlayer = MediaPlayer.create(this@CreateActivity, Uri.parse(path))
-//                mediaPlayer.start()
+                val mediaPlayer = MediaPlayer.create(this@CreateActivity, Uri.parse(path))
+                mediaPlayer.start()
 
 
             }

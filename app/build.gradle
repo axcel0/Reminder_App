@@ -80,8 +80,7 @@ dependencies {
     //add firebase database
     implementation 'com.google.firebase:firebase-database:20.2.2'
     //add ksp
-//    implementation "com.google.devtools.ksp:symbol-processing-api:1.9.0-1.0.12"
+    //implementation "com.google.devtools.ksp:symbol-processing-api:1.9.0-1.0.12"
     ksp 'com.google.devtools.ksp:symbol-processing:1.9.10-1.0.13'
-
 
 }
