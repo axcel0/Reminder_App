@@ -1,6 +1,8 @@
 package com.example.myapplication.UI
 
 import android.content.Intent
+import android.media.MediaPlayer
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
@@ -46,6 +48,7 @@ class CreateActivity : AppCompatActivity() {
         getAudioFiles().run {
             audioFiles = this
         }
+        //get audiofiles uri
         spinnerList += audioFiles.map { it.audioName }
 
         //toast audioFiles size
@@ -54,16 +57,28 @@ class CreateActivity : AppCompatActivity() {
 
         val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, spinnerList)
         binding.spinner.adapter = adapter
-        //toast selected item
+
         binding.spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long){
+
                 Toast.makeText(this@CreateActivity, "Selected item: ${parent?.getItemAtPosition(position).toString()}", Toast.LENGTH_SHORT).show()
+                val audioFiles = audioFiles[position]
+                val path = audioFiles.path
+                Log.e("Path: $path", "Name: ${audioFiles.audioName}")
+                //toast selected item path
+                Toast.makeText(this@CreateActivity, "Selected item path: $path", Toast.LENGTH_SHORT).show()
+                //play audio from selected path whenever user select item
+//                val mediaPlayer = MediaPlayer.create(this@CreateActivity, Uri.parse(path))
+//                mediaPlayer.start()
+
+
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {
                 //do nothing
             }
         }
+
         db = MainActivity.getDatabase(this)
 
         val title = findViewById<TextInputEditText>(R.id.title)
@@ -145,7 +160,7 @@ class CreateActivity : AppCompatActivity() {
         val uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
         val projection = arrayOf(
             MediaStore.Audio.AudioColumns.DATA,
-            MediaStore.Audio.AudioColumns.TITLE
+            MediaStore.Audio.AudioColumns.TITLE,
         )
         val cursor = contentResolver.query(uri, projection, null, null, null)
         if (cursor != null) {

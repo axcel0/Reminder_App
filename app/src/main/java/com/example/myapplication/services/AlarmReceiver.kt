@@ -1,6 +1,8 @@
 package com.example.myapplication.services
 
+import android.app.AlarmManager
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -35,14 +37,18 @@ class AlarmReceiver : BroadcastReceiver() {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             putExtra(NOTIFICATION_ID, notificationId)
             context.startActivity(this)
+
         }
+
     }
 
-    fun cancel(notificationId: String) {
-            val intent = Intent("cancelAlarm")
-            intent.putExtra(NOTIFICATION_ID, notificationId)
-
-        }
+    //make function to cancel alarm from wakeup activity
+    fun cancel(context: WakeupActivity, notificationId: Int) {
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val intent = Intent(context, AlarmReceiver::class.java)
+        val pendingIntent = PendingIntent.getBroadcast(context, notificationId, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        alarmManager.cancel(pendingIntent)
+    }
 
 
 }

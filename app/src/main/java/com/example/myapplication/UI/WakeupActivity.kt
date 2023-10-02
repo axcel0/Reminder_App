@@ -1,6 +1,5 @@
 package com.example.myapplication.UI
 
-import android.annotation.SuppressLint
 import android.app.AlarmManager
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -12,18 +11,10 @@ import android.media.MediaPlayer
 import android.net.Uri
 import android.os.*
 import android.provider.AlarmClock
-import android.text.SpannableString
-import android.text.format.DateFormat
-import android.text.style.RelativeSizeSpan
-import android.view.HapticFeedbackConstants
-import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
-import android.view.animation.AnimationUtils
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.getSystemService
 import com.example.myapplication.R
-import com.example.myapplication.databinding.ActivityMainBinding
 import com.example.myapplication.databinding.ActivityWakeupBinding
 import com.example.myapplication.models.AppDatabase
 import com.example.myapplication.models.entities.ReminderEntity
@@ -89,7 +80,6 @@ class WakeupActivity : AppCompatActivity(){
             // Sementara sudah benar yang diatas ini yang salah karena tidak bisa dijalankan di background dan tidak bisa dijalankan di foreground
 //        }, maxDuration * 1000L)
         }, 1000 * 1000L)
-
         setupButtons()
         setupEffects()
     }
@@ -203,7 +193,7 @@ class WakeupActivity : AppCompatActivity(){
         vibrationHandler.removeCallbacksAndMessages(null)
         if (!finished) {
             finishActivity()
-            AlarmReceiver().cancel(reminder!!.id.toString())
+            AlarmReceiver().cancel(this, reminder!!.id.toInt())
         } else {
             destroyEffects()
         }

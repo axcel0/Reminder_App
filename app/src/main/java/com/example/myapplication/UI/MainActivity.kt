@@ -1,6 +1,7 @@
 package com.example.myapplication.UI
 
 import android.app.AlarmManager
+import android.app.Instrumentation.ActivityResult
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
@@ -11,6 +12,8 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SearchView
 import androidx.core.app.ActivityCompat
@@ -37,7 +40,9 @@ import kotlin.collections.ArrayList
 
 class MainActivity : AppCompatActivity() {
     private var reminderList: List<ReminderEntity> = emptyList()
-
+    private lateinit var permissionLauncher: ActivityResultLauncher<Array<String>>
+    private var isPostNotificationPermissionGranted = false
+    private var isReadMediaAudioPermissionGranted = false
     private var uiScope: CoroutineScope? = null
     private lateinit var binding: ActivityMainBinding
     private lateinit var recyclerView: RecyclerView
@@ -73,10 +78,13 @@ class MainActivity : AppCompatActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.setHasFixedSize(true) //recyclerview size is fixed
         //load data also request permissions
-        loadData().also {
-            requestNotificationPermissions()
-            requestReadStoragePermissions()
+        loadData()
+        permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            permissions.entries.forEach {
+                Log.d("MainActivity", "${it.key} = ${it.value}")
+            }
         }
+        requestPermission()
 
         createNotificationChannel()
         if(intent.hasExtra("reminderName")) {
@@ -228,20 +236,37 @@ class MainActivity : AppCompatActivity() {
         val reminderDao = getDatabase(this).reminderDao()
         reminderDao.updateReminder(reminderId, reminderName, dateAdded, ringtoneName).also { loadData() }
     }
-    //permission to post notification
-    private fun requestNotificationPermissions() {
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 1)
-        }
-    }
     //permission to read media audio
     private fun requestReadStoragePermissions() {
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.READ_MEDIA_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.READ_MEDIA_AUDIO), 2)
         }
     }
+    //permission to post notification
+    private fun requestNotificationPermissions() {
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 1)
+        }
+    }
+    private fun requestPermission() {
+        isReadMediaAudioPermissionGranted = ActivityCompat.checkSelfPermission(this, android.Manifest.permission.READ_MEDIA_AUDIO) == PackageManager.PERMISSION_GRANTED
+        isPostNotificationPermissionGranted = ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
 
+        val permissionRequest: MutableList<String> = ArrayList()
 
+        if (!isReadMediaAudioPermissionGranted) {
+            permissionRequest.add(android.Manifest.permission.READ_MEDIA_AUDIO)
+        }
+
+        if (!isPostNotificationPermissionGranted) {
+            permissionRequest.add(android.Manifest.permission.POST_NOTIFICATIONS)
+        }
+
+        if (permissionRequest.isNotEmpty()) {
+            permissionLauncher.launch(permissionRequest.toTypedArray())
+        }
+
+    }
 
 
     private fun updateUIComponents() {
