@@ -193,7 +193,6 @@ class WakeupActivity : AppCompatActivity(){
         vibrationHandler.removeCallbacksAndMessages(null)
         if (!finished) {
             finishActivity()
-            AlarmReceiver().cancel(this, reminder!!.id.toInt())
         } else {
             destroyEffects()
         }

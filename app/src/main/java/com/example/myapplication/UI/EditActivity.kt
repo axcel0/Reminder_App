@@ -68,7 +68,7 @@ class EditActivity : AppCompatActivity() {
         //set spinner to ringtoneName
         val spinnerPosition = adapter.getPosition(ringtoneName)
         binding.spinner.setSelection(spinnerPosition)
-        binding.saveButton.isEnabled = false
+//        binding.saveButton.isEnabled = true
         //if user close keyboard, check if there any same title
         //use addtextchangedlistener to check if there any same title as soon as user type
         title.addTextChangedListener {
@@ -84,7 +84,8 @@ class EditActivity : AppCompatActivity() {
                 Toast.makeText(this, "Title cannot be more than 20 characters", Toast.LENGTH_SHORT).show()
                 //disable saveButton if title is more than 20 characters
                 binding.saveButton.isEnabled = false
-            }//check if there is no same title, enable saveButton
+            }
+            //check if there is no same title, enable saveButton
             else {
                 binding.saveButton.isEnabled = true
             }

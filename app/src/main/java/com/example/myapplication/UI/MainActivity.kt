@@ -77,15 +77,18 @@ class MainActivity : AppCompatActivity() {
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.setHasFixedSize(true) //recyclerview size is fixed
-        //load data also request permissions
-        loadData()
+
         permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
             permissions.entries.forEach {
                 Log.d("MainActivity", "${it.key} = ${it.value}")
             }
         }
-        requestPermission()
-
+        loadData().also {
+            updateUIComponents()
+            requestPermission()
+        }
+        //get data from intent
+        val intent = intent
         createNotificationChannel()
         if(intent.hasExtra("reminderName")) {
             val id = intent.getLongExtra("id", 0)
