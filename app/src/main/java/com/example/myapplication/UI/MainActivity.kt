@@ -95,9 +95,9 @@ class MainActivity : AppCompatActivity() {
             val title = intent.getStringExtra("reminderName")
             val dateAdded = intent.getLongExtra("dateAdded", 0)
             val time = intent.getLongExtra("time", 0)
-            val ringtoneName = intent.getStringExtra("ringtoneName")
+            val ringtonePath = intent.getStringExtra("ringtonePath")
             Log.d("MainActivity", "onCreate: $title $dateAdded $time")
-            scheduleNotification(ReminderEntity(id = id, reminderName = title!!, dateAdded = dateAdded, ringtoneName = ringtoneName!!), time)
+            scheduleNotification(ReminderEntity(id = id, reminderName = title!!, dateAdded = dateAdded, ringtonePath = ringtonePath!!), time)
         }
     }
     private fun createNotificationChannel() {

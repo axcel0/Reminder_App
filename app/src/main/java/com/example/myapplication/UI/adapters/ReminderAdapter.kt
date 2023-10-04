@@ -89,7 +89,7 @@ class ReminderAdapter(private val dataSet: List<ReminderEntity>) : RecyclerView.
                     intent.putExtra("id", dataSet[position].id)
                     intent.putExtra("name", dataSet[position].reminderName)
                     intent.putExtra("added", dataSet[position].dateAdded)
-                    intent.putExtra("ringtoneName", dataSet[position].ringtoneName)
+                    intent.putExtra("ringtonePath", dataSet[position].ringtonePath)
                     context.startActivity(intent)
                 }
 

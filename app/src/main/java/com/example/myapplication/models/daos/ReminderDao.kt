@@ -27,8 +27,8 @@ interface ReminderDao {
     fun deleteAllReminders()
 
     //update reminder by id
-    @Query("UPDATE reminders SET reminderName = :reminderName, dateAdded = :dateAdded, ringtoneName = :ringtoneName WHERE id = :id")
-    fun updateReminder(id: Long, reminderName: String, dateAdded: Long, ringtoneName: String)
+    @Query("UPDATE reminders SET reminderName = :reminderName, dateAdded = :dateAdded, ringtonePath = :ringtonePath WHERE id = :id")
+    fun updateReminder(id: Long, reminderName: String, dateAdded: Long, ringtonePath: String)
 
     //search reminder by title
     @Query("SELECT * FROM reminders WHERE reminderName LIKE '%' || :reminderName || '%' ")

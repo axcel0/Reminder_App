@@ -23,11 +23,15 @@ import com.google.android.material.textfield.TextInputEditText
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.Calendar
+import android.media.RingtoneManager
 
 
 class CreateActivity : AppCompatActivity() {
     private lateinit var binding: ActivityCreateBinding
     private lateinit var db: AppDatabase
+    private var mediaplayer: MediaPlayer? = null
+    private var isFirstInit = true
+
 
     companion object {
         var audioFiles = ArrayList<AudioFiles>()
@@ -61,15 +65,18 @@ class CreateActivity : AppCompatActivity() {
         binding.spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long){
 
-                Toast.makeText(this@CreateActivity, "Selected item: ${parent?.getItemAtPosition(position).toString()}", Toast.LENGTH_SHORT).show()
                 val audioFiles = audioFiles[position]
                 val path = audioFiles.path
                 Log.e("Path: $path", "Name: ${audioFiles.audioName}")
-                //toast selected item path
-                Toast.makeText(this@CreateActivity, "Selected item path: $path", Toast.LENGTH_SHORT).show()
-                //play audio from selected path whenever user select item
-                val mediaPlayer = MediaPlayer.create(this@CreateActivity, Uri.parse(path))
-                mediaPlayer.start()
+                if (mediaplayer!= null && mediaplayer!!.isPlaying) {
+                    mediaplayer!!.stop()
+                }
+                mediaplayer = MediaPlayer.create(this@CreateActivity, Uri.parse(path))
+                if (!isFirstInit) {
+                    mediaplayer!!.start()
+                } else {
+                    isFirstInit = false
+                }
 
 
             }
@@ -86,25 +93,18 @@ class CreateActivity : AppCompatActivity() {
         val timePicker =  findViewById<TimePicker>(R.id.timePicker)
 
         datePicker.minDate = System.currentTimeMillis().also { timePicker.setIs24HourView(true) }
-        //disable save button before checking
         binding.saveButton.isEnabled = false
-        //if user close keyboard, check if there any same title
-        //use addtextchangedlistener to check if there any same title as soon as user type
         title.addTextChangedListener {
             if (checkSameTitle(title.text.toString())) {
                 Toast.makeText(this, "Reminder with same title already exist", Toast.LENGTH_SHORT).show()
-                //disable saveButton if there any same title
                 binding.saveButton.isEnabled = false
-            }else if (title.text.toString() == "") {
+            } else if (title.text.toString() == "") {
                 Toast.makeText(this, "Title cannot be empty", Toast.LENGTH_SHORT).show()
-                //disable saveButton if title is empty
                 binding.saveButton.isEnabled = false
-            }else if (title.text.toString().length > 20) {
+            } else if (title.text.toString().length > 20) {
                 Toast.makeText(this, "Title cannot be more than 20 characters", Toast.LENGTH_SHORT).show()
-                //disable saveButton if title is more than 20 characters
                 binding.saveButton.isEnabled = false
-            }//check if there is no same title, enable saveButton
-            else {
+            } else {
                 binding.saveButton.isEnabled = true
             }
         }
@@ -114,10 +114,10 @@ class CreateActivity : AppCompatActivity() {
             val titleText = title.text.toString()
             val date = LocalDateTime.of(datePicker.year, datePicker.month+1, datePicker.dayOfMonth, timePicker.hour, timePicker.minute, 0)
             val zoneId = ZoneId.systemDefault()
-            val selectedRingtone = binding.spinner.selectedItem.toString()
+            val selectedRingtonePath = audioFiles[binding.spinner.selectedItemPosition].path
 
             val epoch = date.atZone(zoneId).toEpochSecond()
-            val reminderEntity = ReminderEntity(reminderName = titleText, dateAdded = epoch, ringtoneName = selectedRingtone)
+            val reminderEntity = ReminderEntity(reminderName = titleText, dateAdded = epoch, ringtonePath = selectedRingtonePath)
 
             val calendar = Calendar.getInstance()
             calendar.set(date.year, date.monthValue-1, date.dayOfMonth, date.hour, date.minute, 0)
@@ -131,7 +131,7 @@ class CreateActivity : AppCompatActivity() {
                 intent.putExtra("reminderName", titleText)
                 intent.putExtra("dateAdded", epoch)
                 intent.putExtra("time", time)
-                intent.putExtra("ringtoneName", selectedRingtone)
+                intent.putExtra("ringtonePath", selectedRingtonePath)
                 startActivity(intent).also { finish() }
 
             }
@@ -143,6 +143,12 @@ class CreateActivity : AppCompatActivity() {
         }
 
     }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mediaplayer?.stop()
+    }
+
     //make function to check if there any same title in database
     private fun checkSameTitle(title: String): Boolean {
         val reminderList = db.reminderDao().getReminders()
@@ -156,12 +162,13 @@ class CreateActivity : AppCompatActivity() {
 
     //load audio files from local storage
     private fun getAudioFiles(): ArrayList<AudioFiles> {
-        val tempAudioList = ArrayList<AudioFiles>()
+        val audioList = ArrayList<AudioFiles>()
         val uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
         val projection = arrayOf(
             MediaStore.Audio.AudioColumns.DATA,
             MediaStore.Audio.AudioColumns.TITLE,
         )
+
         val cursor = contentResolver.query(uri, projection, null, null, null)
         if (cursor != null) {
             while (cursor.moveToNext()) {
@@ -169,11 +176,26 @@ class CreateActivity : AppCompatActivity() {
                 val name = cursor.getString(1)
                 val audioFiles = AudioFiles(path, name)
                 Log.e("Path: $path", "Name: $name")
-                tempAudioList.add(audioFiles)
+                audioList.add(audioFiles)
             }
             cursor.close()
         }
-        return tempAudioList
+
+        val ringtoneManager = RingtoneManager(this)
+        ringtoneManager.setType(RingtoneManager.TYPE_RINGTONE)
+
+        val cursor2 = ringtoneManager.cursor
+        if (cursor2 != null) {
+            while (cursor2.moveToNext()) {
+                val name = cursor2.getString(RingtoneManager.TITLE_COLUMN_INDEX)
+                val path = cursor2.getString(RingtoneManager.URI_COLUMN_INDEX) + "/" + cursor2.getString(RingtoneManager.ID_COLUMN_INDEX)
+                val audioFiles = AudioFiles(path, name)
+                Log.e("Path: $path", "Name: $name")
+                audioList.add(audioFiles)
+            }
+            cursor2.close()
+        }
+        return audioList
     }
 
 }

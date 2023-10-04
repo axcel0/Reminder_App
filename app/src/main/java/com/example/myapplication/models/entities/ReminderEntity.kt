@@ -16,5 +16,5 @@ data class ReminderEntity(
     @PrimaryKey(autoGenerate = true) var id: Long = 0,
     @ColumnInfo(name = "reminderName") val reminderName: String,
     @ColumnInfo(name = "dateAdded") val dateAdded: Long,
-    @ColumnInfo(name = "ringtoneName") val ringtoneName: String,
+    @ColumnInfo(name = "ringtonePath") val ringtonePath: String,
 )

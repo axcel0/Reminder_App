@@ -12,7 +12,7 @@
     <string name="date_added">Date Added</string>
     <string name="reminder_name">Reminder Name</string>
     <string name="time_added">time added</string>
-    <string name="dismiss">dismiss</string>
+    <string name="dismiss">Dismiss</string>
     <string name="swipe_right_to_dismiss">swipe_right_to_dismiss</string>
     <string name="time_expired">time_expired</string>
     <string name="snooze">Snooze</string>
