@@ -90,6 +90,7 @@ class EditActivity : AppCompatActivity() {
                 } else {
                     isFirstInit = false
                 }
+
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {

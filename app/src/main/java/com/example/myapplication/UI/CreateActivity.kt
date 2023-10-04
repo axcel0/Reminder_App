@@ -78,11 +78,10 @@ class CreateActivity : AppCompatActivity() {
                     isFirstInit = false
                 }
 
-
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {
-                //do nothing
+
             }
         }
 

@@ -17,6 +17,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.myapplication.R
 import com.example.myapplication.databinding.ActivityWakeupBinding
 import com.example.myapplication.models.AppDatabase
+import com.example.myapplication.models.AudioFiles
 import com.example.myapplication.models.entities.ReminderEntity
 import com.example.myapplication.services.AlarmReceiver
 import com.example.myapplication.services.NOTIFICATION_ID
@@ -30,5 +31,15 @@ class WakeupActivity : AppCompatActivity(){
     private lateinit var reminder: ReminderEntity
     //media player
     private var mediaPlayer: MediaPlayer? = null
+
+    companion object {
+        var audioFiles = ArrayList<AudioFiles>()
+
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+    }
 
 }
