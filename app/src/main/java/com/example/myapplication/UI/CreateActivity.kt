@@ -1,6 +1,9 @@
 package com.example.myapplication.UI
 
+import android.content.Context
 import android.content.Intent
+import android.media.AudioAttributes
+import android.media.AudioManager
 import android.media.MediaPlayer
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
@@ -24,6 +27,7 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.Calendar
 import android.media.RingtoneManager
+import android.view.WindowManager
 
 
 class CreateActivity : AppCompatActivity() {
