@@ -7,7 +7,7 @@
     android:layout_height="match_parent">
 
     <Button
-        android:id="@+id/reminder_stop"
+        android:id="@+id/dismiss_button"
         android:text="@string/dismiss"
         android:layout_width="wrap_content"
         android:layout_height="@dimen/stopwatch_button_size"
@@ -17,7 +17,9 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        />
+
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

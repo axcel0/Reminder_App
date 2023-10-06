@@ -104,6 +104,5 @@ class ReminderAdapter(private val dataSet: List<ReminderEntity>) : RecyclerView.
     override fun getItemCount(): Int {
         return dataSet.size
     }
-    //make function to delete notification id if reminder is deleted
 
 }

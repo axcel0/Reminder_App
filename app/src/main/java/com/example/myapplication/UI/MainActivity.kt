@@ -160,11 +160,9 @@ class MainActivity : AppCompatActivity() {
             }
             R.id.action_delete_all -> {
                 val alertDialog = MaterialAlertDialogBuilder(this)
-                    .setTitle("Delete All Reminders")
-                    .setMessage("Are you sure you want to delete all reminders?")
                 if (deleteList.size > 0) {
-                    alertDialog.setTitle("Delete Selected Reminders")
-                    alertDialog.setMessage("Are you sure you want to delete selected reminders?")
+                    alertDialog.setTitle("Delete Selected Reminders ")
+                    alertDialog.setMessage("Are you sure you want to delete ${deleteList.size} selected reminders?")
                     alertDialog.setPositiveButton("Yes") { _, _ ->
                         deleteList.forEach {
                             deleteReminder(it.toLong())
