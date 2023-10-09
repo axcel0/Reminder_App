@@ -38,6 +38,10 @@ class WakeupActivity : AppCompatActivity(){
     private var mediaPlayer: MediaPlayer? = null
 
 
+    companion object {
+        var audioFiles = ArrayList<AudioFiles>()
+
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         //make array for spinner to be filled with data from local storage alarm sounds
@@ -81,23 +85,25 @@ class WakeupActivity : AppCompatActivity(){
             //set audio duration
             setOnPreparedListener {
                 it.start()
-                //set looping
                 isLooping = true
-                //set volume
                 setVolume(1.0f, 1.0f)
-            }
-            prepare()
-            //add vibration
-            val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-            val vibrator = vibratorManager.defaultVibrator
-            vibrator.vibrate(
-                //loop vibration pattern
-                VibrationEffect.createWaveform(
-                    longArrayOf(0, 1000, 500, 1000, 500, 1000, 500, 1000, 500),
-                    //repeat at index 0
-                    0
+                val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC), 0)
+                //set screen to be on
+                window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
+                //add vibration
+                val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+                val vibrator = vibratorManager.defaultVibrator
+                vibrator.vibrate(
+                    //loop vibration pattern
+                    VibrationEffect.createWaveform(
+                        longArrayOf(0, 1000, 500, 1000, 500, 1000, 500, 1000, 500), 0
+                    )
                 )
-            )
+            }.run {
+                prepare()
+            }
 
         }
     }
