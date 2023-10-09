@@ -45,6 +45,7 @@ class WakeupActivity : AppCompatActivity(){
         val view = binding.root
         setContentView(view)
         playAudio(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM))
+
         //set onclick listener for dismiss button
         binding.dismissButton.setOnClickListener {
             //finish the activity
@@ -54,11 +55,19 @@ class WakeupActivity : AppCompatActivity(){
                 //cancel the notification
                 val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                 notificationManager.cancel(notificationManager.activeNotifications[0].id)
+                //cancel the alarm
+                val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+                val intent = Intent(this, AlarmReceiver::class.java)
+                val pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+                alarmManager.cancel(pendingIntent)
+                //stop vibrator
+                val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+                val vibrator = vibratorManager.defaultVibrator
+                vibrator.cancel()
             }
         }
     }
-    //make play audio function from database
-    private fun playAudio(audioUri: Uri) {
+    private fun playAudio(audioUri: Uri, audioName: String = "", audioPath: String = "", audioDuration: Int = 0) {
         //make media player
         mediaPlayer = MediaPlayer().apply {
             //set audio attributes
@@ -67,12 +76,29 @@ class WakeupActivity : AppCompatActivity(){
                     .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
                     .build()
             )
-            //set data source
-            setDataSource(applicationContext, audioUri)
-            //prepare the media player
+            //set audioPath from selected ringtone from spinner
+            setDataSource(this@WakeupActivity, audioUri)
+            //set audio duration
+            setOnPreparedListener {
+                it.start()
+                //set looping
+                isLooping = true
+                //set volume
+                setVolume(1.0f, 1.0f)
+            }
             prepare()
-            //start the media player
-            start()
+            //add vibration
+            val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+            val vibrator = vibratorManager.defaultVibrator
+            vibrator.vibrate(
+                //loop vibration pattern
+                VibrationEffect.createWaveform(
+                    longArrayOf(0, 1000, 500, 1000, 500, 1000, 500, 1000, 500),
+                    //repeat at index 0
+                    0
+                )
+            )
+
         }
     }
 
