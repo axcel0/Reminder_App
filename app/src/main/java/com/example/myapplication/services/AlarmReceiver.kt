@@ -41,6 +41,16 @@ class AlarmReceiver : BroadcastReceiver() {
         val pendingIntent: PendingIntent = Intent(context, WakeupActivity::class.java).let { notificationIntent ->
             PendingIntent.getActivity(context, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE)
         }
+        //set alarm manager
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val intent = Intent(context, WakeupActivity::class.java)
+        val pendingIntent2 = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+
+
+
+
+        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), pendingIntent)
+
 
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.mipmap.reminder_icon)
@@ -53,16 +63,9 @@ class AlarmReceiver : BroadcastReceiver() {
 
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.notify(notificationId, builder.build())
-    }
-    private fun cancelAlarm (context: Context, notificationId: Int) {
-        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val intent = Intent(context, AlarmReceiver::class.java)
-        val pendingIntent = PendingIntent.getBroadcast(context, notificationId, intent, PendingIntent.FLAG_IMMUTABLE)
-        alarmManager.cancel(pendingIntent)
-    }
-    private fun cancelNotification(context: Context, notificationId: Int) {
-        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.cancel(notificationId)
+
+
+
     }
 
 }

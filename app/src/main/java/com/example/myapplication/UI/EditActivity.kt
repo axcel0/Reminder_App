@@ -155,7 +155,7 @@ class EditActivity : AppCompatActivity() {
         return false
     }
 
-    private fun getAudioFiles(): ArrayList<AudioFiles> {
+    fun getAudioFiles(): ArrayList<AudioFiles> {
         val audioList = ArrayList<AudioFiles>()
         val uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
         val projection = arrayOf(

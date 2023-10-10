@@ -16,6 +16,8 @@ import android.provider.MediaStore
 import android.util.Log
 import android.view.View
 import android.view.WindowManager
+import android.widget.ArrayAdapter
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.myapplication.R
 import com.example.myapplication.UI.EditActivity.Companion.audioFiles
@@ -26,6 +28,7 @@ import com.example.myapplication.models.AudioFiles
 import com.example.myapplication.models.entities.ReminderEntity
 import com.example.myapplication.services.AlarmReceiver
 import com.example.myapplication.services.NOTIFICATION_ID
+import kotlin.math.log
 
 class WakeupActivity : AppCompatActivity(){
     //binding for the activity layout
@@ -48,7 +51,13 @@ class WakeupActivity : AppCompatActivity(){
         binding = ActivityWakeupBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
-        playAudio(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM))
+        //bundle data ringtonePath from reminder
+        val bundle : Bundle? = intent.extras
+        val ringtonePath = bundle?.getString("ringtonePath")
+
+//        playAudio((RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)))
+        ringtonePath ?: playAudio(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM))
+        ringtonePath?.let { playAudio(Uri.parse(it)) }
 
         //set onclick listener for dismiss button
         binding.dismissButton.setOnClickListener {
@@ -71,7 +80,7 @@ class WakeupActivity : AppCompatActivity(){
             }
         }
     }
-    private fun playAudio(audioUri: Uri, audioName: String = "", audioPath: String = "", audioDuration: Int = 0) {
+    private fun playAudio(audioUri: Uri) {
         //make media player
         mediaPlayer = MediaPlayer().apply {
             //set audio attributes

@@ -43,6 +43,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var permissionLauncher: ActivityResultLauncher<Array<String>>
     private var isPostNotificationPermissionGranted = false
     private var isReadMediaAudioPermissionGranted = false
+    private var isExactAlarmPermissionGranted = false
     private var uiScope: CoroutineScope? = null
     private lateinit var binding: ActivityMainBinding
     private lateinit var recyclerView: RecyclerView
@@ -251,7 +252,7 @@ class MainActivity : AppCompatActivity() {
     private fun requestPermission() {
         isReadMediaAudioPermissionGranted = ActivityCompat.checkSelfPermission(this, android.Manifest.permission.READ_MEDIA_AUDIO) == PackageManager.PERMISSION_GRANTED
         isPostNotificationPermissionGranted = ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
-
+        isExactAlarmPermissionGranted = ActivityCompat.checkSelfPermission(this, android.Manifest.permission.SCHEDULE_EXACT_ALARM) == PackageManager.PERMISSION_GRANTED
         val permissionRequest: MutableList<String> = ArrayList()
 
         if (!isReadMediaAudioPermissionGranted) {
@@ -260,6 +261,10 @@ class MainActivity : AppCompatActivity() {
 
         if (!isPostNotificationPermissionGranted) {
             permissionRequest.add(android.Manifest.permission.POST_NOTIFICATIONS)
+        }
+
+        if (!isExactAlarmPermissionGranted) {
+            permissionRequest.add(android.Manifest.permission.SCHEDULE_EXACT_ALARM)
         }
 
         if (permissionRequest.isNotEmpty()) {
