@@ -18,6 +18,7 @@ import android.os.VibrationEffect
 import android.os.VibratorManager
 import android.util.Log
 import android.view.WindowManager
+import android.widget.Toast
 import com.example.myapplication.R
 import com.example.myapplication.UI.WakeupActivity
 import com.example.myapplication.databinding.ActivityWakeupBinding
@@ -31,17 +32,29 @@ class AlarmService : Service() {
     override fun onCreate() {
         super.onCreate()
         Log.d(TAG, "Service created")
-//        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-//        val intent = Intent(this, WakeupActivity::class.java)
-//        val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
-//
-//        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), pendingIntent)
+
 
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Log.d(TAG, "Service started")
+        val bundle = intent?.extras
+        val notificationId = bundle?.getInt(NOTIFICATION_ID)
+        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val wakeupIntent = Intent(this, WakeupActivity::class.java)
+        val pendingIntent =
+            notificationId?.let {
+                PendingIntent.getActivity(this,
+                    it, wakeupIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+            }
 
+        if (pendingIntent != null) {
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), pendingIntent)
+        }
+        //toast notification id
+        if (notificationId != null) {
+            Toast.makeText(this, "Alarm $notificationId", Toast.LENGTH_SHORT).show()
+        }
         // Perform background tasks here
 
         // If the system kills the service, restart it

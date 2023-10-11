@@ -7,15 +7,17 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
-import androidx.appcompat.app.AppCompatActivity
+import android.net.Uri
 import android.os.Bundle
 import android.os.IBinder
+import android.provider.Settings
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -38,7 +40,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlin.collections.ArrayList
 
 class MainActivity : AppCompatActivity(), ServiceConnection {
     private var reminderList: List<ReminderEntity> = emptyList()
@@ -86,10 +87,13 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
                 Log.d("MainActivity", "${it.key} = ${it.value}")
             }
         }
+
         loadData().also {
             updateUIComponents()
             requestPermission()
+
         }
+
         //get data from intent
         val intent = intent
         createNotificationChannel()
@@ -116,23 +120,27 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
     }
     private fun scheduleNotification(reminder: ReminderEntity, time: Long) {
         val notificationIntent = Intent(this, AlarmReceiver::class.java)
-        val notificationID = reminder.id.toInt()
+        val notificationId = reminder.id.toInt()
         val title = reminder.reminderName
         val message = "Don't Forget to do ${reminder.reminderName}"
-        //toast notificationID
-        Toast.makeText(this, "notificationID: $notificationID", Toast.LENGTH_SHORT).show()
-        notificationIntent.putExtra(NOTIFICATION_ID, notificationID)
+
+        notificationIntent.putExtra(NOTIFICATION_ID, notificationId)
         notificationIntent.putExtra(TITLE_EXTRA, title)
         notificationIntent.putExtra(MESSAGE_EXTRA, message)
+        notificationIntent.putExtra("ringtonePath", reminder.ringtonePath)
+        notificationIntent.putExtra("time", time)
+        notificationIntent.putExtra("snoozeCounter", 5 )
 
-        val pendingIntent = PendingIntent.getBroadcast(applicationContext, notificationID, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        val pendingIntent = PendingIntent.getBroadcast(applicationContext, notificationId, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
 
         val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
-        val serviceIntent = Intent(this, AlarmService::class.java)
-        bindService(serviceIntent, this, Context.BIND_AUTO_CREATE)
-        startService(serviceIntent)
         alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, time, pendingIntent)
+
+//        val serviceIntent = Intent(this, AlarmService::class.java)
+//        bindService(serviceIntent, this, Context.BIND_AUTO_CREATE)
+//        serviceIntent.putExtra(NOTIFICATION_ID, notificationId)
+//        startService(serviceIntent)
 
     }
 

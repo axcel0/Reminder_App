@@ -27,7 +27,10 @@ import com.example.myapplication.models.AppDatabase
 import com.example.myapplication.models.AudioFiles
 import com.example.myapplication.models.entities.ReminderEntity
 import com.example.myapplication.services.AlarmReceiver
+import com.example.myapplication.services.MESSAGE_EXTRA
 import com.example.myapplication.services.NOTIFICATION_ID
+import com.example.myapplication.services.TITLE_EXTRA
+import java.util.Calendar
 import kotlin.math.log
 
 class WakeupActivity : AppCompatActivity(){
@@ -40,6 +43,12 @@ class WakeupActivity : AppCompatActivity(){
     //media player
     private var mediaPlayer: MediaPlayer? = null
 
+    private var ringtonePath: String? = null
+    private var notificationId: Int? = null
+    private var title: String? = null
+    private var message: String? = null
+    private var time: Long? = null
+    private var snoozeCounter: Int? = null
 
     companion object {
         var audioFiles = ArrayList<AudioFiles>()
@@ -53,11 +62,14 @@ class WakeupActivity : AppCompatActivity(){
         setContentView(view)
         //bundle data ringtonePath from reminder
         val bundle : Bundle? = intent.extras
-        val ringtonePath = bundle?.getString("ringtonePath")
+        ringtonePath = bundle?.getString("ringtonePath")
+        notificationId = bundle?.getInt(NOTIFICATION_ID)
+        title = bundle?.getString("title")
+        message = bundle?.getString("message")
+        time = bundle?.getLong("time")
+        snoozeCounter = bundle?.getInt("snoozeCounter")
 
-//        playAudio((RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)))
-        ringtonePath ?: playAudio(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM))
-        ringtonePath?.let { playAudio(Uri.parse(it)) }
+        playAudio(ringtonePath?.let { Uri.parse(it) } ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM))
 
         //set onclick listener for dismiss button
         binding.dismissButton.setOnClickListener {
@@ -78,6 +90,26 @@ class WakeupActivity : AppCompatActivity(){
                 val vibrator = vibratorManager.defaultVibrator
                 vibrator.cancel()
             }
+        }
+        //set onclick listener for snooze button
+        if(snoozeCounter == 0){
+            binding.snoozeButton.visibility = View.GONE
+        }
+        else{
+            binding.snoozeButton.visibility = View.VISIBLE
+        }
+        binding.snoozeButton.setOnClickListener {
+            //finish the activity
+            mediaPlayer?.stop()
+            //cancel the notification
+            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.cancel(notificationManager.activeNotifications[0].id)
+            //snooze the alarm
+            snoozeAlarm(300000)
+            //stop vibrator
+            val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+            val vibrator = vibratorManager.defaultVibrator
+            vibrator.cancel().also { finish() }
         }
     }
     private fun playAudio(audioUri: Uri) {
@@ -114,6 +146,28 @@ class WakeupActivity : AppCompatActivity(){
                 prepare()
             }
 
+        }
+    }
+    private fun snoozeAlarm(additionalTime: Long){
+        val totalTime = time?.plus(additionalTime)
+        Toast.makeText(this, "Snoozed for 5 minutes", Toast.LENGTH_SHORT).show()
+        val notificationIntent = Intent(this, AlarmReceiver::class.java)
+        notificationIntent.putExtra(NOTIFICATION_ID, notificationId)
+        notificationIntent.putExtra(TITLE_EXTRA, title)
+        notificationIntent.putExtra(MESSAGE_EXTRA, message)
+        notificationIntent.putExtra("ringtonePath", ringtonePath)
+        notificationIntent.putExtra("time", totalTime)
+        notificationIntent.putExtra("snoozeCounter", snoozeCounter?.minus(1))
+
+        val pendingIntent = notificationId?.let {
+            PendingIntent.getBroadcast(applicationContext,
+                it, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        }
+
+        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+        if (pendingIntent != null && totalTime != null) {
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, totalTime, pendingIntent)
         }
     }
 

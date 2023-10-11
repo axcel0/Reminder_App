@@ -33,13 +33,16 @@ class AlarmReceiver : BroadcastReceiver() {
         wakeupIntent.putExtra(NOTIFICATION_ID, notificationId)
         wakeupIntent.putExtra(TITLE_EXTRA, intent.getStringExtra(TITLE_EXTRA))
         wakeupIntent.putExtra(MESSAGE_EXTRA, intent.getStringExtra(MESSAGE_EXTRA))
+        wakeupIntent.putExtra("ringtonePath", intent.getStringExtra("ringtonePath"))
+        wakeupIntent.putExtra("time", intent.getLongExtra("time", 0))
+        wakeupIntent.putExtra("snoozeCounter", intent.getIntExtra("snoozeCounter", 0))
         wakeupIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         context.startActivity(wakeupIntent)
 
     }
     private fun showNotification(context: Context, notificationId: Int, intent: Intent?) {
         val pendingIntent: PendingIntent = Intent(context, WakeupActivity::class.java).let { notificationIntent ->
-            PendingIntent.getActivity(context, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+            PendingIntent.getActivity(context, notificationId, notificationIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         }
 
 
@@ -54,8 +57,6 @@ class AlarmReceiver : BroadcastReceiver() {
 
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.notify(notificationId, builder.build())
-
-
 
     }
 
