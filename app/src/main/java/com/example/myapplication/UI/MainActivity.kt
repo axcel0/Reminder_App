@@ -1,20 +1,21 @@
 package com.example.myapplication.UI
 
 import android.app.AlarmManager
-import android.app.Instrumentation.ActivityResult
 import android.app.PendingIntent
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.IBinder
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SearchView
 import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -26,6 +27,7 @@ import com.example.myapplication.databinding.ActivityMainBinding
 import com.example.myapplication.models.AppDatabase
 import com.example.myapplication.models.entities.ReminderEntity
 import com.example.myapplication.services.AlarmReceiver
+import com.example.myapplication.services.AlarmService
 import com.example.myapplication.services.MESSAGE_EXTRA
 import com.example.myapplication.services.NOTIFICATION_ID
 import com.example.myapplication.services.TITLE_EXTRA
@@ -38,12 +40,12 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.collections.ArrayList
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), ServiceConnection {
     private var reminderList: List<ReminderEntity> = emptyList()
     private lateinit var permissionLauncher: ActivityResultLauncher<Array<String>>
     private var isPostNotificationPermissionGranted = false
     private var isReadMediaAudioPermissionGranted = false
-    private var isExactAlarmPermissionGranted = false
+    private var isDisplayOverOtherAppsPermissionGranted = false
     private var uiScope: CoroutineScope? = null
     private lateinit var binding: ActivityMainBinding
     private lateinit var recyclerView: RecyclerView
@@ -127,6 +129,9 @@ class MainActivity : AppCompatActivity() {
 
         val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
+        val serviceIntent = Intent(this, AlarmService::class.java)
+        bindService(serviceIntent, this, Context.BIND_AUTO_CREATE)
+        startService(serviceIntent)
         alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, time, pendingIntent)
 
     }
@@ -252,7 +257,7 @@ class MainActivity : AppCompatActivity() {
     private fun requestPermission() {
         isReadMediaAudioPermissionGranted = ActivityCompat.checkSelfPermission(this, android.Manifest.permission.READ_MEDIA_AUDIO) == PackageManager.PERMISSION_GRANTED
         isPostNotificationPermissionGranted = ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
-        isExactAlarmPermissionGranted = ActivityCompat.checkSelfPermission(this, android.Manifest.permission.SCHEDULE_EXACT_ALARM) == PackageManager.PERMISSION_GRANTED
+        isDisplayOverOtherAppsPermissionGranted = ActivityCompat.checkSelfPermission(this, android.Manifest.permission.SYSTEM_ALERT_WINDOW) == PackageManager.PERMISSION_GRANTED
         val permissionRequest: MutableList<String> = ArrayList()
 
         if (!isReadMediaAudioPermissionGranted) {
@@ -263,8 +268,8 @@ class MainActivity : AppCompatActivity() {
             permissionRequest.add(android.Manifest.permission.POST_NOTIFICATIONS)
         }
 
-        if (!isExactAlarmPermissionGranted) {
-            permissionRequest.add(android.Manifest.permission.SCHEDULE_EXACT_ALARM)
+        if (!isDisplayOverOtherAppsPermissionGranted) {
+            permissionRequest.add(android.Manifest.permission.SYSTEM_ALERT_WINDOW)
         }
 
         if (permissionRequest.isNotEmpty()) {
@@ -291,6 +296,16 @@ class MainActivity : AppCompatActivity() {
             }
 
         }
+    }
+
+    override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+        val binder = service as AlarmService.AlarmBinder
+        val alarmService = binder.getService()
+        Log.d("MainActivity", "onServiceConnected: $alarmService")
+    }
+
+    override fun onServiceDisconnected(name: ComponentName?) {
+        Log.d("MainActivity", "onServiceDisconnected: ")
     }
 
 }

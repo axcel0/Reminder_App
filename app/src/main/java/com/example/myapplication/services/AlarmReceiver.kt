@@ -39,17 +39,8 @@ class AlarmReceiver : BroadcastReceiver() {
     }
     private fun showNotification(context: Context, notificationId: Int, intent: Intent?) {
         val pendingIntent: PendingIntent = Intent(context, WakeupActivity::class.java).let { notificationIntent ->
-            PendingIntent.getActivity(context, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE)
+            PendingIntent.getActivity(context, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         }
-        //set alarm manager
-        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val intent = Intent(context, WakeupActivity::class.java)
-        val pendingIntent2 = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
-
-
-
-
-        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), pendingIntent)
 
 
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
