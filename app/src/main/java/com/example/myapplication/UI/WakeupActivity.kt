@@ -1,6 +1,7 @@
 package com.example.myapplication.UI
 
 import android.app.AlarmManager
+import android.app.KeyguardManager
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
@@ -74,8 +75,11 @@ class WakeupActivity : AppCompatActivity(){
 
 
         playAudio(ringtonePath?.let { Uri.parse(it) } ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM))
-        //set screen to be on
-        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON + WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED)
+
+        setShowWhenLocked(true)
+        setTurnScreenOn(true)
+        val keyguardManager = getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
+        keyguardManager.requestDismissKeyguard(this, null)
         //set onclick listener for dismiss button
         binding.dismissButton.setOnClickListener {
             //finish the activity
@@ -107,9 +111,9 @@ class WakeupActivity : AppCompatActivity(){
             //cancel the notification
             val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.cancel(notificationManager.activeNotifications[0].id)
-            cancelPendingIntent()
+
             //snooze the alarm
-            snoozeAlarm(300000)
+            snoozeAlarm(300000).also { finish() }
 
         }
     }
@@ -152,6 +156,9 @@ class WakeupActivity : AppCompatActivity(){
         val totalTime = time?.plus(additionalTime)
         Toast.makeText(this, "Snoozed for 5 minutes", Toast.LENGTH_SHORT).show()
         val notificationIntent = Intent(this, AlarmReceiver::class.java)
+        val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+        val vibrator = vibratorManager.defaultVibrator
+        vibrator.cancel()
         notificationIntent.putExtra(NOTIFICATION_ID, notificationId)
         notificationIntent.putExtra(TITLE_EXTRA, title)
         notificationIntent.putExtra(MESSAGE_EXTRA, message)
@@ -185,5 +192,6 @@ class WakeupActivity : AppCompatActivity(){
             }
 
     }
+
 
 }

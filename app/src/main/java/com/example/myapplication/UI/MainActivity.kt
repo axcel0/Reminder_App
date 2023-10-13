@@ -181,6 +181,8 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
                         deleteList.forEach {
                             deleteReminder(it.toLong())
                             deleteList = ArrayList()
+                            //cancel alarm
+                            cancelAlarm(it.toLong())
                         }
                     }
                     alertDialog.setNegativeButton("No") { _, _ ->
@@ -201,6 +203,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
                        alertDialog.setMessage("Are you sure you want to delete all reminders?")
                        alertDialog.setPositiveButton("Yes") { _, _ ->
                            deleteAllReminders()
+                            cancelAllAlarm()
                        }
                        alertDialog.setNegativeButton("No") { _, _ ->
                            deleteList = ArrayList()
@@ -245,22 +248,24 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
         val reminderDao = getDatabase(this).reminderDao()
         reminderDao.deleteAllReminders().also { loadData() }
     }
+    private fun cancelAlarm(reminderId: Long) {
+        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val intent = Intent(this, AlarmReceiver::class.java)
+        val pendingIntent = PendingIntent.getBroadcast(applicationContext, reminderId.toInt(), intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        alarmManager.cancel(pendingIntent)
+    }
+    private fun cancelAllAlarm() {
+        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val intent = Intent(this, AlarmReceiver::class.java)
+        for (reminder in reminderList) {
+            val pendingIntent = PendingIntent.getBroadcast(applicationContext, reminder.id.toInt(), intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+            alarmManager.cancel(pendingIntent)
+        }
+    }
     //update data reminder by id
     fun updateReminder(reminderId: Long, reminderName: String, dateAdded: Long, ringtoneName: String) {
         val reminderDao = getDatabase(this).reminderDao()
         reminderDao.updateReminder(reminderId, reminderName, dateAdded, ringtoneName).also { loadData() }
-    }
-    //permission to read media audio
-    private fun requestReadStoragePermissions() {
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.READ_MEDIA_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.READ_MEDIA_AUDIO), 2)
-        }
-    }
-    //permission to post notification
-    private fun requestNotificationPermissions() {
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 1)
-        }
     }
     private fun requestPermission() {
         isReadMediaAudioPermissionGranted = ActivityCompat.checkSelfPermission(this, android.Manifest.permission.READ_MEDIA_AUDIO) == PackageManager.PERMISSION_GRANTED

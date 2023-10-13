@@ -124,6 +124,7 @@ class EditActivity : AppCompatActivity() {
                 val newDateTime = LocalDateTime.of(date.year, date.month+1, date.dayOfMonth, time.hour, time.minute, 0)
                 val newDateTimeLong = newDateTime.atZone(java.time.ZoneId.systemDefault()).toEpochSecond()
                 val newRingtonePath = audioFiles[binding.spinner.selectedItemPosition].path
+
                 MainActivity().updateReminder(id, newTitle, newDateTimeLong, newRingtonePath)
                 MainActivity().loadData().run {
                     //refresh the list
