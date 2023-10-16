@@ -21,6 +21,7 @@ import com.example.myapplication.models.AppDatabase
 import com.example.myapplication.models.AudioFiles
 import com.google.android.material.textfield.TextInputEditText
 import java.time.LocalDateTime
+import java.util.Calendar
 
 
 class EditActivity : AppCompatActivity() {
@@ -125,13 +126,23 @@ class EditActivity : AppCompatActivity() {
                 val newDateTimeLong = newDateTime.atZone(java.time.ZoneId.systemDefault()).toEpochSecond()
                 val newRingtonePath = audioFiles[binding.spinner.selectedItemPosition].path
 
+                val calendar = Calendar.getInstance()
+                calendar.set(newDateTime.year, newDateTime.monthValue-1, newDateTime.dayOfMonth, newDateTime.hour, newDateTime.minute, 0)
+                val time = calendar.timeInMillis
+
+                val intent = Intent(this, MainActivity::class.java)
+                intent.putExtra("id", id)
+                intent.putExtra("reminderName", newTitle)
+                intent.putExtra("dateAdded", newDateTimeLong)
+                intent.putExtra("time", time)
+                intent.putExtra("ringtonePath", newRingtonePath)
+
                 MainActivity().updateReminder(id, newTitle, newDateTimeLong, newRingtonePath)
                 MainActivity().loadData().run {
                     //refresh the list
-                    startActivity(Intent(this@EditActivity, MainActivity::class.java)).also { finish() }
+                    startActivity(intent).also { finish() }
                 }
             }
-
         }
         //cancel
         binding.cancelButton.setOnClickListener {
@@ -156,7 +167,7 @@ class EditActivity : AppCompatActivity() {
         return false
     }
 
-    fun getAudioFiles(): ArrayList<AudioFiles> {
+    private fun getAudioFiles(): ArrayList<AudioFiles> {
         val audioList = ArrayList<AudioFiles>()
         val uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
         val projection = arrayOf(

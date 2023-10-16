@@ -94,7 +94,6 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
 
         }
 
-        //get data from intent
         val intent = intent
         createNotificationChannel()
         if(intent.hasExtra("reminderName")) {
@@ -195,7 +194,6 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
                    if(reminderList.isEmpty()) {
                        alertDialog.setMessage("There is no reminder to delete")
                        alertDialog.setPositiveButton("Ok") { _, _ ->
-
                        }
                    }else {
                        //alert dialog to delete all reminders
@@ -211,11 +209,8 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
                    }
                 }
                 alertDialog.show()
-                //notify adapter
                 true
             }
-            //use material design
-
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -290,11 +285,17 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
         }
 
     }
-
+    //make function to cancel pending intent when activity is destroyed or reminder has been dleted
+    fun cancelPendingIntent(reminderId: Long){
+        val notificationId = reminderId.toInt()
+        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val intent = Intent(this, AlarmReceiver::class.java)
+        val pendingIntent = PendingIntent.getBroadcast(this, notificationId, intent, PendingIntent.FLAG_IMMUTABLE)
+        alarmManager.cancel(pendingIntent)
+    }
 
     private fun updateUIComponents() {
         uiScope?.cancel()
-
         uiScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
         uiScope?.launch {
             try {

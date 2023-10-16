@@ -39,13 +39,10 @@ class CreateActivity : AppCompatActivity() {
 
     companion object {
         var audioFiles = ArrayList<AudioFiles>()
-
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        setAllAudioFiles()
-        //make array for spinner to be filled with data from local storage alarm sounds
         binding = ActivityCreateBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
@@ -78,6 +75,15 @@ class CreateActivity : AppCompatActivity() {
                 mediaplayer = MediaPlayer.create(this@CreateActivity, Uri.parse(path))
                 if (!isFirstInit) {
                     mediaplayer!!.start()
+                    //limit mediaplayer to play for 5 seconds for each audio, reset when spinner is changed
+                    Thread(Runnable {
+                        try {
+                            Thread.sleep(5000)
+                        } catch (e: InterruptedException) {
+                            e.printStackTrace()
+                        }
+                        mediaplayer!!.stop()
+                    }).start()
                 } else {
                     isFirstInit = false
                 }
