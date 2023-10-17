@@ -24,6 +24,7 @@ import com.example.myapplication.UI.WakeupActivity
 import com.example.myapplication.databinding.ActivityWakeupBinding
 import com.example.myapplication.models.AppDatabase
 import com.example.myapplication.models.entities.ReminderEntity
+import com.example.myapplication.utils.Constants
 
 class AlarmService : Service() {
     private var alarmBinder = AlarmBinder()
@@ -43,7 +44,7 @@ class AlarmService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Log.d(TAG, "Service started")
         val bundle = intent?.extras
-        val notificationId = bundle?.getInt(NOTIFICATION_ID)
+        val notificationId = bundle?.getInt(Constants.NOTIFICATION_ID)
         val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val wakeupIntent = Intent(this, WakeupActivity::class.java)
         val pendingIntent =

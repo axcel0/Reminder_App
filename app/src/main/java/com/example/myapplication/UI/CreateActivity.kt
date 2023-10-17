@@ -1,9 +1,6 @@
 package com.example.myapplication.UI
 
-import android.content.Context
 import android.content.Intent
-import android.media.AudioAttributes
-import android.media.AudioManager
 import android.media.MediaPlayer
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
@@ -13,141 +10,103 @@ import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.DatePicker
-import android.widget.TimePicker
 import android.widget.Toast
-import androidx.core.widget.addTextChangedListener
-import com.example.myapplication.R
 import com.example.myapplication.databinding.ActivityCreateBinding
 import com.example.myapplication.models.AppDatabase
 import com.example.myapplication.models.AudioFiles
 import com.example.myapplication.models.entities.ReminderEntity
-import com.google.android.material.textfield.TextInputEditText
 import java.time.LocalDateTime
 import java.time.ZoneId
-import java.util.Calendar
 import android.media.RingtoneManager
-import android.view.WindowManager
-
+import androidx.core.widget.addTextChangedListener
+import com.example.myapplication.utils.Constants
 
 class CreateActivity : AppCompatActivity() {
+    private var mediaPlayer: MediaPlayer? = null
+    private var isFirstInit = true
+    private var audioFiles = ArrayList<AudioFiles>()
+    private var currentMode : Mode = Mode.CREATE
+    private var oldTitleName : String? = null
+
     private lateinit var binding: ActivityCreateBinding
     private lateinit var db: AppDatabase
-    private var mediaplayer: MediaPlayer? = null
-    private var isFirstInit = true
 
-
-    companion object {
-        var audioFiles = ArrayList<AudioFiles>()
+    private enum class Mode {
+        CREATE, EDIT
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         binding = ActivityCreateBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
 
-        //set spinner to array from audioFiles
-        val spinnerList = ArrayList<String>()
-
-        audioFiles = getAudioFiles()
-
-        //get audiofiles uri
-        spinnerList += audioFiles.map { it.audioName }
-
-        //toast audioFiles size
-        Toast.makeText(this, "audioFiles size: ${audioFiles.size}", Toast.LENGTH_SHORT).show()
-
-
-        val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, spinnerList)
-        binding.spinner.adapter = adapter
-
-        binding.spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long){
-
-                val audioFiles = audioFiles[position]
-                val path = audioFiles.path
-                Log.e("Path: $path", "Name: ${audioFiles.audioName}")
-                if (mediaplayer!= null && mediaplayer!!.isPlaying) {
-                    mediaplayer!!.stop()
-                }
-                mediaplayer = MediaPlayer.create(this@CreateActivity, Uri.parse(path))
-                if (!isFirstInit) {
-                    mediaplayer!!.start()
-                    //limit mediaplayer to play for 5 seconds for each audio, reset when spinner is changed
-                    Thread(Runnable {
-                        try {
-                            Thread.sleep(5000)
-                        } catch (e: InterruptedException) {
-                            e.printStackTrace()
-                        }
-                        mediaplayer!!.stop()
-                    }).start()
-                } else {
-                    isFirstInit = false
-                }
-
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-
-            }
-        }
-
+        // Get the database
         db = MainActivity.getDatabase(this)
 
-        val title = findViewById<TextInputEditText>(R.id.title)
-        val datePicker =  findViewById<DatePicker>(R.id.datePicker)
-        val timePicker =  findViewById<TimePicker>(R.id.timePicker)
+        // Get the audio files
+        audioFiles = getAudioFiles()
+        val spinnerList = ArrayList<String>()
+        spinnerList += audioFiles.map { it.audioName }
 
-        datePicker.minDate = System.currentTimeMillis().also { timePicker.setIs24HourView(true) }
-        binding.saveButton.isEnabled = false
+        // Set the spinner adapter
+        val spinnerAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, spinnerList)
+        binding.spinner.adapter = spinnerAdapter
 
-        title.addTextChangedListener {
-            val titleText = title.text.toString()
+        // Set the date picker and time picker
+        binding.datePicker.minDate = System.currentTimeMillis().also { binding.timePicker.setIs24HourView(true) }
 
-            if (titleText.isBlank()) {
-                Toast.makeText(this, "Title cannot be empty", Toast.LENGTH_SHORT).show()
-            } else if (titleText.length > 20) {
-                Toast.makeText(this, "Title cannot be more than 20 characters", Toast.LENGTH_SHORT).show()
-            } else if (checkSameTitle(titleText)) {
-                Toast.makeText(this, "Reminder with same title already exist", Toast.LENGTH_SHORT).show()
-            } else {
-                binding.saveButton.isEnabled = true
+        // Set Event Listeners
+        binding.title.addTextChangedListener {onTitleChanged() }
+        binding.cancelButton.setOnClickListener{ onCancelButtonClicked() }
+        binding.spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                if (isFirstInit) {
+                    isFirstInit = false
+                } else {
+                    onSpinnerItemSelected()
+                }
             }
         }
 
-        //set saveButton to save data
-        binding.saveButton.setOnClickListener {
-            val titleText = title.text.toString()
-            val date = LocalDateTime.of(datePicker.year, datePicker.month+1, datePicker.dayOfMonth, timePicker.hour, timePicker.minute, 0)
-            val zoneId = ZoneId.systemDefault()
-            val selectedRingtonePath = audioFiles[binding.spinner.selectedItemPosition].path
+        // Determine the current mode of the activity
+        currentMode = if (intent.hasExtra(Constants.REMINDER_ID_EXTRA)) Mode.EDIT else Mode.CREATE
+        when (currentMode) {
+            Mode.CREATE -> {
+                binding.saveButton.isEnabled = false
+                binding.saveButton.setOnClickListener { onCreateSaveButtonClicked() }
+            }
 
-            // Create a reminder entity
-            val reminderEntity = ReminderEntity(reminderName = titleText, dateAdded = date.atZone(zoneId).toEpochSecond(), ringtonePath = selectedRingtonePath)
+            Mode.EDIT -> {
+                val bundle: Bundle = intent.extras!!
+                val id = bundle.getLong(Constants.REMINDER_ID_EXTRA)
+                val name = bundle.getString(Constants.REMINDER_NAME_EXTRA)
+                val dateTime = bundle.getLong(Constants.REMINDER_DATE_EXTRA)
+                val ringtonePath = bundle.getString(Constants.REMINDER_RINGTONE_PATH_EXTRA)
+                oldTitleName = name
+                currentMode = Mode.EDIT
 
-            // Insert the reminder into the database
-            db.reminderDao().insertReminder(reminderEntity)
+                binding.title.setText(name)
 
-            // Show a toast message
-            Toast.makeText(this, "Reminder added", Toast.LENGTH_SHORT).show()
+                binding.datePicker.minDate = System.currentTimeMillis().also { binding.timePicker.setIs24HourView(true) }
+                binding.timePicker.hour = LocalDateTime.ofEpochSecond(
+                    if (dateTime < System.currentTimeMillis()) System.currentTimeMillis() / 1000 else dateTime, 0,
+                    ZoneId.systemDefault().rules.getOffset(java.time.Instant.now())
+                ).hour
+                binding.timePicker.minute = LocalDateTime.ofEpochSecond(
+                    if (dateTime < System.currentTimeMillis()) System.currentTimeMillis() / 1000 else dateTime, 0,
+                    ZoneId.systemDefault().rules.getOffset(java.time.Instant.now())
+                ).minute
 
-            // Start the main activity
-            val intent = Intent(this@CreateActivity, MainActivity::class.java)
-            intent.putExtra("id", reminderEntity.id)
-            intent.putExtra("reminderName", reminderEntity.reminderName)
-            intent.putExtra("dateAdded", reminderEntity.dateAdded)
-            intent.putExtra("time", epochToMillis(reminderEntity.dateAdded))
-            intent.putExtra("ringtonePath", reminderEntity.ringtonePath)
-            startActivity(intent).also { finish() }
+                val ringtoneName = audioFiles.find { it.path == ringtonePath }?.audioName
+                val spinnerPosition = spinnerAdapter.getPosition(ringtoneName)
+                binding.spinner.setSelection(spinnerPosition)
+
+                binding.saveButton.setOnClickListener { onEditSaveButtonClicked(id) }
+            }
         }
-        //set cancelButton to go back to MainActivity
-        binding.cancelButton.setOnClickListener {
-            val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent).also { finish() }
-        }
-
     }
 
     private fun epochToMillis(epochTime: Long): Long {
@@ -156,7 +115,7 @@ class CreateActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        mediaplayer?.stop()
+        mediaPlayer?.stop()
     }
 
     //make function to check if there any same title in database
@@ -202,4 +161,135 @@ class CreateActivity : AppCompatActivity() {
         return audioList
     }
 
+    //region Event Listeners
+
+    private fun onSpinnerItemSelected() {
+        val audioFiles = audioFiles[binding.spinner.selectedItemPosition]
+        val path = audioFiles.path
+        Log.e("Path: $path", "Name: ${audioFiles.audioName}")
+
+        // Stop the previous audio
+        if (mediaPlayer!= null && mediaPlayer!!.isPlaying) {
+            mediaPlayer!!.stop()
+        }
+
+        // Play the audio for 5 seconds
+        mediaPlayer = MediaPlayer.create(this@CreateActivity, Uri.parse(path))
+        mediaPlayer!!.start()
+        Thread {
+            try {
+                Thread.sleep(5000)
+            } catch (e: InterruptedException) {
+                e.printStackTrace()
+            }
+            mediaPlayer!!.stop()
+        }.start()
+    }
+
+    private fun onTitleChanged() {
+        val title = binding.title.text.toString()
+
+        if (title.isBlank()) {
+            Toast.makeText(this, "Title cannot be empty", Toast.LENGTH_SHORT).show()
+            binding.saveButton.isEnabled = false
+        } else if (title.length > 20) {
+            Toast.makeText(this, "Title cannot be more than 20 characters", Toast.LENGTH_SHORT).show()
+            binding.saveButton.isEnabled = false
+        } else if (currentMode == Mode.CREATE && checkSameTitle(title)) {
+            Toast.makeText(this, "Reminder with same title already exist", Toast.LENGTH_SHORT).show()
+            binding.saveButton.isEnabled = false
+        } else if (currentMode == Mode.EDIT && title != oldTitleName) {
+            if (checkSameTitle(title)) {
+                Toast.makeText(this, "Reminder with same title already exist", Toast.LENGTH_SHORT).show()
+                binding.saveButton.isEnabled = false
+            }
+            else {
+                binding.saveButton.isEnabled = true
+            }
+        }
+        else {
+            binding.saveButton.isEnabled = true
+        }
+    }
+
+    private fun onCreateSaveButtonClicked() {
+        val title = binding.title.text.toString()
+        val date = LocalDateTime.of(
+            binding.datePicker.year,
+            binding.datePicker.month+1,
+            binding.datePicker.dayOfMonth,
+            binding.timePicker.hour,
+            binding.timePicker.minute,
+            0)
+
+        val zoneId = ZoneId.systemDefault()
+        val selectedRingtonePath = audioFiles[binding.spinner.selectedItemPosition].path
+
+        val reminderEntity = ReminderEntity(
+            reminderName = title,
+            dateAdded = date.atZone(zoneId).toEpochSecond(),
+            ringtonePath = selectedRingtonePath
+        )
+
+        // Insert the reminder into the database
+        db.reminderDao().insertReminder(reminderEntity)
+
+        val intent = Intent(this@CreateActivity, MainActivity::class.java)
+        intent.putExtra(Constants.REMINDER_ID_EXTRA, reminderEntity.id)
+        intent.putExtra(Constants.REMINDER_NAME_EXTRA, reminderEntity.reminderName)
+        intent.putExtra(Constants.REMINDER_DATE_EXTRA, reminderEntity.dateAdded)
+        intent.putExtra(Constants.REMINDER_TIME_EXTRA, epochToMillis(reminderEntity.dateAdded))
+        intent.putExtra(Constants.REMINDER_RINGTONE_PATH_EXTRA, reminderEntity.ringtonePath)
+
+        // Show a toast message
+        Toast.makeText(this, "Reminder added", Toast.LENGTH_SHORT).show()
+
+        // Start the main activity
+        startActivity(intent).also { finish() }
+    }
+
+    private fun onEditSaveButtonClicked(id: Long) {
+        val title = binding.title.text.toString()
+        val date = LocalDateTime.of(
+            binding.datePicker.year,
+            binding.datePicker.month+1,
+            binding.datePicker.dayOfMonth,
+            binding.timePicker.hour,
+            binding.timePicker.minute,
+            0)
+
+        val zoneId = ZoneId.systemDefault()
+        val audioFiles = getAudioFiles()
+        val selectedRingtonePath = audioFiles[binding.spinner.selectedItemPosition].path
+
+        val reminderEntity = ReminderEntity(
+            id = id,
+            reminderName = title,
+            dateAdded = date.atZone(zoneId).toEpochSecond(),
+            ringtonePath = selectedRingtonePath
+        )
+
+        // Update the reminder into the database
+        db.reminderDao().updateReminder(reminderEntity)
+
+        val intent = Intent(this@CreateActivity, MainActivity::class.java)
+        intent.putExtra(Constants.REMINDER_ID_EXTRA, reminderEntity.id)
+        intent.putExtra(Constants.REMINDER_NAME_EXTRA, reminderEntity.reminderName)
+        intent.putExtra(Constants.REMINDER_DATE_EXTRA, reminderEntity.dateAdded)
+        intent.putExtra(Constants.REMINDER_TIME_EXTRA, epochToMillis(reminderEntity.dateAdded))
+        intent.putExtra(Constants.REMINDER_RINGTONE_PATH_EXTRA, reminderEntity.ringtonePath)
+
+        // Show a toast message
+        Toast.makeText(this, "Reminder updated", Toast.LENGTH_SHORT).show()
+
+        // Start the main activity
+        startActivity(intent).also { finish() }
+    }
+
+    private fun onCancelButtonClicked() {
+        val intent = Intent(this, MainActivity::class.java)
+        startActivity(intent).also { finish() }
+    }
+
+    //endregion
 }

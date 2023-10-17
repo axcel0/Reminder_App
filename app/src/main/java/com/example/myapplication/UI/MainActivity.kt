@@ -9,14 +9,11 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Bundle
 import android.os.IBinder
-import android.provider.Settings
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -32,9 +29,7 @@ import com.example.myapplication.models.AppDatabase
 import com.example.myapplication.models.entities.ReminderEntity
 import com.example.myapplication.services.AlarmReceiver
 import com.example.myapplication.services.AlarmService
-import com.example.myapplication.services.MESSAGE_EXTRA
-import com.example.myapplication.services.NOTIFICATION_ID
-import com.example.myapplication.services.TITLE_EXTRA
+import com.example.myapplication.utils.Constants
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -45,15 +40,14 @@ import kotlinx.coroutines.withContext
 
 class MainActivity : AppCompatActivity(), ServiceConnection {
     private var reminderList: List<ReminderEntity> = emptyList()
-    private lateinit var permissionLauncher: ActivityResultLauncher<Array<String>>
     private var isPostNotificationPermissionGranted = false
     private var isReadMediaAudioPermissionGranted = false
     private var isDisplayOverOtherAppsPermissionGranted = false
     private var uiScope: CoroutineScope? = null
+
+    private lateinit var permissionLauncher: ActivityResultLauncher<Array<String>>
     private lateinit var binding: ActivityMainBinding
     private lateinit var recyclerView: RecyclerView
-    private lateinit var adapter: ReminderAdapter
-//    private String CHANNEL_ID = "CHANNEL 1"
 
     companion object {
         var deleteList : ArrayList<String> = ArrayList()
@@ -72,17 +66,18 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
         menuInflater.inflate(R.menu.menu_main, binding.toolbar.menu)
-        supportActionBar!!.title = "Reminders"
 
         recyclerView = binding.recyclerView
-        adapter = ReminderAdapter(reminderList)
-        recyclerView.adapter = adapter
+        recyclerView.adapter = ReminderAdapter(reminderList)
         recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerView.setHasFixedSize(true) //recyclerview size is fixed
+        recyclerView.setHasFixedSize(true)
+
+        supportActionBar!!.title = getString(R.string.action_bar_name)
 
         permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
             permissions.entries.forEach {
@@ -90,50 +85,55 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
             }
         }
 
-        loadData().also {
-            updateUIComponents()
-            requestPermission()
-
-        }
-
-        val intent = intent
+        loadData()
+        requestPermission()
         createNotificationChannel()
-        if(intent.hasExtra("reminderName")) {
-            val id = intent.getLongExtra("id", 0)
-            val title = intent.getStringExtra("reminderName")
-            val dateAdded = intent.getLongExtra("dateAdded", 0)
-            val time = intent.getLongExtra("time", 0)
-            val ringtonePath = intent.getStringExtra("ringtonePath")
+
+        if (intent.hasExtra(Constants.REMINDER_ID_EXTRA)) {
+            val id = intent.getLongExtra(Constants.REMINDER_ID_EXTRA, 0)
+            val title = intent.getStringExtra(Constants.REMINDER_NAME_EXTRA)
+            val dateAdded = intent.getLongExtra(Constants.REMINDER_DATE_EXTRA, 0)
+            val time = intent.getLongExtra(Constants.REMINDER_TIME_EXTRA, 0)
+            val ringtonePath = intent.getStringExtra(Constants.REMINDER_RINGTONE_PATH_EXTRA)
+
             Log.d("MainActivity", "onCreate: $title $dateAdded $time")
             scheduleNotification(ReminderEntity(id = id, reminderName = title!!, dateAdded = dateAdded, ringtonePath = ringtonePath!!), time)
         }
     }
+
     private fun createNotificationChannel() {
-        val name = "Reminder"
-        val descriptionText = "Reminder"
-        val importance = NotificationManager.IMPORTANCE_DEFAULT
-        val channel = NotificationChannel("Reminder", name, importance).apply {
-            description = descriptionText
-        }
-        // Register the channel with the system
         val notificationManager = getSystemService(NotificationManager::class.java)
-        notificationManager.createNotificationChannel(channel)
+        if (notificationManager.getNotificationChannel(Constants.DEFAULT_CHANNEL_ID) == null)
+        {
+            val name = Constants.NOTIFICATION_CHANNEL_NAME
+            val descriptionText = Constants.NOTIFICATION_CHANNEL_DESCRIPTION
+            val importance = NotificationManager.IMPORTANCE_DEFAULT
+            val channel = NotificationChannel(Constants.DEFAULT_CHANNEL_ID, name, importance).apply {
+                description = descriptionText
+            }
+
+            notificationManager.createNotificationChannel(channel)
+        }
     }
 
     private fun scheduleNotification(reminder: ReminderEntity, time: Long) {
         val notificationIntent = Intent(this, AlarmReceiver::class.java).apply {
-            putExtra(NOTIFICATION_ID, reminder.id.toInt())
-            putExtra(TITLE_EXTRA, reminder.reminderName)
-            putExtra(MESSAGE_EXTRA, "Don't Forget to do ${reminder.reminderName}")
-            putExtra("ringtonePath", reminder.ringtonePath)
-            putExtra("time", time)
-            putExtra("snoozeCounter", 5)
+            putExtra(Constants.NOTIFICATION_ID, reminder.id.toInt())
+            putExtra(Constants.TITLE_EXTRA, reminder.reminderName)
+            putExtra(Constants.MESSAGE_EXTRA, "Don't Forget to do ${reminder.reminderName}")
+            putExtra(Constants.RINGTONE_PATH_EXTRA, reminder.ringtonePath)
+            putExtra(Constants.TIME_EXTRA, time)
+            putExtra(Constants.SNOOZE_COUNTER, Constants.DEFAULT_SNOOZE_COUNTER)
         }
 
-        val pendingIntent = PendingIntent.getBroadcast(applicationContext, reminder.id.toInt(), notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        val pendingIntent = PendingIntent.getBroadcast(
+            applicationContext,
+            reminder.id.toInt(),
+            notificationIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
 
         val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-
         alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, time, pendingIntent)
     }
 
@@ -162,7 +162,6 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
                         searchReminder(newText)
                         return true
                     }
-
                 })
                 true
             }
@@ -182,7 +181,6 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
                     alertDialog.setNegativeButton("No") { _, _ ->
                         //set deleteList to empty
                         deleteList = ArrayList()
-
                     }
                 }
                 else {
@@ -220,6 +218,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
             updateUIComponents()
         }
     }
+
     //search reminder by title
     private fun searchReminder(reminderName: String?) {
         val reminderDao = getDatabase(this).reminderDao()
@@ -237,6 +236,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
         val reminderDao = getDatabase(this).reminderDao()
         reminderDao.deleteAllReminders().also { loadData() }
     }
+
     private fun cancelAlarm(reminderId: Long) {
         val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = Intent(this, AlarmReceiver::class.java)
@@ -252,33 +252,34 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
             alarmManager.cancel(pendingIntent)
         }
     }
+
     //update data reminder by id
     fun updateReminder(reminderId: Long, reminderName: String, dateAdded: Long, ringtoneName: String) {
         val reminderDao = getDatabase(this).reminderDao()
         reminderDao.updateReminder(ReminderEntity(id = reminderId, reminderName = reminderName, dateAdded = dateAdded, ringtonePath = ringtoneName)).also { loadData() }
     }
+
     private fun requestPermission() {
-        isReadMediaAudioPermissionGranted = ActivityCompat.checkSelfPermission(this, android.Manifest.permission.READ_MEDIA_AUDIO) == PackageManager.PERMISSION_GRANTED
-        isPostNotificationPermissionGranted = ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
-        isDisplayOverOtherAppsPermissionGranted = ActivityCompat.checkSelfPermission(this, android.Manifest.permission.SYSTEM_ALERT_WINDOW) == PackageManager.PERMISSION_GRANTED
         val permissionRequest: MutableList<String> = ArrayList()
 
-        if (!isReadMediaAudioPermissionGranted) {
+        isReadMediaAudioPermissionGranted =
+            ActivityCompat.checkSelfPermission(this, android.Manifest.permission.READ_MEDIA_AUDIO) == PackageManager.PERMISSION_GRANTED
+        isPostNotificationPermissionGranted =
+            ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+        isDisplayOverOtherAppsPermissionGranted =
+            ActivityCompat.checkSelfPermission(this, android.Manifest.permission.SYSTEM_ALERT_WINDOW) == PackageManager.PERMISSION_GRANTED
+
+        if (!isReadMediaAudioPermissionGranted)
             permissionRequest.add(android.Manifest.permission.READ_MEDIA_AUDIO)
-        }
 
-        if (!isPostNotificationPermissionGranted) {
+        if (!isPostNotificationPermissionGranted)
             permissionRequest.add(android.Manifest.permission.POST_NOTIFICATIONS)
-        }
 
-        if (!isDisplayOverOtherAppsPermissionGranted) {
+        if (!isDisplayOverOtherAppsPermissionGranted)
             permissionRequest.add(android.Manifest.permission.SYSTEM_ALERT_WINDOW)
-        }
 
-        if (permissionRequest.isNotEmpty()) {
+        if (permissionRequest.isNotEmpty())
             permissionLauncher.launch(permissionRequest.toTypedArray())
-        }
-
     }
 
     private fun updateUIComponents() {

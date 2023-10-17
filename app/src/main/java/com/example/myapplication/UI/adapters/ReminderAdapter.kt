@@ -14,6 +14,7 @@ import com.example.myapplication.R
 import com.example.myapplication.UI.MainActivity
 import com.example.myapplication.UI.MainActivity.Companion.deleteList
 import com.example.myapplication.models.entities.ReminderEntity
+import com.example.myapplication.utils.Constants
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -86,11 +87,11 @@ class ReminderAdapter(private val dataSet: List<ReminderEntity>) : RecyclerView.
                     }
                     else -> {
                         val context = holder.itemView.context
-                        val intent = android.content.Intent(context, com.example.myapplication.UI.EditActivity::class.java).apply {
-                            putExtra("id", dataSet[position].id)
-                            putExtra("name", dataSet[position].reminderName)
-                            putExtra("added", dataSet[position].dateAdded)
-                            putExtra("ringtonePath", dataSet[position].ringtonePath)
+                        val intent = android.content.Intent(context, com.example.myapplication.UI.CreateActivity::class.java).apply {
+                            putExtra(Constants.REMINDER_ID_EXTRA, dataSet[position].id)
+                            putExtra(Constants.REMINDER_NAME_EXTRA, dataSet[position].reminderName)
+                            putExtra(Constants.REMINDER_DATE_EXTRA, dataSet[position].dateAdded)
+                            putExtra(Constants.REMINDER_RINGTONE_PATH_EXTRA, dataSet[position].ringtonePath)
                         }
                         context.startActivity(intent)
                     }
