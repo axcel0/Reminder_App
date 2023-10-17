@@ -50,9 +50,8 @@ class CreateActivity : AppCompatActivity() {
         //set spinner to array from audioFiles
         val spinnerList = ArrayList<String>()
 
-        getAudioFiles().run {
-            audioFiles = this
-        }
+        audioFiles = getAudioFiles()
+
         //get audiofiles uri
         spinnerList += audioFiles.map { it.audioName }
 
@@ -103,16 +102,16 @@ class CreateActivity : AppCompatActivity() {
 
         datePicker.minDate = System.currentTimeMillis().also { timePicker.setIs24HourView(true) }
         binding.saveButton.isEnabled = false
+
         title.addTextChangedListener {
-            if (checkSameTitle(title.text.toString())) {
-                Toast.makeText(this, "Reminder with same title already exist", Toast.LENGTH_SHORT).show()
-                binding.saveButton.isEnabled = false
-            } else if (title.text.toString() == "") {
+            val titleText = title.text.toString()
+
+            if (titleText.isBlank()) {
                 Toast.makeText(this, "Title cannot be empty", Toast.LENGTH_SHORT).show()
-                binding.saveButton.isEnabled = false
-            } else if (title.text.toString().length > 20) {
+            } else if (titleText.length > 20) {
                 Toast.makeText(this, "Title cannot be more than 20 characters", Toast.LENGTH_SHORT).show()
-                binding.saveButton.isEnabled = false
+            } else if (checkSameTitle(titleText)) {
+                Toast.makeText(this, "Reminder with same title already exist", Toast.LENGTH_SHORT).show()
             } else {
                 binding.saveButton.isEnabled = true
             }
@@ -125,25 +124,23 @@ class CreateActivity : AppCompatActivity() {
             val zoneId = ZoneId.systemDefault()
             val selectedRingtonePath = audioFiles[binding.spinner.selectedItemPosition].path
 
-            val epoch = date.atZone(zoneId).toEpochSecond()
-            val reminderEntity = ReminderEntity(reminderName = titleText, dateAdded = epoch, ringtonePath = selectedRingtonePath)
+            // Create a reminder entity
+            val reminderEntity = ReminderEntity(reminderName = titleText, dateAdded = date.atZone(zoneId).toEpochSecond(), ringtonePath = selectedRingtonePath)
 
-            val calendar = Calendar.getInstance()
-            calendar.set(date.year, date.monthValue-1, date.dayOfMonth, date.hour, date.minute, 0)
-            val time = calendar.timeInMillis
+            // Insert the reminder into the database
+            db.reminderDao().insertReminder(reminderEntity)
 
-            db.reminderDao().insertReminder(reminderEntity).also {
-                Toast.makeText(this, "Reminder added", Toast.LENGTH_SHORT).show()
-            }.run {
-                val intent = Intent(this@CreateActivity, MainActivity::class.java)
-                intent.putExtra("id", this)
-                intent.putExtra("reminderName", titleText)
-                intent.putExtra("dateAdded", epoch)
-                intent.putExtra("time", time)
-                intent.putExtra("ringtonePath", selectedRingtonePath)
-                startActivity(intent).also { finish() }
+            // Show a toast message
+            Toast.makeText(this, "Reminder added", Toast.LENGTH_SHORT).show()
 
-            }
+            // Start the main activity
+            val intent = Intent(this@CreateActivity, MainActivity::class.java)
+            intent.putExtra("id", reminderEntity.id)
+            intent.putExtra("reminderName", reminderEntity.reminderName)
+            intent.putExtra("dateAdded", reminderEntity.dateAdded)
+            intent.putExtra("time", epochToMillis(reminderEntity.dateAdded))
+            intent.putExtra("ringtonePath", reminderEntity.ringtonePath)
+            startActivity(intent).also { finish() }
         }
         //set cancelButton to go back to MainActivity
         binding.cancelButton.setOnClickListener {
@@ -153,6 +150,10 @@ class CreateActivity : AppCompatActivity() {
 
     }
 
+    private fun epochToMillis(epochTime: Long): Long {
+        return epochTime * 1000
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         mediaplayer?.stop()
@@ -160,13 +161,7 @@ class CreateActivity : AppCompatActivity() {
 
     //make function to check if there any same title in database
     private fun checkSameTitle(title: String): Boolean {
-        val reminderList = db.reminderDao().getReminders()
-        for (reminder in reminderList) {
-            if (reminder.reminderName == title) {
-                return true
-            }
-        }
-        return false
+        return db.reminderDao().getReminders().any { reminder -> reminder.reminderName == title }
     }
 
     //load audio files from local storage

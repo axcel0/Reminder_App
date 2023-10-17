@@ -33,7 +33,11 @@ class AlarmService : Service() {
         super.onCreate()
         Log.d(TAG, "Service created")
 
-
+        //main activity code
+//        val serviceIntent = Intent(this, AlarmService::class.java)
+//        bindService(serviceIntent, this, Context.BIND_AUTO_CREATE)
+//        serviceIntent.putExtra(NOTIFICATION_ID, notificationId)
+//        startService(serviceIntent)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {

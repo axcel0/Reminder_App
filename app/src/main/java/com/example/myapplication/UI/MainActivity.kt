@@ -1,6 +1,8 @@
 package com.example.myapplication.UI
 
 import android.app.AlarmManager
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.ComponentName
 import android.content.Context
@@ -109,39 +111,32 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
     private fun createNotificationChannel() {
         val name = "Reminder"
         val descriptionText = "Reminder"
-        val importance = android.app.NotificationManager.IMPORTANCE_DEFAULT
-        val channel = android.app.NotificationChannel("Reminder", name, importance).apply {
+        val importance = NotificationManager.IMPORTANCE_DEFAULT
+        val channel = NotificationChannel("Reminder", name, importance).apply {
             description = descriptionText
         }
         // Register the channel with the system
-        val notificationManager: android.app.NotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
+        val notificationManager = getSystemService(NotificationManager::class.java)
         notificationManager.createNotificationChannel(channel)
     }
+
     private fun scheduleNotification(reminder: ReminderEntity, time: Long) {
-        val notificationIntent = Intent(this, AlarmReceiver::class.java)
-        val notificationId = reminder.id.toInt()
-        val title = reminder.reminderName
-        val message = "Don't Forget to do ${reminder.reminderName}"
+        val notificationIntent = Intent(this, AlarmReceiver::class.java).apply {
+            putExtra(NOTIFICATION_ID, reminder.id.toInt())
+            putExtra(TITLE_EXTRA, reminder.reminderName)
+            putExtra(MESSAGE_EXTRA, "Don't Forget to do ${reminder.reminderName}")
+            putExtra("ringtonePath", reminder.ringtonePath)
+            putExtra("time", time)
+            putExtra("snoozeCounter", 5)
+        }
 
-        notificationIntent.putExtra(NOTIFICATION_ID, notificationId)
-        notificationIntent.putExtra(TITLE_EXTRA, title)
-        notificationIntent.putExtra(MESSAGE_EXTRA, message)
-        notificationIntent.putExtra("ringtonePath", reminder.ringtonePath)
-        notificationIntent.putExtra("time", time)
-        notificationIntent.putExtra("snoozeCounter", 5 )
-
-        val pendingIntent = PendingIntent.getBroadcast(applicationContext, notificationId, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        val pendingIntent = PendingIntent.getBroadcast(applicationContext, reminder.id.toInt(), notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
 
         val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
         alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, time, pendingIntent)
-
-//        val serviceIntent = Intent(this, AlarmService::class.java)
-//        bindService(serviceIntent, this, Context.BIND_AUTO_CREATE)
-//        serviceIntent.putExtra(NOTIFICATION_ID, notificationId)
-//        startService(serviceIntent)
-
     }
+
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
@@ -228,14 +223,13 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
     //search reminder by title
     private fun searchReminder(reminderName: String?) {
         val reminderDao = getDatabase(this).reminderDao()
-        reminderList = reminderDao.searchReminder(reminderName!!).also {
-            updateUIComponents()
-        }
+        reminderList = reminderDao.searchReminder(reminderName ?: "").also { updateUIComponents() }
     }
+
     //delete reminder
     private fun deleteReminder(reminderId: Long) {
         val reminderDao = getDatabase(this).reminderDao()
-        reminderDao.deleteReminder(reminderId).also { loadData() }
+        reminderDao.deleteReminder(reminderDao.getReminder(reminderId.toInt())).also { loadData() }
     }
 
     //delete all reminders
@@ -249,6 +243,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
         val pendingIntent = PendingIntent.getBroadcast(applicationContext, reminderId.toInt(), intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         alarmManager.cancel(pendingIntent)
     }
+
     private fun cancelAllAlarm() {
         val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = Intent(this, AlarmReceiver::class.java)
@@ -260,7 +255,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
     //update data reminder by id
     fun updateReminder(reminderId: Long, reminderName: String, dateAdded: Long, ringtoneName: String) {
         val reminderDao = getDatabase(this).reminderDao()
-        reminderDao.updateReminder(reminderId, reminderName, dateAdded, ringtoneName).also { loadData() }
+        reminderDao.updateReminder(ReminderEntity(id = reminderId, reminderName = reminderName, dateAdded = dateAdded, ringtonePath = ringtoneName)).also { loadData() }
     }
     private fun requestPermission() {
         isReadMediaAudioPermissionGranted = ActivityCompat.checkSelfPermission(this, android.Manifest.permission.READ_MEDIA_AUDIO) == PackageManager.PERMISSION_GRANTED
@@ -285,30 +280,28 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
         }
 
     }
-    //make function to cancel pending intent when activity is destroyed or reminder has been dleted
-    fun cancelPendingIntent(reminderId: Long){
-        val notificationId = reminderId.toInt()
-        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val intent = Intent(this, AlarmReceiver::class.java)
-        val pendingIntent = PendingIntent.getBroadcast(this, notificationId, intent, PendingIntent.FLAG_IMMUTABLE)
-        alarmManager.cancel(pendingIntent)
-    }
 
     private fun updateUIComponents() {
+        // Cancel the previous UI scope if it is running.
         uiScope?.cancel()
+
+        // Create a new UI scope with a SupervisorJob.
+        // This will ensure that the UI scope is not cancelled if one of the coroutines it launches fails.
         uiScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+
+        // Launch a coroutine to update the adapter.
         uiScope?.launch {
             try {
-                // Update the adapter on the IO dispatcher
+                // Update the adapter on the IO dispatcher.
                 val newAdapter = withContext(Dispatchers.IO) {
                     ReminderAdapter(reminderList)
                 }
-                // Update the RecyclerView adapter on the main thread
+
+                // Update the RecyclerView adapter on the main thread.
                 recyclerView.adapter = newAdapter
             } catch (e: Exception) {
                 e.printStackTrace()
             }
-
         }
     }
 

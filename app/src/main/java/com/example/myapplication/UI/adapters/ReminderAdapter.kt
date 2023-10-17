@@ -32,68 +32,71 @@ class ReminderAdapter(private val dataSet: List<ReminderEntity>) : RecyclerView.
             return ViewHolder(view)
         }
 
-        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            holder.reminderName.text = dataSet[position].reminderName
-            val date = LocalDateTime.ofEpochSecond(dataSet[position].dateAdded, 0, ZoneId.systemDefault().rules.getOffset(Date().toInstant()))
-            //format date to "Month Day, Year"
-            val dateStr = date.format(DateTimeFormatter.ofPattern("EEEE, MMMM d \nyyyy"))
-            val timeStr = date.format(DateTimeFormatter.ofPattern("hh:mm a"))
-            holder.dateAdded.text = dateStr
-            holder.timeAdded.text = timeStr
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        holder.reminderName.text = dataSet[position].reminderName
+        val date = LocalDateTime.ofEpochSecond(dataSet[position].dateAdded, 0, ZoneId.systemDefault().rules.getOffset(Date().toInstant()))
+        //format date to "Month Day, Year"
+        val dateStr = date.format(DateTimeFormatter.ofPattern("EEEE, MMMM d \nyyyy"))
+        val timeStr = date.format(DateTimeFormatter.ofPattern("hh:mm a"))
+        holder.dateAdded.text = dateStr
+        holder.timeAdded.text = timeStr
 
-            val clickedElement = deleteList.find() {
-                if (it == dataSet[position].id.toString()) {
-                    return@find true
+        val clickedElement = deleteList.find() {
+            if (it == dataSet[position].id.toString()) {
+                return@find true
+            }
+            return@find false
+        }
+
+        if (clickedElement != null) {
+            holder.itemView.setBackgroundColor(ContextCompat.getColor(holder.itemView.context, com.google.android.material.R.color.material_blue_grey_800))
+        }
+        else {
+            //set background color to blue
+            holder.itemView.setBackgroundColor(ContextCompat.getColor(holder.itemView.context, com.google.android.material.R.color.material_deep_teal_200))
+        }
+
+            holder.itemView.setOnLongClickListener {
+                when {
+                    clickedElement != null -> {
+                        holder.itemView.setBackgroundColor(holder.itemView.context.getColor(com.google.android.material.R.color.material_dynamic_neutral70))
+                        deleteList.remove(dataSet[position].id.toString())
+                        notifyItemChanged(position)
+                    }
+                    else -> {
+                        holder.itemView.setBackgroundColor(holder.itemView.context.getColor(com.google.android.material.R.color.material_dynamic_neutral10))
+                        selectDeleteList(dataSet[position].id)
+                        notifyItemChanged(position)
+                    }
                 }
-                return@find false
+                true
             }
 
-            if (clickedElement != null) {
-                holder.itemView.setBackgroundColor(ContextCompat.getColor(holder.itemView.context, com.google.android.material.R.color.material_blue_grey_800))
-            }
-            else {
-                //set background color to blue
-                holder.itemView.setBackgroundColor(ContextCompat.getColor(holder.itemView.context, com.google.android.material.R.color.material_deep_teal_200))
+            holder.itemView.setOnClickListener {
+                when {
+                    clickedElement != null -> {
+                        holder.itemView.setBackgroundColor(holder.itemView.context.getColor(com.google.android.material.R.color.material_dynamic_neutral70))
+                        deleteList.remove(dataSet[position].id.toString())
+                        notifyItemChanged(position)
+                    }
+                    deleteList.isNotEmpty() -> {
+                        holder.itemView.setBackgroundColor(holder.itemView.context.getColor(com.google.android.material.R.color.material_dynamic_neutral10))
+                        selectDeleteList(dataSet[position].id)
+                        notifyItemChanged(position)
+                    }
+                    else -> {
+                        val context = holder.itemView.context
+                        val intent = android.content.Intent(context, com.example.myapplication.UI.EditActivity::class.java).apply {
+                            putExtra("id", dataSet[position].id)
+                            putExtra("name", dataSet[position].reminderName)
+                            putExtra("added", dataSet[position].dateAdded)
+                            putExtra("ringtonePath", dataSet[position].ringtonePath)
+                        }
+                        context.startActivity(intent)
+                    }
+                }
             }
 
-            holder.itemView.setOnLongClickListener{
-                if (clickedElement != null) {
-                    holder.itemView.setBackgroundColor(holder.itemView.context.getColor(com.google.android.material.R.color.material_dynamic_neutral70))
-                    deleteList.remove(dataSet[position].id.toString())
-                    notifyItemChanged(position)
-                }
-                else {
-                    holder.itemView.setBackgroundColor(holder.itemView.context.getColor(com.google.android.material.R.color.material_dynamic_neutral10))
-                    selectDeleteList(dataSet[position].id)
-                    notifyItemChanged(position)
-                }
-                return@setOnLongClickListener true
-            }
-
-            holder.itemView.setOnClickListener{
-
-                if (clickedElement != null) {
-                    holder.itemView.setBackgroundColor(holder.itemView.context.getColor(com.google.android.material.R.color.material_dynamic_neutral70))
-                    deleteList.remove(dataSet[position].id.toString())
-                    notifyItemChanged(position)
-                }
-                else if(deleteList.size > 0) {
-                    holder.itemView.setBackgroundColor(holder.itemView.context.getColor(com.google.android.material.R.color.material_dynamic_neutral10))
-                    selectDeleteList(dataSet[position].id)
-                    notifyItemChanged(position)
-                }
-                //else if no items are selected, go to edit activity
-                else {
-                    val context = holder.itemView.context
-                    val intent = android.content.Intent(context, com.example.myapplication.UI.EditActivity::class.java)
-                    intent.putExtra("id", dataSet[position].id)
-                    intent.putExtra("name", dataSet[position].reminderName)
-                    intent.putExtra("added", dataSet[position].dateAdded)
-                    intent.putExtra("ringtonePath", dataSet[position].ringtonePath)
-                    context.startActivity(intent)
-                }
-
-            }
 
         }
 

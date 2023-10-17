@@ -42,9 +42,8 @@ class EditActivity : AppCompatActivity() {
         setContentView(binding.root)
 
 
-        getAudioFiles().run {
-            audioFiles = this
-        }
+        audioFiles = getAudioFiles()
+
 
         //set spinner to array from audioFiles
         val spinnerList = ArrayList<String>()
@@ -100,15 +99,16 @@ class EditActivity : AppCompatActivity() {
         }
 
         title.addTextChangedListener {
-            if (checkSameTitle(title.text.toString())) {
+            val titleText = title.text.toString()
+            if (checkSameTitle(titleText)) {
                 Toast.makeText(this, "Reminder with same title already exist", Toast.LENGTH_SHORT).show()
                 //disable saveButton if there any same title
                 binding.saveButton.isEnabled = false
-            }else if (title.text.toString() == "") {
+            }else if (titleText.isBlank()) {
                 Toast.makeText(this, "Title cannot be empty", Toast.LENGTH_SHORT).show()
                 //disable saveButton if title is empty
                 binding.saveButton.isEnabled = false
-            }else if (title.text.toString().length > 20) {
+            }else if (titleText.length > 20) {
                 Toast.makeText(this, "Title cannot be more than 20 characters", Toast.LENGTH_SHORT).show()
                 //disable saveButton if title is more than 20 characters
                 binding.saveButton.isEnabled = false
@@ -158,13 +158,7 @@ class EditActivity : AppCompatActivity() {
     }
 
     private fun checkSameTitle(title: String): Boolean {
-        val reminderList = db.reminderDao().getReminders()
-        for (reminder in reminderList) {
-            if (reminder.reminderName == title) {
-                return true
-            }
-        }
-        return false
+        return db.reminderDao().getReminders().any { reminder -> reminder.reminderName == title }
     }
 
     private fun getAudioFiles(): ArrayList<AudioFiles> {
