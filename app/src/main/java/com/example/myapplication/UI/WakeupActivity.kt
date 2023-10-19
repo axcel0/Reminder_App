@@ -16,6 +16,9 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.resources.Compatibility.Api18Impl.setAutoCancel
+import androidx.core.app.NotificationCompat
+import com.example.myapplication.R
 import com.example.myapplication.databinding.ActivityWakeupBinding
 import com.example.myapplication.models.AppDatabase
 import com.example.myapplication.services.AlarmReceiver
@@ -160,7 +163,16 @@ class WakeupActivity : AppCompatActivity(){
         for (notification in notificationManager.activeNotifications) {
             Log.e("Notification ID: ${notification.id}", "Notification TAG: ${notification.tag}")
             if (notification.id == notificationId) {
-                notificationManager.cancel(notification.id)
+                val builder = NotificationCompat.Builder(this, Constants.DEFAULT_CHANNEL_ID).apply {
+                    setSmallIcon(R.mipmap.reminder_icon)
+                    setContentTitle(title)
+                    setContentText("Snooze: ${snoozeCounter?.minus(1)}")
+                    priority = NotificationCompat.PRIORITY_HIGH
+                    setCategory(NotificationCompat.CATEGORY_ALARM)
+                    setAutoCancel(true)
+                }
+
+                notificationManager.notify(notification.id, builder.build())
             }
         }
 

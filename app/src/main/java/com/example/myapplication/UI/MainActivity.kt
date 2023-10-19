@@ -11,6 +11,7 @@ import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.IBinder
+import android.os.VibratorManager
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
@@ -228,13 +229,33 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
     //delete reminder
     private fun deleteReminder(reminderId: Long) {
         val reminderDao = getDatabase(this).reminderDao()
-        reminderDao.deleteReminder(reminderDao.getReminder(reminderId.toInt())).also { loadData() }
+        reminderDao.deleteReminder(reminderDao.getReminder(reminderId.toInt())).also {
+            loadData()
+//            cancelPendingIntent()
+        }
     }
+//    private fun cancelPendingIntent() {
+//        val notificationId = intent.getIntExtra(Constants.NOTIFICATION_ID, 0)
+//        val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+//        val vibrator = vibratorManager.defaultVibrator
+//
+//        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+//        val intent = Intent(this, AlarmReceiver::class.java)
+//        val pendingIntent = PendingIntent.getBroadcast(this, notificationId, intent, PendingIntent.FLAG_IMMUTABLE)
+//
+//        alarmManager.cancel(pendingIntent)
+//        vibrator.cancel()
+//        finish()
+//    }
 
     //delete all reminders
     private fun deleteAllReminders() {
         val reminderDao = getDatabase(this).reminderDao()
-        reminderDao.deleteAllReminders().also { loadData() }
+        reminderDao.deleteAllReminders().also {
+            loadData()
+            //aldo cancel pending intent when all reminders are deleted
+            cancelAllAlarm()
+        }
     }
 
     private fun cancelAlarm(reminderId: Long) {

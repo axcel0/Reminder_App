@@ -1,5 +1,9 @@
 package com.example.myapplication.UI
 
+import android.app.AlarmManager
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
 import android.media.MediaPlayer
 import android.net.Uri
@@ -18,7 +22,11 @@ import com.example.myapplication.models.entities.ReminderEntity
 import java.time.LocalDateTime
 import java.time.ZoneId
 import android.media.RingtoneManager
+import android.os.VibratorManager
+import androidx.core.app.NotificationCompat
 import androidx.core.widget.addTextChangedListener
+import com.example.myapplication.R
+import com.example.myapplication.services.AlarmReceiver
 import com.example.myapplication.utils.Constants
 
 class CreateActivity : AppCompatActivity() {
@@ -27,6 +35,12 @@ class CreateActivity : AppCompatActivity() {
     private var audioFiles = ArrayList<AudioFiles>()
     private var currentMode : Mode = Mode.CREATE
     private var oldTitleName : String? = null
+    private var ringtonePath: String? = null
+    private var notificationId: Int? = null
+    private var title: String? = null
+    private var message: String? = null
+    private var time: Long? = null
+    private var snoozeCounter: Int? = null
 
     private lateinit var binding: ActivityCreateBinding
     private lateinit var db: AppDatabase
@@ -123,6 +137,16 @@ class CreateActivity : AppCompatActivity() {
         return db.reminderDao().getReminders().any { reminder -> reminder.reminderName == title }
     }
 
+    private fun getBundleExtras() {
+        val bundle : Bundle? = intent.extras
+        ringtonePath = bundle?.getString(Constants.RINGTONE_PATH_EXTRA)
+        notificationId = bundle?.getInt(Constants.NOTIFICATION_ID)
+        title = bundle?.getString(Constants.TITLE_EXTRA)
+        message = bundle?.getString(Constants.MESSAGE_EXTRA)
+        time = bundle?.getLong(Constants.TIME_EXTRA)
+        snoozeCounter = bundle?.getInt(Constants.SNOOZE_COUNTER)
+    }
+
     //load audio files from local storage
     private fun getAudioFiles(): ArrayList<AudioFiles> {
         val audioList = ArrayList<AudioFiles>()
@@ -213,6 +237,7 @@ class CreateActivity : AppCompatActivity() {
     }
 
     private fun onCreateSaveButtonClicked() {
+        getBundleExtras()
         val title = binding.title.text.toString()
         val date = LocalDateTime.of(
             binding.datePicker.year,
@@ -241,6 +266,22 @@ class CreateActivity : AppCompatActivity() {
         intent.putExtra(Constants.REMINDER_TIME_EXTRA, epochToMillis(reminderEntity.dateAdded))
         intent.putExtra(Constants.REMINDER_RINGTONE_PATH_EXTRA, reminderEntity.ringtonePath)
 
+        //show notification whenever reminder is created
+
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        for (notification in notificationManager.activeNotifications) {
+            if (notification.id == notificationId) {
+                val builder = NotificationCompat.Builder(this, Constants.DEFAULT_CHANNEL_ID).apply {
+                    setSmallIcon(R.mipmap.reminder_icon)
+                    setContentTitle(title)
+                    setContentText("Reminder")
+                    priority = NotificationCompat.PRIORITY_HIGH
+                    setCategory(NotificationCompat.CATEGORY_REMINDER)
+                }
+                //notify the notification
+                notificationManager.notify(notification.id, builder.build())
+            }
+        }
         // Show a toast message
         Toast.makeText(this, "Reminder added", Toast.LENGTH_SHORT).show()
 
