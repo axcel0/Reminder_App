@@ -12,15 +12,16 @@ import java.util.Date
 
 @Dao
 interface ReminderDao {
+    //get all reminders
     @Query("SELECT * FROM reminders")
     fun getReminders(): List<ReminderEntity>
-
+    //get reminder by id
     @Query("SELECT * FROM reminders WHERE id = :id")
     fun getReminder(id: Int): ReminderEntity
-
+    //insert reminder
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun insertReminder(reminder: ReminderEntity): Long
-
+    //delete reminder
     @Delete
     fun deleteReminder(reminder: ReminderEntity)
 

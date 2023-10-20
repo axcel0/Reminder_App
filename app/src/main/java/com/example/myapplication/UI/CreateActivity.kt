@@ -237,7 +237,13 @@ class CreateActivity : AppCompatActivity() {
     }
 
     private fun onCreateSaveButtonClicked() {
-        getBundleExtras()
+        val bundle : Bundle? = intent.extras
+        ringtonePath = bundle?.getString(Constants.RINGTONE_PATH_EXTRA)
+        notificationId = bundle?.getInt(Constants.NOTIFICATION_ID)
+        title = bundle?.getString(Constants.TITLE_EXTRA)
+        message = bundle?.getString(Constants.MESSAGE_EXTRA)
+        time = bundle?.getLong(Constants.TIME_EXTRA)
+        snoozeCounter = bundle?.getInt(Constants.SNOOZE_COUNTER)
         val title = binding.title.text.toString()
         val date = LocalDateTime.of(
             binding.datePicker.year,
@@ -266,25 +272,21 @@ class CreateActivity : AppCompatActivity() {
         intent.putExtra(Constants.REMINDER_TIME_EXTRA, epochToMillis(reminderEntity.dateAdded))
         intent.putExtra(Constants.REMINDER_RINGTONE_PATH_EXTRA, reminderEntity.ringtonePath)
 
-        //show notification whenever reminder is created
-
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        for (notification in notificationManager.activeNotifications) {
-            if (notification.id == notificationId) {
-                val builder = NotificationCompat.Builder(this, Constants.DEFAULT_CHANNEL_ID).apply {
-                    setSmallIcon(R.mipmap.reminder_icon)
-                    setContentTitle(title)
-                    setContentText("Reminder")
-                    priority = NotificationCompat.PRIORITY_HIGH
-                    setCategory(NotificationCompat.CATEGORY_REMINDER)
-                }
-                //notify the notification
-                notificationManager.notify(notification.id, builder.build())
-            }
-        }
         // Show a toast message
         Toast.makeText(this, "Reminder added", Toast.LENGTH_SHORT).show()
-
+        //create new notification to notify user that reminder has been added
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val builder = NotificationCompat.Builder(this, Constants.DEFAULT_CHANNEL_ID).apply {
+            setSmallIcon(R.mipmap.reminder_icon)
+            setContentTitle("Reminder")
+            setContentText("Reminder $title will be triggered at ${date.hour}:${date.minute}")
+            setContentIntent(PendingIntent.getActivity(this@CreateActivity, 0, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT))
+            priority = NotificationCompat.PRIORITY_HIGH
+            setCategory(NotificationCompat.CATEGORY_ALARM)
+            setAutoCancel(true)
+        }
+        //set notification manager id same as notificationId from bundle
+        notificationManager.notify(0, builder.build())
         // Start the main activity
         startActivity(intent).also { finish() }
     }

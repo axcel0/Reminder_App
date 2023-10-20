@@ -231,22 +231,8 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
         val reminderDao = getDatabase(this).reminderDao()
         reminderDao.deleteReminder(reminderDao.getReminder(reminderId.toInt())).also {
             loadData()
-//            cancelPendingIntent()
         }
     }
-//    private fun cancelPendingIntent() {
-//        val notificationId = intent.getIntExtra(Constants.NOTIFICATION_ID, 0)
-//        val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-//        val vibrator = vibratorManager.defaultVibrator
-//
-//        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-//        val intent = Intent(this, AlarmReceiver::class.java)
-//        val pendingIntent = PendingIntent.getBroadcast(this, notificationId, intent, PendingIntent.FLAG_IMMUTABLE)
-//
-//        alarmManager.cancel(pendingIntent)
-//        vibrator.cancel()
-//        finish()
-//    }
 
     //delete all reminders
     private fun deleteAllReminders() {
