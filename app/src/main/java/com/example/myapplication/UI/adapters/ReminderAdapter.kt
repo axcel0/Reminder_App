@@ -36,7 +36,6 @@ class ReminderAdapter(private val dataSet: List<ReminderEntity>) : RecyclerView.
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.reminderName.text = dataSet[position].reminderName
         val date = LocalDateTime.ofEpochSecond(dataSet[position].dateAdded, 0, ZoneId.systemDefault().rules.getOffset(Date().toInstant()))
-        //format date to "Month Day, Year"
         val dateStr = date.format(DateTimeFormatter.ofPattern("EEEE, MMMM d \nyyyy"))
         val timeStr = date.format(DateTimeFormatter.ofPattern("hh:mm a"))
         holder.dateAdded.text = dateStr
