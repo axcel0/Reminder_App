@@ -312,7 +312,7 @@ class CreateActivity : AppCompatActivity() {
         if (id!= null && name != null) {
             val newTitle = title
             val newDateTime = LocalDateTime.of(date.year, date.month+1, date.dayOfMonth, date.hour, date.minute, 0)
-            val newDateTimeLong = newDateTime.atZone(java.time.ZoneId.systemDefault()).toEpochSecond()
+            val newDateTimeLong = newDateTime.atZone(ZoneId.systemDefault()).toEpochSecond()
             val newRingtonePath = EditActivity.audioFiles[binding.spinner.selectedItemPosition].path
 
             val calendar = Calendar.getInstance()
