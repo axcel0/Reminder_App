@@ -12,28 +12,24 @@ import java.util.Date
 
 @Dao
 interface ReminderDao {
-    //get all reminders
     @Query("SELECT * FROM reminders")
     fun getReminders(): List<ReminderEntity>
-    //get reminder by id
+
     @Query("SELECT * FROM reminders WHERE id = :id")
     fun getReminder(id: Int): ReminderEntity
-    //insert reminder
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun insertReminder(reminder: ReminderEntity): Long
-    //delete reminder
+
     @Delete
     fun deleteReminder(reminder: ReminderEntity)
 
-    //delete all items in the table
     @Query("DELETE FROM reminders")
     fun deleteAllReminders()
 
-    //update reminder by id
     @Update
     fun updateReminder(reminder: ReminderEntity)
 
-    //search reminder by title
     @Query("SELECT * FROM reminders WHERE reminderName LIKE '%' || :reminderName || '%' ")
     fun searchReminder(reminderName: String): List<ReminderEntity>
 }

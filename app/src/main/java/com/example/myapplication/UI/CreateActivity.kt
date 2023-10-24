@@ -270,19 +270,21 @@ class CreateActivity : AppCompatActivity() {
         )
 
         // Insert the reminder into the database
-        db.reminderDao().insertReminder(reminderEntity)
+        val reminderId = db.reminderDao().insertReminder(reminderEntity)
 
         val intent = Intent(this@CreateActivity, MainActivity::class.java)
-        intent.putExtra(Constants.REMINDER_ID_EXTRA, reminderEntity.id)
+        intent.putExtra(Constants.REMINDER_ID_EXTRA, reminderId)
         intent.putExtra(Constants.REMINDER_NAME_EXTRA, reminderEntity.reminderName)
         intent.putExtra(Constants.REMINDER_DATE_EXTRA, reminderEntity.dateAdded)
         intent.putExtra(Constants.REMINDER_TIME_EXTRA, epochToMillis(reminderEntity.dateAdded))
         intent.putExtra(Constants.REMINDER_RINGTONE_PATH_EXTRA, reminderEntity.ringtonePath)
+
         //log id
-        Log.e(" OnCreate save button intent ID", reminderEntity.id.toString())
+        Log.e(" OnCreate save button intent ID", reminderId.toString())
 
         // Show a toast message
         Toast.makeText(this, "Reminder added", Toast.LENGTH_SHORT).show()
+
         //create new notification to notify user that reminder has been added
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val builder = NotificationCompat.Builder(this, Constants.DEFAULT_CHANNEL_ID).apply {
@@ -294,8 +296,10 @@ class CreateActivity : AppCompatActivity() {
             setCategory(NotificationCompat.CATEGORY_ALARM)
             setAutoCancel(true)
         }
+
         //set notification manager id same as notificationId from bundle
         notificationManager.notify(0, builder.build())
+
         // Start the main activity
         startActivity(intent).also { finish() }
     }
@@ -323,11 +327,11 @@ class CreateActivity : AppCompatActivity() {
             val time = calendar.timeInMillis
 
             val intent = Intent(this, MainActivity::class.java)
-            intent.putExtra("id", id)
-            intent.putExtra("reminderName", newTitle)
-            intent.putExtra("dateAdded", newDateTimeLong)
-            intent.putExtra("time", time)
-            intent.putExtra("ringtonePath", newRingtonePath)
+            intent.putExtra(Constants.REMINDER_ID_EXTRA, id)
+            intent.putExtra(Constants.REMINDER_NAME_EXTRA, newTitle)
+            intent.putExtra(Constants.REMINDER_DATE_EXTRA, newDateTimeLong)
+            intent.putExtra(Constants.TIME_EXTRA, time)
+            intent.putExtra(Constants.RINGTONE_PATH_EXTRA, newRingtonePath)
 
             MainActivity().updateReminder(id, newTitle, newDateTimeLong, newRingtonePath)
             MainActivity().loadData().run {
