@@ -99,6 +99,8 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
 
             Log.d("MainActivity", "onCreate: $title $dateAdded $time")
             scheduleNotification(ReminderEntity(id = id, reminderName = title!!, dateAdded = dateAdded, ringtonePath = ringtonePath!!), time)
+            //log id
+            Log.d("MainActivity id", "onCreate: $id")
         }
     }
 

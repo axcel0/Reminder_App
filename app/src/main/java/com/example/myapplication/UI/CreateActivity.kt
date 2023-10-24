@@ -32,6 +32,7 @@ import com.example.myapplication.services.AlarmReceiver
 import com.example.myapplication.utils.Constants
 import com.google.android.material.textfield.TextInputEditText
 import java.util.Calendar
+import java.time.format.DateTimeFormatter
 
 class CreateActivity : AppCompatActivity() {
     private var mediaPlayer: MediaPlayer? = null
@@ -94,7 +95,9 @@ class CreateActivity : AppCompatActivity() {
         when (currentMode) {
             Mode.CREATE -> {
                 binding.saveButton.isEnabled = false
-                binding.saveButton.setOnClickListener { onCreateSaveButtonClicked() }
+                binding.saveButton.setOnClickListener {
+                    onCreateSaveButtonClicked()
+                }
             }
 
             Mode.EDIT -> {
@@ -256,7 +259,7 @@ class CreateActivity : AppCompatActivity() {
             binding.timePicker.hour,
             binding.timePicker.minute,
             0)
-
+        val time = date.format(DateTimeFormatter.ofPattern("hh:mm a"))
         val zoneId = ZoneId.systemDefault()
         val selectedRingtonePath = audioFiles[binding.spinner.selectedItemPosition].path
 
@@ -275,6 +278,8 @@ class CreateActivity : AppCompatActivity() {
         intent.putExtra(Constants.REMINDER_DATE_EXTRA, reminderEntity.dateAdded)
         intent.putExtra(Constants.REMINDER_TIME_EXTRA, epochToMillis(reminderEntity.dateAdded))
         intent.putExtra(Constants.REMINDER_RINGTONE_PATH_EXTRA, reminderEntity.ringtonePath)
+        //log id
+        Log.e(" OnCreate save button intent ID", reminderEntity.id.toString())
 
         // Show a toast message
         Toast.makeText(this, "Reminder added", Toast.LENGTH_SHORT).show()
@@ -283,7 +288,7 @@ class CreateActivity : AppCompatActivity() {
         val builder = NotificationCompat.Builder(this, Constants.DEFAULT_CHANNEL_ID).apply {
             setSmallIcon(R.mipmap.reminder_icon)
             setContentTitle("Reminder")
-            setContentText("Reminder $title will be triggered at ${date.hour}:${date.minute}")
+            setContentText("Reminder $title will be triggered at $time")
             setContentIntent(PendingIntent.getActivity(this@CreateActivity, 0, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT))
             priority = NotificationCompat.PRIORITY_HIGH
             setCategory(NotificationCompat.CATEGORY_ALARM)
@@ -297,8 +302,6 @@ class CreateActivity : AppCompatActivity() {
 
     private fun onEditSaveButtonClicked(id: Long) {
         val bundle : Bundle? = intent.extras
-        //bundle data
-        val id = bundle?.getLong("id")
         val name = bundle?.getString("name")
        //binding title, date, time
         val title = binding.title.text.toString()
@@ -309,7 +312,7 @@ class CreateActivity : AppCompatActivity() {
             binding.timePicker.hour,
             binding.timePicker.minute,
             0)
-        if (id!= null && name != null) {
+        if (name != null) {
             val newTitle = title
             val newDateTime = LocalDateTime.of(date.year, date.month+1, date.dayOfMonth, date.hour, date.minute, 0)
             val newDateTimeLong = newDateTime.atZone(ZoneId.systemDefault()).toEpochSecond()
