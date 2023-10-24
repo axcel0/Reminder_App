@@ -305,9 +305,6 @@ class CreateActivity : AppCompatActivity() {
     }
 
     private fun onEditSaveButtonClicked(id: Long) {
-        val bundle : Bundle? = intent.extras
-        val name = bundle?.getString("name")
-       //binding title, date, time
         val title = binding.title.text.toString()
         val date = LocalDateTime.of(
             binding.datePicker.year,
@@ -316,29 +313,48 @@ class CreateActivity : AppCompatActivity() {
             binding.timePicker.hour,
             binding.timePicker.minute,
             0)
-        if (name != null) {
-            val newTitle = title
-            val newDateTime = LocalDateTime.of(date.year, date.month+1, date.dayOfMonth, date.hour, date.minute, 0)
-            val newDateTimeLong = newDateTime.atZone(ZoneId.systemDefault()).toEpochSecond()
-            val newRingtonePath = EditActivity.audioFiles[binding.spinner.selectedItemPosition].path
 
-            val calendar = Calendar.getInstance()
-            calendar.set(newDateTime.year, newDateTime.monthValue-1, newDateTime.dayOfMonth, newDateTime.hour, newDateTime.minute, 0)
-            val time = calendar.timeInMillis
+        val zoneId = ZoneId.systemDefault()
+        val audioFiles = getAudioFiles()
+        val selectedRingtonePath = audioFiles[binding.spinner.selectedItemPosition].path
 
-            val intent = Intent(this, MainActivity::class.java)
-            intent.putExtra(Constants.REMINDER_ID_EXTRA, id)
-            intent.putExtra(Constants.REMINDER_NAME_EXTRA, newTitle)
-            intent.putExtra(Constants.REMINDER_DATE_EXTRA, newDateTimeLong)
-            intent.putExtra(Constants.TIME_EXTRA, time)
-            intent.putExtra(Constants.RINGTONE_PATH_EXTRA, newRingtonePath)
+        val reminderEntity = ReminderEntity(
+            id = id,
+            reminderName = title,
+            dateAdded = date.atZone(zoneId).toEpochSecond(),
+            ringtonePath = selectedRingtonePath
+        )
 
-            MainActivity().updateReminder(id, newTitle, newDateTimeLong, newRingtonePath)
-            MainActivity().loadData().run {
-                //refresh the list
-                startActivity(intent).also { finish() }
-            }
+        // Update the reminder into the database
+        db.reminderDao().updateReminder(reminderEntity)
+
+        val intent = Intent(this@CreateActivity, MainActivity::class.java)
+        intent.putExtra(Constants.REMINDER_ID_EXTRA, reminderEntity.id)
+        intent.putExtra(Constants.REMINDER_NAME_EXTRA, reminderEntity.reminderName)
+        intent.putExtra(Constants.REMINDER_DATE_EXTRA, reminderEntity.dateAdded)
+        intent.putExtra(Constants.REMINDER_TIME_EXTRA, epochToMillis(reminderEntity.dateAdded))
+        intent.putExtra(Constants.REMINDER_RINGTONE_PATH_EXTRA, reminderEntity.ringtonePath)
+
+        //create new notification to notify user that reminder has been added
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val builder = NotificationCompat.Builder(this, Constants.DEFAULT_CHANNEL_ID).apply {
+            setSmallIcon(R.mipmap.reminder_icon)
+            setContentTitle("Reminder")
+            //TODO change time to new time
+            setContentText("Reminder $title will be triggered at $time")
+            setContentIntent(PendingIntent.getActivity(this@CreateActivity, 0, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT))
+            priority = NotificationCompat.PRIORITY_HIGH
+            setCategory(NotificationCompat.CATEGORY_ALARM)
+            setAutoCancel(true)
         }
+
+        //set notification manager id same as notificationId from bundle
+        notificationManager.notify(0, builder.build())
+        // Show a toast message
+        Toast.makeText(this, "Reminder updated", Toast.LENGTH_SHORT).show()
+
+        // Start the main activity
+        startActivity(intent).also { finish() }
     }
 
     private fun onCancelButtonClicked() {
