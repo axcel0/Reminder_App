@@ -313,7 +313,7 @@ class CreateActivity : AppCompatActivity() {
             binding.timePicker.hour,
             binding.timePicker.minute,
             0)
-
+        val time = date.format(DateTimeFormatter.ofPattern("hh:mm a"))
         val zoneId = ZoneId.systemDefault()
         val audioFiles = getAudioFiles()
         val selectedRingtonePath = audioFiles[binding.spinner.selectedItemPosition].path
