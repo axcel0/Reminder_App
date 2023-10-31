@@ -133,27 +133,21 @@ class WakeupActivity : AppCompatActivity(){
     }
 
     private fun setSnoozeCounterVisibility() {
-        if (snoozeCounter == 0) {
-            binding.snoozeButton.visibility = View.GONE
-        } else {
-            binding.snoozeButton.visibility = View.VISIBLE
-        }
+        binding.snoozeButton.visibility = if (snoozeCounter == 0) View.GONE else View.VISIBLE
     }
+
 
     private fun onDismissButtonClicked() {
         mediaPlayer?.stop()
         cancelPendingIntent()
 
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        for (notification in notificationManager.activeNotifications) {
-            Log.e("Notification ID: ${notification.id}", "Notification TAG: ${notification.tag}")
-            if (notification.id == notificationId) {
-                notificationManager.cancel(notification.id)
-            }
+        notificationManager.activeNotifications.find { it.id == notificationId }?.let {
+            notificationManager.cancel(it.id)
         }
-
         finish()
     }
+
 
     private fun onSnoozeButtonClicked() {
         mediaPlayer?.stop()
@@ -171,7 +165,6 @@ class WakeupActivity : AppCompatActivity(){
                     setCategory(NotificationCompat.CATEGORY_ALARM)
                     setAutoCancel(true)
                 }
-
                 notificationManager.notify(notification.id, builder.build())
             }
         }

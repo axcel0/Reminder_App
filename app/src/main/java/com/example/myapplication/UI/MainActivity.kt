@@ -11,7 +11,6 @@ import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.IBinder
-import android.os.VibratorManager
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
@@ -187,22 +186,22 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
                     }
                 }
                 else {
-                   if(reminderList.isEmpty()) {
-                       alertDialog.setMessage("There is no reminder to delete")
-                       alertDialog.setPositiveButton("Ok") { _, _ ->
-                       }
-                   }else {
-                       //alert dialog to delete all reminders
-                       alertDialog.setTitle("Delete All Reminders")
-                       alertDialog.setMessage("Are you sure you want to delete all reminders?")
-                       alertDialog.setPositiveButton("Yes") { _, _ ->
-                           deleteAllReminders()
+                    if(reminderList.isEmpty()) {
+                        alertDialog.setMessage("There is no reminder to delete")
+                        alertDialog.setPositiveButton("Ok") { _, _ ->
+                        }
+                    }else {
+                        //alert dialog to delete all reminders
+                        alertDialog.setTitle("Delete All Reminders")
+                        alertDialog.setMessage("Are you sure you want to delete all reminders?")
+                        alertDialog.setPositiveButton("Yes") { _, _ ->
+                            deleteAllReminders()
                             cancelAllAlarm()
-                       }
-                       alertDialog.setNegativeButton("No") { _, _ ->
-                           deleteList = ArrayList()
-                       }
-                   }
+                        }
+                        alertDialog.setNegativeButton("No") { _, _ ->
+                            deleteList = ArrayList()
+                        }
+                    }
                 }
                 alertDialog.show()
                 true

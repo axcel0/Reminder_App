@@ -43,7 +43,7 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.10.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    implementation 'com.google.firebase:firebase-messaging-ktx:23.3.0'
+    implementation 'com.google.firebase:firebase-messaging-ktx:23.3.1'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2'
     implementation 'androidx.gridlayout:gridlayout:1.0.0'
 
@@ -75,9 +75,9 @@ dependencies {
     implementation 'androidx.room:room-paging:2.6.0'
 
     //add firebase messaging
-    implementation 'com.google.firebase:firebase-messaging:23.3.0'
+    implementation 'com.google.firebase:firebase-messaging:23.3.1'
     //add firebase analytics
-    implementation 'com.google.firebase:firebase-analytics:21.4.0'
+    implementation 'com.google.firebase:firebase-analytics:21.5.0'
     implementation(platform('com.google.firebase:firebase-bom:32.2.3'))
     //add firebase auth
     implementation 'com.google.firebase:firebase-auth:22.2.0'

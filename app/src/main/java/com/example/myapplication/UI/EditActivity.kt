@@ -126,16 +126,18 @@ class EditActivity : AppCompatActivity() {
                 val newDateTimeLong = newDateTime.atZone(java.time.ZoneId.systemDefault()).toEpochSecond()
                 val newRingtonePath = audioFiles[binding.spinner.selectedItemPosition].path
 
-                val calendar = Calendar.getInstance()
-                calendar.set(newDateTime.year, newDateTime.monthValue-1, newDateTime.dayOfMonth, newDateTime.hour, newDateTime.minute, 0)
-                val time = calendar.timeInMillis
+                val calendar = Calendar.getInstance().apply {
+                    set(newDateTime.year, newDateTime.monthValue - 1, newDateTime.dayOfMonth, newDateTime.hour, newDateTime.minute, 0)
+                }
+                val newTime = calendar.timeInMillis
 
-                val intent = Intent(this, MainActivity::class.java)
-                intent.putExtra("id", id)
-                intent.putExtra("reminderName", newTitle)
-                intent.putExtra("dateAdded", newDateTimeLong)
-                intent.putExtra("time", time)
-                intent.putExtra("ringtonePath", newRingtonePath)
+                val intent = Intent(this, MainActivity::class.java).apply {
+                    putExtra("id", id)
+                    putExtra("reminderName", newTitle)
+                    putExtra("dateAdded", newDateTimeLong)
+                    putExtra("time", newTime)
+                    putExtra("ringtonePath", newRingtonePath)
+                }
 
                 MainActivity().updateReminder(id, newTitle, newDateTimeLong, newRingtonePath)
                 MainActivity().loadData().run {

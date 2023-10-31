@@ -106,18 +106,24 @@ class CreateActivity : AppCompatActivity() {
                 val name = bundle.getString(Constants.REMINDER_NAME_EXTRA)
                 val dateTime = bundle.getLong(Constants.REMINDER_DATE_EXTRA)
                 val ringtonePath = bundle.getString(Constants.REMINDER_RINGTONE_PATH_EXTRA)
+
                 oldTitleName = name
                 currentMode = Mode.EDIT
 
                 binding.title.setText(name)
 
-                binding.datePicker.minDate = System.currentTimeMillis().also { binding.timePicker.setIs24HourView(true) }
+                binding.datePicker.minDate = System.currentTimeMillis().also {
+                    binding.timePicker.setIs24HourView(true)
+                }
+
+                val currentTimeMillis = System.currentTimeMillis() / 1000
                 binding.timePicker.hour = LocalDateTime.ofEpochSecond(
-                    if (dateTime < System.currentTimeMillis()) System.currentTimeMillis() / 1000 else dateTime, 0,
+                    if (dateTime < currentTimeMillis) currentTimeMillis else dateTime, 0,
                     ZoneId.systemDefault().rules.getOffset(java.time.Instant.now())
                 ).hour
+
                 binding.timePicker.minute = LocalDateTime.ofEpochSecond(
-                    if (dateTime < System.currentTimeMillis()) System.currentTimeMillis() / 1000 else dateTime, 0,
+                    if (dateTime < currentTimeMillis) currentTimeMillis else dateTime, 0,
                     ZoneId.systemDefault().rules.getOffset(java.time.Instant.now())
                 ).minute
 
@@ -127,7 +133,7 @@ class CreateActivity : AppCompatActivity() {
 
                 binding.saveButton.setOnClickListener { onEditSaveButtonClicked(id) }
             }
-        }
+            }
     }
 
     private fun epochToMillis(epochTime: Long): Long {
@@ -258,11 +264,12 @@ class CreateActivity : AppCompatActivity() {
             binding.datePicker.dayOfMonth,
             binding.timePicker.hour,
             binding.timePicker.minute,
-            0)
+            0
+        )
         val time = date.format(DateTimeFormatter.ofPattern("hh:mm a"))
-        val zoneId = ZoneId.systemDefault()
         val selectedRingtonePath = audioFiles[binding.spinner.selectedItemPosition].path
 
+        val zoneId = ZoneId.systemDefault()
         val reminderEntity = ReminderEntity(
             reminderName = title,
             dateAdded = date.atZone(zoneId).toEpochSecond(),
@@ -272,20 +279,21 @@ class CreateActivity : AppCompatActivity() {
         // Insert the reminder into the database
         val reminderId = db.reminderDao().insertReminder(reminderEntity)
 
-        val intent = Intent(this@CreateActivity, MainActivity::class.java)
-        intent.putExtra(Constants.REMINDER_ID_EXTRA, reminderId)
-        intent.putExtra(Constants.REMINDER_NAME_EXTRA, reminderEntity.reminderName)
-        intent.putExtra(Constants.REMINDER_DATE_EXTRA, reminderEntity.dateAdded)
-        intent.putExtra(Constants.REMINDER_TIME_EXTRA, epochToMillis(reminderEntity.dateAdded))
-        intent.putExtra(Constants.REMINDER_RINGTONE_PATH_EXTRA, reminderEntity.ringtonePath)
+        val intent = Intent(this@CreateActivity, MainActivity::class.java).apply {
+            putExtra(Constants.REMINDER_ID_EXTRA, reminderId)
+            putExtra(Constants.REMINDER_NAME_EXTRA, reminderEntity.reminderName)
+            putExtra(Constants.REMINDER_DATE_EXTRA, reminderEntity.dateAdded)
+            putExtra(Constants.REMINDER_TIME_EXTRA, epochToMillis(reminderEntity.dateAdded))
+            putExtra(Constants.REMINDER_RINGTONE_PATH_EXTRA, reminderEntity.ringtonePath)
+        }
 
         //log id
-        Log.e(" OnCreate save button intent ID", reminderId.toString())
+        Log.e("OnCreate save button intent ID", reminderId.toString())
 
         // Show a toast message
         Toast.makeText(this, "Reminder added", Toast.LENGTH_SHORT).show()
 
-        //create new notification to notify user that reminder has been added
+        // Create a new notification to notify the user that the reminder has been added
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val builder = NotificationCompat.Builder(this, Constants.DEFAULT_CHANNEL_ID).apply {
             setSmallIcon(R.mipmap.reminder_icon)
@@ -297,11 +305,12 @@ class CreateActivity : AppCompatActivity() {
             setAutoCancel(true)
         }
 
-        //set notification manager id same as notificationId from bundle
-        notificationManager.notify(0, builder.build())
+        // Set the notification manager ID to the same value as the notification ID from the bundle
+        notificationManager.notify(notificationId ?: 0, builder.build())
 
         // Start the main activity
         startActivity(intent).also { finish() }
+
     }
 
     private fun onEditSaveButtonClicked(id: Long) {

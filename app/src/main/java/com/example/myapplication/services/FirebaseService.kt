@@ -1,5 +1,7 @@
 package com.example.myapplication.services
 
+import android.app.AlarmManager
+import android.app.Notification
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
@@ -80,10 +82,18 @@ class FirebaseService: FirebaseMessagingService() {
 //    private fun showNotification(title: String, message: String) {
 //        NotificationUtil(applicationContext).showNotification(title, message)
 //    }
+//make fun to schedule alarm using firebase cloud messaging
+//private fun scheduleAlarm() {
+//    val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
+//    val intent = Intent(this, MyReminderReceiver::class.java)
+//    val pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+//    val timeAtButtonClick = System.currentTimeMillis()
+//    val tenSecondsInMillis = 1000 * 10
+//    alarmManager.set(AlarmManager.RTC_WAKEUP, timeAtButtonClick + tenSecondsInMillis, pendingIntent)
+//}
 
     private fun showNotification(title: String?, body: String?) {
         Log.d("FirebaseService", "showNotification: $title, $body")
-        val channelId = "com.example.myapplication"
         val intent = Intent(this, MainActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         Log.d("FirebaseService", "showNotification.intent: $intent")
@@ -100,18 +110,18 @@ class FirebaseService: FirebaseMessagingService() {
         Log.d("FirebaseService", "showNotification.defaultSoundUri: $defaultSoundUri")
 
 
-        val notificationBuilder = NotificationCompat.Builder(this)
+        val notification = Notification.Builder(this, "channelId")
             .setSmallIcon(R.mipmap.ic_launcher)
             .setContentTitle(title)
             .setContentText(body)
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
-        Log.d("FirebaseService", "showNotification.notificationBuilder: $notificationBuilder")
+            .build()
+        Log.d("FirebaseService", "showNotification.notificationBuilder: $notification")
 
-
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.notify(0, notification)
         Log.d("FirebaseService", "showNotification.notificationManager: $notificationManager")
-        notificationManager.notify(0, notificationBuilder.build())
 
 
     }
