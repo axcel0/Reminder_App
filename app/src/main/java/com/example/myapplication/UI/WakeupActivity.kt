@@ -15,6 +15,8 @@ import android.os.*
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.resources.Compatibility.Api18Impl.setAutoCancel
 import androidx.core.app.NotificationCompat
@@ -38,7 +40,10 @@ class WakeupActivity : AppCompatActivity(){
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        //set onbackpressed dispatcher
+        onBackPressedDispatcher.addCallback(this) {
+            onSnoozeButtonClicked()
+        }
         binding = ActivityWakeupBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)

@@ -22,9 +22,8 @@ import com.example.myapplication.models.entities.ReminderEntity
 import java.time.LocalDateTime
 import java.time.ZoneId
 import android.media.RingtoneManager
-import android.os.VibratorManager
-import android.widget.DatePicker
-import android.widget.TimePicker
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.addCallback
 import androidx.core.app.NotificationCompat
 import androidx.core.widget.addTextChangedListener
 import com.example.myapplication.R
@@ -56,7 +55,12 @@ class CreateActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                val intent = Intent(this@CreateActivity, MainActivity::class.java)
+                startActivity(intent).also { finish() }
+            }
+        })
         binding = ActivityCreateBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
