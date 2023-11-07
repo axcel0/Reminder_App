@@ -32,6 +32,10 @@ import com.example.myapplication.utils.Constants
 import com.google.android.material.textfield.TextInputEditText
 import java.util.Calendar
 import java.time.format.DateTimeFormatter
+import androidx.core.view.MotionEventCompat
+import android.view.MotionEvent
+import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.startActivity
 
 class CreateActivity : AppCompatActivity() {
     private var mediaPlayer: MediaPlayer? = null
@@ -52,18 +56,59 @@ class CreateActivity : AppCompatActivity() {
     private enum class Mode {
         CREATE, EDIT
     }
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        return when (event.action) {
+            MotionEvent.ACTION_DOWN -> {
+                Toast.makeText(this, "DOWN", Toast.LENGTH_SHORT).show()
+                true
+            }
+            MotionEvent.ACTION_MOVE -> {
+                Toast.makeText(this, "MOVE", Toast.LENGTH_SHORT).show()
+                true
+            }
+            MotionEvent.ACTION_UP -> {
+                Toast.makeText(this, "UP", Toast.LENGTH_SHORT).show()
+                true
+            }
+            MotionEvent.ACTION_CANCEL -> {
+                Toast.makeText(this, "CANCEL", Toast.LENGTH_SHORT).show()
+                true
+            }
+            MotionEvent.ACTION_OUTSIDE -> {
+                Toast.makeText(this, "OUTSIDE", Toast.LENGTH_SHORT).show()
+                true
+            }
+            MotionEventCompat.AXIS_RELATIVE_X -> {
+                // toast("X")
+                Toast.makeText(this, "X", Toast.LENGTH_SHORT).show()
+                true
+            }
+            MotionEventCompat.AXIS_RELATIVE_Y -> {
+                // toast("Y")
+                Toast.makeText(this, "Y", Toast.LENGTH_SHORT).show()
+                //call handle on back pressed
+                backPressed()
+                true
+            }
+            else -> super.onTouchEvent(event)
+        }
+    }
+    private fun backPressed() {
+        onBackPressedDispatcher.addCallback(this) {
+            val intent = Intent(this@CreateActivity, MainActivity::class.java)
+            startActivity(intent).also { finish() }
+        }
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                val intent = Intent(this@CreateActivity, MainActivity::class.java)
-                startActivity(intent).also { finish() }
-            }
-        })
+        backPressed()
         binding = ActivityCreateBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
+        onTouchEvent(MotionEvent.obtain(0, 0, MotionEvent.ACTION_UP, 0f, 0f, 0))
+
 
         // Get the database
         db = MainActivity.getDatabase(this)
