@@ -66,10 +66,6 @@ class ReminderAdapter(private val dataSet: List<ReminderEntity>, private val ite
         notifyItemChanged(position)
     }
 
-    fun getSelectedItemCount(): Int {
-        return selectedItems.size
-    }
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.card_view_title, parent, false)
         return ViewHolder(view)

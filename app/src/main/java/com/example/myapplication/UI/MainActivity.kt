@@ -35,20 +35,17 @@ import com.example.myapplication.services.AlarmReceiver
 import com.example.myapplication.services.AlarmService
 import com.example.myapplication.utils.Constants
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.flow.collect
 
 class MainActivity : AppCompatActivity(), ServiceConnection {
     private var reminderList: List<ReminderEntity> = emptyList()
     private var isPostNotificationPermissionGranted = false
     private var isReadMediaAudioPermissionGranted = false
     private var isDisplayOverOtherAppsPermissionGranted = false
-    private var uiScope: CoroutineScope? = null
 
     private lateinit var permissionLauncher: ActivityResultLauncher<Array<String>>
     private lateinit var binding: ActivityMainBinding
@@ -295,16 +292,6 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
         for (reminder in reminderList) {
             val pendingIntent = PendingIntent.getBroadcast(applicationContext, reminder.id.toInt(), intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
             alarmManager.cancel(pendingIntent)
-        }
-    }
-
-    //update data reminder by id
-    fun updateReminder(reminderId: Long, reminderName: String, dateAdded: Long, ringtoneName: String) {
-        lifecycleScope.launch {
-            val reminderDao = getDatabase(this@MainActivity).reminderDao()
-            val reminder = ReminderEntity(id = reminderId, reminderName = reminderName, dateAdded = dateAdded, ringtonePath = ringtoneName)
-            reminderDao.updateReminder(reminder)
-            loadData()
         }
     }
 

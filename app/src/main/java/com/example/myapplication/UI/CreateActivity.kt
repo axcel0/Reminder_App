@@ -220,16 +220,6 @@ class CreateActivity : AppCompatActivity() {
         }
     }
 
-    private fun getBundleExtras() {
-        val bundle : Bundle? = intent.extras
-        ringtonePath = bundle?.getString(Constants.RINGTONE_PATH_EXTRA)
-        notificationId = bundle?.getInt(Constants.NOTIFICATION_ID)
-        title = bundle?.getString(Constants.TITLE_EXTRA)
-        message = bundle?.getString(Constants.MESSAGE_EXTRA)
-        time = bundle?.getLong(Constants.TIME_EXTRA)
-        snoozeCounter = bundle?.getInt(Constants.SNOOZE_COUNTER)
-    }
-
     //load audio files from local storage
     private fun getAudioFiles(): ArrayList<AudioFiles> {
         val audioList = ArrayList<AudioFiles>()

@@ -39,9 +39,7 @@
         <activity
             android:name=".UI.CreateActivity"
             android:exported="false" />
-        <activity
-            android:name=".UI.EditActivity"
-            android:exported="false" />
+
         <activity
             android:name=".UI.MainActivity"
             android:exported="true"

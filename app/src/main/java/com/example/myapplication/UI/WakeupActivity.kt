@@ -7,7 +7,6 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.media.AudioAttributes
-import android.media.AudioManager
 import android.media.MediaPlayer
 import android.media.RingtoneManager
 import android.net.Uri
@@ -26,7 +25,6 @@ import com.example.myapplication.services.AlarmReceiver
 import com.example.myapplication.utils.Constants
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class WakeupActivity : AppCompatActivity(){
     private var mediaPlayer: MediaPlayer? = null
@@ -68,38 +66,19 @@ class WakeupActivity : AppCompatActivity(){
         lifecycleScope.launch(Dispatchers.IO) {
             try {
                 mediaPlayer = MediaPlayer().apply {
-                    setDataSource(this@WakeupActivity, audioUri)
-
                     setAudioAttributes(
                         AudioAttributes.Builder()
                             .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
                             .setUsage(AudioAttributes.USAGE_ALARM)
                             .build()
                     )
-
-                    setOnPreparedListener {
-                        it.start()
-                        isLooping = true
-                        setVolume(1.0f, 1.0f)
-
-                        val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-                        audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_RAISE, 0)
-
-                        val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-                        val vibrator = vibratorManager.defaultVibrator
-                        vibrator.vibrate(
-                            VibrationEffect.createWaveform(
-                                longArrayOf(0, 1000, 500, 1000, 500, 1000, 500, 1000, 500), 0
-                            )
-                        )
-                    }
-
-                    prepareAsync()
+                    setDataSource(applicationContext, audioUri)
+                    isLooping = true
+                    prepare()
+                    start()
                 }
             } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(this@WakeupActivity, "Error playing audio", Toast.LENGTH_SHORT).show()
-                }
+                Log.e("WakeupActivity", "Error playing audio", e)
             }
         }
     }
