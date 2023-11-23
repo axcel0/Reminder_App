@@ -15,16 +15,18 @@ import android.os.*
 import android.util.Log
 import android.view.View
 import android.widget.Toast
-import androidx.activity.OnBackPressedCallback
 import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.resources.Compatibility.Api18Impl.setAutoCancel
 import androidx.core.app.NotificationCompat
+import androidx.lifecycle.lifecycleScope
 import com.example.myapplication.R
 import com.example.myapplication.databinding.ActivityWakeupBinding
 import com.example.myapplication.models.AppDatabase
 import com.example.myapplication.services.AlarmReceiver
 import com.example.myapplication.utils.Constants
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class WakeupActivity : AppCompatActivity(){
     private var mediaPlayer: MediaPlayer? = null
@@ -63,77 +65,92 @@ class WakeupActivity : AppCompatActivity(){
     }
 
     private fun playAudio(audioUri: Uri) {
-        mediaPlayer = MediaPlayer().apply {
-            setDataSource(this@WakeupActivity, audioUri)
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                mediaPlayer = MediaPlayer().apply {
+                    setDataSource(this@WakeupActivity, audioUri)
 
-            setAudioAttributes(
-                AudioAttributes.Builder()
-                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                    .setUsage(AudioAttributes.USAGE_ALARM)
-                    .build()
-            )
-
-            setOnPreparedListener {
-                it.start()
-                isLooping = true
-                setVolume(1.0f, 1.0f)
-
-                val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-                audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_RAISE, 0)
-
-                val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-                val vibrator = vibratorManager.defaultVibrator
-                vibrator.vibrate(
-                    VibrationEffect.createWaveform(
-                        longArrayOf(0, 1000, 500, 1000, 500, 1000, 500, 1000, 500), 0
+                    setAudioAttributes(
+                        AudioAttributes.Builder()
+                            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                            .setUsage(AudioAttributes.USAGE_ALARM)
+                            .build()
                     )
-                )
-            }
 
-            prepareAsync()
+                    setOnPreparedListener {
+                        it.start()
+                        isLooping = true
+                        setVolume(1.0f, 1.0f)
+
+                        val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+                        audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_RAISE, 0)
+
+                        val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+                        val vibrator = vibratorManager.defaultVibrator
+                        vibrator.vibrate(
+                            VibrationEffect.createWaveform(
+                                longArrayOf(0, 1000, 500, 1000, 500, 1000, 500, 1000, 500), 0
+                            )
+                        )
+                    }
+
+                    prepareAsync()
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@WakeupActivity, "Error playing audio", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
     }
 
-    private fun snoozeAlarm(additionalTime: Long){
-        Toast.makeText(this, "Snoozed for ${Constants.DEFAULT_SNOOZE_TIME/60_000} minutes", Toast.LENGTH_SHORT).show()
-
+    private fun snoozeAlarm(additionalTime: Long) {
         val totalTime = time?.plus(additionalTime)
-        val notificationIntent = Intent(this, AlarmReceiver::class.java)
+        val notificationIntent = createNotificationIntent(totalTime)
 
-        val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-        val vibrator = vibratorManager.defaultVibrator
-        vibrator.cancel()
+        cancelVibration()
 
-        notificationIntent.apply {
+        if (notificationId != null && totalTime != null) {
+            scheduleAlarm(notificationId!!, totalTime, notificationIntent)
+        }
+
+        Toast.makeText(this, "Snoozed for ${additionalTime / 60_000} minutes", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun createNotificationIntent(totalTime: Long?): Intent {
+        return Intent(this, AlarmReceiver::class.java).apply {
             putExtra(Constants.NOTIFICATION_ID, notificationId)
             putExtra(Constants.TITLE_EXTRA, title)
             putExtra(Constants.MESSAGE_EXTRA, message)
             putExtra(Constants.RINGTONE_PATH_EXTRA, ringtonePath)
             putExtra(Constants.TIME_EXTRA, totalTime)
-            putExtra(Constants.SNOOZE_COUNTER, snoozeCounter?.minus(1))
+            snoozeCounter?.let { putExtra(Constants.SNOOZE_COUNTER, it - 1) }
         }
+    }
 
-        if (notificationId != null && totalTime != null) {
-            val pendingIntent = PendingIntent.getBroadcast(applicationContext, notificationId!!, notificationIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+    private fun cancelVibration() {
+        val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+        vibratorManager.defaultVibrator.cancel()
+    }
 
-            val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, totalTime, pendingIntent)
-        }
+    private fun scheduleAlarm(notificationId: Int, totalTime: Long, notificationIntent: Intent) {
+        val pendingIntent = PendingIntent.getBroadcast(applicationContext, notificationId, notificationIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+
+        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, totalTime, pendingIntent)
     }
 
     //make function to cancel pending intent when activity is destroyed or reminder has been deleted
     private fun cancelPendingIntent() {
         val notificationId = intent.getIntExtra(Constants.NOTIFICATION_ID, 0)
         val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-        val vibrator = vibratorManager.defaultVibrator
-
         val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = Intent(this, AlarmReceiver::class.java)
         val pendingIntent = PendingIntent.getBroadcast(this, notificationId, intent, PendingIntent.FLAG_IMMUTABLE)
 
         alarmManager.cancel(pendingIntent)
-        vibrator.cancel()
+        vibratorManager.defaultVibrator.cancel()
         finish()
     }
 
@@ -141,18 +158,17 @@ class WakeupActivity : AppCompatActivity(){
         binding.snoozeButton.visibility = if (snoozeCounter == 0) View.GONE else View.VISIBLE
     }
 
-
     private fun onDismissButtonClicked() {
         mediaPlayer?.stop()
         cancelPendingIntent()
 
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.activeNotifications.find { it.id == notificationId }?.let {
-            notificationManager.cancel(it.id)
+        // Use the correct notification ID to cancel the notification
+        notificationId?.let {
+            notificationManager.cancel(it)
         }
         finish()
     }
-
 
     private fun onSnoozeButtonClicked() {
         mediaPlayer?.stop()
@@ -186,9 +202,20 @@ class WakeupActivity : AppCompatActivity(){
         time = bundle?.getLong(Constants.TIME_EXTRA)
         snoozeCounter = bundle?.getInt(Constants.SNOOZE_COUNTER)
     }
-
     private fun requestDismissKeyguard() {
         val keyguardManager = getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
         keyguardManager.requestDismissKeyguard(this, null)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // Stop and release the media player if it's not null
+        mediaPlayer?.let {
+            if (it.isPlaying) {
+                it.stop()
+            }
+            it.release()
+        }
+        mediaPlayer = null
     }
 }

@@ -1,6 +1,5 @@
 package com.example.myapplication.services
 
-import android.app.AlarmManager
 import android.app.Notification
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -10,19 +9,15 @@ import android.content.Intent
 import android.media.RingtoneManager
 import android.util.Log
 import androidx.core.app.NotificationCompat
-import androidx.core.content.ContextCompat
 import com.example.myapplication.R
 import com.example.myapplication.UI.MainActivity
-import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
-import com.google.firebase.messaging.ktx.messaging
-import kotlinx.coroutines.tasks.await
 
 class FirebaseService: FirebaseMessagingService() {
     override fun onNewToken(token: String) {
         super.onNewToken(token)
-        Log.d("bapakmu", "Refreshed token: $token")
+        Log.d("FirebaseService", "Refreshed token: $token")
         sendRegistrationToServer(token)
     }
 
@@ -35,12 +30,9 @@ class FirebaseService: FirebaseMessagingService() {
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .build()
             notificationManager.notify(0, notification)
-
         }
     }
 
-
-//    val tokenStored = preferences.getString("deviceToken", "")
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
         println("FirebaseService.onMessageReceived: $remoteMessage")
@@ -52,45 +44,6 @@ class FirebaseService: FirebaseMessagingService() {
 
         showNotification(title, body)
     }
-//    private fun scheduleAlarm(
-//        scheduledTimeString: String?,
-//        title: String?,
-//        message: String?
-//    ) {
-//        val alarmMgr = applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-//        val alarmIntent =
-//            Intent(applicationContext, NotificationBroadcastReceiver::class.java).let { intent ->
-//                intent.putExtra(NOTIFICATION_TITLE, title)
-//                intent.putExtra(NOTIFICATION_MESSAGE, message)
-//                PendingIntent.getBroadcast(applicationContext, 0, intent, 0)
-//            }
-//
-//        // Parse Schedule time
-//        val scheduledTime = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-//            .parse(scheduledTimeString!!)
-//
-//        scheduledTime?.let {
-//            // With set(), it'll set non repeating one time alarm.
-//            alarmMgr.set(
-//                AlarmManager.RTC_WAKEUP,
-//                it.time,
-//                alarmIntent
-//            )
-//        }
-//    }
-//
-//    private fun showNotification(title: String, message: String) {
-//        NotificationUtil(applicationContext).showNotification(title, message)
-//    }
-//make fun to schedule alarm using firebase cloud messaging
-//private fun scheduleAlarm() {
-//    val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
-//    val intent = Intent(this, MyReminderReceiver::class.java)
-//    val pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
-//    val timeAtButtonClick = System.currentTimeMillis()
-//    val tenSecondsInMillis = 1000 * 10
-//    alarmManager.set(AlarmManager.RTC_WAKEUP, timeAtButtonClick + tenSecondsInMillis, pendingIntent)
-//}
 
     private fun showNotification(title: String?, body: String?) {
         Log.d("FirebaseService", "showNotification: $title, $body")
@@ -122,17 +75,13 @@ class FirebaseService: FirebaseMessagingService() {
         val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.notify(0, notification)
         Log.d("FirebaseService", "showNotification.notificationManager: $notificationManager")
-
-
     }
-   //make function to send token to server
+
     private fun sendRegistrationToServer(token: String) {
         val preferences = getSharedPreferences("SHARED_PREF", MODE_PRIVATE)
         val editor = preferences.edit()
         editor.putString("deviceToken", token)
         editor.apply()
         Log.d("FirebaseService", "sendRegistrationToServer: $token")
-   }
-
-
+    }
 }

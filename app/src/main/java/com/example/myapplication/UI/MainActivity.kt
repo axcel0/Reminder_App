@@ -20,9 +20,12 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.example.myapplication.R
 import com.example.myapplication.UI.adapters.ReminderAdapter
 import com.example.myapplication.databinding.ActivityMainBinding
@@ -33,11 +36,12 @@ import com.example.myapplication.services.AlarmService
 import com.example.myapplication.utils.Constants
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.collect
 
 class MainActivity : AppCompatActivity(), ServiceConnection {
     private var reminderList: List<ReminderEntity> = emptyList()
@@ -49,9 +53,10 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
     private lateinit var permissionLauncher: ActivityResultLauncher<Array<String>>
     private lateinit var binding: ActivityMainBinding
     private lateinit var recyclerView: RecyclerView
+    private lateinit var swipeRefreshLayout: SwipeRefreshLayout
+    private lateinit var adapter: ReminderAdapter
 
     companion object {
-        var deleteList : ArrayList<String> = ArrayList()
         private var db: AppDatabase? = null
         fun getDatabase(context: Context): AppDatabase {
             if (db == null) {
@@ -67,28 +72,54 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        window.statusBarColor = ContextCompat.getColor(this, R.color.material_dynamic_primary)
         onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 finishAffinity()
             }
         })
+        permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            permissions.entries.forEach {
+                when (it.key) {
+                    android.Manifest.permission.READ_MEDIA_AUDIO -> isReadMediaAudioPermissionGranted = it.value
+                    android.Manifest.permission.POST_NOTIFICATIONS -> isPostNotificationPermissionGranted = it.value
+                    android.Manifest.permission.SYSTEM_ALERT_WINDOW -> isDisplayOverOtherAppsPermissionGranted = it.value
+                }
+            }
+        }
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
         menuInflater.inflate(R.menu.menu_main, binding.toolbar.menu)
 
         recyclerView = binding.recyclerView
-        recyclerView.adapter = ReminderAdapter(reminderList)
-        recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerView.setHasFixedSize(true)
+        swipeRefreshLayout = binding.swipeRefreshLayout
+
+        adapter = ReminderAdapter(reminderList, object : ReminderAdapter.OnItemClickListener {
+            override fun onItemClick(reminder: ReminderEntity) {
+                // Handle the click event here to edit the reminder
+                val intent = Intent(this@MainActivity, CreateActivity::class.java).apply {
+                    putExtra(Constants.REMINDER_ID_EXTRA, reminder.id)
+                    putExtra(Constants.REMINDER_NAME_EXTRA, reminder.reminderName)
+                    putExtra(Constants.REMINDER_DATE_EXTRA, reminder.dateAdded)
+                    putExtra(Constants.REMINDER_RINGTONE_PATH_EXTRA, reminder.ringtonePath)
+                }
+                startActivity(intent)
+            }
+        })
+
+        recyclerView.apply {
+            layoutManager = LinearLayoutManager(this@MainActivity)
+            setHasFixedSize(true)
+            adapter = this@MainActivity.adapter
+        }
+
+        swipeRefreshLayout.setOnRefreshListener {
+            loadData()
+            swipeRefreshLayout.isRefreshing = false
+        }
 
         supportActionBar!!.title = getString(R.string.action_bar_name)
-
-        permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-            permissions.entries.forEach {
-                Log.d("MainActivity", "${it.key} = ${it.value}")
-            }
-        }
 
         loadData()
         requestPermission()
@@ -107,6 +138,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
             Log.d("MainActivity id", "onCreate: $id")
         }
     }
+
 
     private fun createNotificationChannel() {
         val notificationManager = getSystemService(NotificationManager::class.java)
@@ -144,7 +176,6 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
         alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, time, pendingIntent)
     }
 
-
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
         return true
@@ -161,12 +192,12 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
                 searchView.queryHint = "Search Reminder"
                 searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
                     override fun onQueryTextSubmit(query: String?): Boolean {
-                        searchReminder(query)
+                        query?.let { searchReminder(it) }
                         return true
                     }
 
                     override fun onQueryTextChange(newText: String?): Boolean {
-                        searchReminder(newText)
+                        newText?.let { searchReminder(it) }
                         return true
                     }
                 })
@@ -174,39 +205,27 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
             }
             R.id.action_delete_all -> {
                 val alertDialog = MaterialAlertDialogBuilder(this)
-                if (deleteList.size > 0) {
-                    alertDialog.setTitle("Delete Selected Reminders ")
-                    alertDialog.setMessage("Are you sure you want to delete ${deleteList.size} selected reminders?")
+                val adapter = recyclerView.adapter as ReminderAdapter
+                val selectedItems = adapter.getSelectedItems()
+                if (selectedItems.isNotEmpty()) {
+                    alertDialog.setTitle("Delete Selected Reminders")
+                    alertDialog.setMessage("Are you sure you want to delete ${selectedItems.size} selected reminders?")
                     alertDialog.setPositiveButton("Yes") { _, _ ->
-                        deleteList.forEach {
-                            deleteReminder(it.toLong())
-                            deleteList = ArrayList()
-                            //cancel alarm
-                            cancelAlarm(it.toLong())
+                        selectedItems.apply {
+                            forEachIndexed { index, reminder ->
+                                runBlocking { deleteReminder(reminder.id) }
+                                adapter.notifyItemRemoved(index)
+                            }
                         }
                     }
-                    alertDialog.setNegativeButton("No") { _, _ ->
-                        //set deleteList to empty
-                        deleteList = ArrayList()
+                    alertDialog.setNegativeButton("No") { _, _ -> }
+                } else {
+                    alertDialog.setTitle("Delete All Reminders")
+                    alertDialog.setMessage("Are you sure you want to delete all reminders?")
+                    alertDialog.setPositiveButton("Yes") { _, _ ->
+                        deleteAllReminders()
                     }
-                }
-                else {
-                    if(reminderList.isEmpty()) {
-                        alertDialog.setMessage("There is no reminder to delete")
-                        alertDialog.setPositiveButton("Ok") { _, _ ->
-                        }
-                    }else {
-                        //alert dialog to delete all reminders
-                        alertDialog.setTitle("Delete All Reminders")
-                        alertDialog.setMessage("Are you sure you want to delete all reminders?")
-                        alertDialog.setPositiveButton("Yes") { _, _ ->
-                            deleteAllReminders()
-                            cancelAllAlarm()
-                        }
-                        alertDialog.setNegativeButton("No") { _, _ ->
-                            deleteList = ArrayList()
-                        }
-                    }
+                    alertDialog.setNegativeButton("No") { _, _ -> }
                 }
                 alertDialog.show()
                 true
@@ -220,32 +239,45 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
         startActivity(intent)
     }
 
-    fun loadData() {
-        reminderList = getDatabase(this).reminderDao().getReminders().also{
-            updateUIComponents()
+    private fun loadData() {
+        lifecycleScope.launch {
+            getDatabase(this@MainActivity).reminderDao().getReminders().collect { reminders ->
+                reminderList = reminders
+                updateUIComponents()
+            }
         }
     }
 
     //search reminder by title
     private fun searchReminder(reminderName: String?) {
-        val reminderDao = getDatabase(this).reminderDao()
-        reminderList = reminderDao.searchReminder(reminderName ?: "").also { updateUIComponents() }
+        lifecycleScope.launch {
+            val reminderDao = getDatabase(this@MainActivity).reminderDao()
+            reminderDao.searchReminder(reminderName ?: "").collect { reminders ->
+                reminderList = reminders
+                updateUIComponents()
+            }
+        }
     }
 
     //delete reminder
     private fun deleteReminder(reminderId: Long) {
-        val reminderDao = getDatabase(this).reminderDao()
-        reminderDao.deleteReminder(reminderDao.getReminder(reminderId.toInt())).also {
+        lifecycleScope.launch {
+            val reminderDao = getDatabase(this@MainActivity).reminderDao()
+            val reminder = reminderDao.getReminder(reminderId.toInt()).apply {
+                cancelAlarm(this.id)
+            }
+            reminderDao.deleteReminder(reminder)
             loadData()
         }
     }
 
     //delete all reminders
     private fun deleteAllReminders() {
-        val reminderDao = getDatabase(this).reminderDao()
-        reminderDao.deleteAllReminders().also {
+        lifecycleScope.launch {
+            val reminderDao = getDatabase(this@MainActivity).reminderDao()
+            reminderDao.deleteAllReminders()
             loadData()
-            //aldo cancel pending intent when all reminders are deleted
+            //also cancel pending intent when all reminders are deleted
             cancelAllAlarm()
         }
     }
@@ -268,51 +300,56 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
 
     //update data reminder by id
     fun updateReminder(reminderId: Long, reminderName: String, dateAdded: Long, ringtoneName: String) {
-        val reminderDao = getDatabase(this).reminderDao()
-        reminderDao.updateReminder(ReminderEntity(id = reminderId, reminderName = reminderName, dateAdded = dateAdded, ringtonePath = ringtoneName)).also { loadData() }
+        lifecycleScope.launch {
+            val reminderDao = getDatabase(this@MainActivity).reminderDao()
+            val reminder = ReminderEntity(id = reminderId, reminderName = reminderName, dateAdded = dateAdded, ringtonePath = ringtoneName)
+            reminderDao.updateReminder(reminder)
+            loadData()
+        }
     }
 
     private fun requestPermission() {
-        val permissionRequest: MutableList<String> = ArrayList()
+        val permissions = mapOf(
+            android.Manifest.permission.READ_MEDIA_AUDIO to ::isReadMediaAudioPermissionGranted,
+            android.Manifest.permission.POST_NOTIFICATIONS to ::isPostNotificationPermissionGranted,
+            android.Manifest.permission.SYSTEM_ALERT_WINDOW to ::isDisplayOverOtherAppsPermissionGranted
+        )
 
-        isReadMediaAudioPermissionGranted =
-            ActivityCompat.checkSelfPermission(this, android.Manifest.permission.READ_MEDIA_AUDIO) == PackageManager.PERMISSION_GRANTED
-        isPostNotificationPermissionGranted =
-            ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
-        isDisplayOverOtherAppsPermissionGranted =
-            ActivityCompat.checkSelfPermission(this, android.Manifest.permission.SYSTEM_ALERT_WINDOW) == PackageManager.PERMISSION_GRANTED
+        val permissionRequest = permissions.keys.filter { permission ->
+            ActivityCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED
+        }
 
-        if (!isReadMediaAudioPermissionGranted)
-            permissionRequest.add(android.Manifest.permission.READ_MEDIA_AUDIO)
+        permissionRequest.forEach { permission ->
+            permissions[permission]?.set(false)
+        }
 
-        if (!isPostNotificationPermissionGranted)
-            permissionRequest.add(android.Manifest.permission.POST_NOTIFICATIONS)
-
-        if (!isDisplayOverOtherAppsPermissionGranted)
-            permissionRequest.add(android.Manifest.permission.SYSTEM_ALERT_WINDOW)
-
-        if (permissionRequest.isNotEmpty())
+        if (permissionRequest.isNotEmpty()) {
             permissionLauncher.launch(permissionRequest.toTypedArray())
+        }
     }
 
     private fun updateUIComponents() {
-        // Cancel the previous UI scope if it is running.
-        uiScope?.cancel()
-
-        // Create a new UI scope with a SupervisorJob.
-        // This will ensure that the UI scope is not cancelled if one of the coroutines it launches fails.
-        uiScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
-
-        // Launch a coroutine to update the adapter.
-        uiScope?.launch {
+        lifecycleScope.launch {
             try {
                 // Update the adapter on the IO dispatcher.
                 val newAdapter = withContext(Dispatchers.IO) {
-                    ReminderAdapter(reminderList)
+                    ReminderAdapter(reminderList, object : ReminderAdapter.OnItemClickListener {
+                        override fun onItemClick(reminder: ReminderEntity) {
+                            // Handle the click event here to edit the reminder
+                            val intent = Intent(this@MainActivity, CreateActivity::class.java).apply {
+                                putExtra(Constants.REMINDER_ID_EXTRA, reminder.id)
+                                putExtra(Constants.REMINDER_NAME_EXTRA, reminder.reminderName)
+                                putExtra(Constants.REMINDER_DATE_EXTRA, reminder.dateAdded)
+                                putExtra(Constants.REMINDER_RINGTONE_PATH_EXTRA, reminder.ringtonePath)
+                            }
+                            startActivity(intent)
+                        }
+                    })
                 }
-
-                // Update the RecyclerView adapter on the main thread.
-                recyclerView.adapter = newAdapter
+                // Check if the lifecycle is still at least STARTED before updating the RecyclerView adapter.
+                if (isActive) {
+                    recyclerView.adapter = newAdapter
+                }
             } catch (e: Exception) {
                 e.printStackTrace()
             }

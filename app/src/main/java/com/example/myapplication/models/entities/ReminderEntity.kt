@@ -1,9 +1,9 @@
 package com.example.myapplication.models.entities
 
 import androidx.room.ColumnInfo
-import androidx.room.PrimaryKey
 import androidx.room.Entity
 import androidx.room.Index
+import androidx.room.PrimaryKey
 
 @Entity(
     tableName = "reminders",
@@ -13,8 +13,12 @@ import androidx.room.Index
     )]
 )
 data class ReminderEntity(
-    @PrimaryKey(autoGenerate = true) var id: Long = 0,
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
     @ColumnInfo(name = "reminderName") val reminderName: String,
     @ColumnInfo(name = "dateAdded") val dateAdded: Long,
     @ColumnInfo(name = "ringtonePath") val ringtonePath: String,
-)
+) {
+    override fun toString(): String {
+        return "ReminderEntity(id=$id, reminderName='$reminderName', dateAdded=$dateAdded, ringtonePath='$ringtonePath')"
+    }
+}

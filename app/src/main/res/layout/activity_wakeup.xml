@@ -6,31 +6,53 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <Button
-        android:id="@+id/dismiss_button"
-        android:text="@string/dismiss"
+    <ImageView
+        android:id="@+id/alarm_icon"
         android:layout_width="wrap_content"
-        android:layout_height="@dimen/stopwatch_button_size"
-        android:layout_marginBottom="@dimen/big_margin"
-        android:padding="@dimen/normal_margin"
-        android:src="@drawable/baseline_stop_24"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_alarm_on"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        />
-    <Button
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/alarm_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Alarm Title"
+        android:textSize="24sp"
+        app:layout_constraintTop_toBottomOf="@id/alarm_icon"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/alarm_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Alarm Message"
+        android:textSize="18sp"
+        app:layout_constraintTop_toBottomOf="@id/alarm_title"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/snooze_button"
         android:text="@string/snooze"
         android:layout_width="wrap_content"
-        android:layout_height="@dimen/stopwatch_button_size"
+        android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/small_margin"
-        android:padding="@dimen/normal_margin"
-        android:src="@drawable/baseline_stop_24"
         app:layout_constraintBottom_toTopOf="@id/dismiss_button"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        />
+        app:layout_constraintStart_toStartOf="parent" />
 
-
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/dismiss_button"
+        android:text="@string/dismiss"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/big_margin"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
