@@ -6,5 +6,9 @@
         <item name="colorSecondary">@color/white</item>
     </style>
 
-    <style name="Theme.MyApplication" parent="Base.Theme.MyApplication" />
+    <style name="Theme.MyApplication" parent="Base.Theme.MyApplication">
+        <!-- Customize your theme here. -->
+        <item name="colorOnPrimary">@color/black</item>
+        <item name="colorOnSecondary">@color/white</item>
+    </style>
 </resources>

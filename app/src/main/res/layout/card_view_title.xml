@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:clickable="true"
-    app:cardBackgroundColor="@color/material_dynamic_primary60"
+    app:cardBackgroundColor="?attr/colorPrimary"
     app:cardCornerRadius="10dp"
     app:cardElevation="1dp"
     app:cardMaxElevation="2dp"
@@ -26,7 +26,7 @@
             android:text="@string/app_name"
             android:textSize="20sp"
             android:textStyle="bold"
-            android:textColor="@color/white"
+            android:textColor="?attr/colorOnPrimary"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:drawableStartCompat="@drawable/ic_alarm_on" />
@@ -37,7 +37,7 @@
             android:layout_height="wrap_content"
             android:text="@string/date_added"
             android:textSize="20sp"
-            android:textColor="@color/white"
+            android:textColor="?attr/colorOnPrimary"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tv_title_name" />
 
@@ -47,7 +47,7 @@
             android:layout_height="wrap_content"
             android:text="@string/time_added"
             android:textSize="15sp"
-            android:textColor="@color/white"
+            android:textColor="?attr/colorOnPrimary"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tv_date_added" />
 

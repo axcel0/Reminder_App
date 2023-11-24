@@ -34,6 +34,7 @@ import com.example.myapplication.models.entities.ReminderEntity
 import com.example.myapplication.services.AlarmReceiver
 import com.example.myapplication.services.AlarmService
 import com.example.myapplication.utils.Constants
+import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.Dispatchers
@@ -46,7 +47,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
     private var isPostNotificationPermissionGranted = false
     private var isReadMediaAudioPermissionGranted = false
     private var isDisplayOverOtherAppsPermissionGranted = false
-
+    private lateinit var toolbar: MaterialToolbar
     private lateinit var permissionLauncher: ActivityResultLauncher<Array<String>>
     private lateinit var binding: ActivityMainBinding
     private lateinit var recyclerView: RecyclerView
@@ -69,7 +70,9 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        window.statusBarColor = ContextCompat.getColor(this, R.color.material_dynamic_primary)
+        toolbar = findViewById(R.id.toolbar)
+        setSupportActionBar(toolbar)
+//        window.statusBarColor = ContextCompat.getColor(this, R.color.material_dynamic_primary)
         onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 finishAffinity()
