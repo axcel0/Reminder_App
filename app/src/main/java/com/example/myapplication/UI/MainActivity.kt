@@ -53,7 +53,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
     private lateinit var recyclerView: RecyclerView
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
     private lateinit var adapter: ReminderAdapter
-
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
     companion object {
         private var db: AppDatabase? = null
         fun getDatabase(context: Context): AppDatabase {
