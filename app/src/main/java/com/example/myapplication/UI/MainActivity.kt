@@ -9,6 +9,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
@@ -17,10 +18,10 @@ import android.view.MenuItem
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -67,6 +68,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -298,24 +300,20 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private fun requestPermission() {
         val permissions = mapOf(
-            android.Manifest.permission.READ_MEDIA_AUDIO to ::isReadMediaAudioPermissionGranted,
-            android.Manifest.permission.POST_NOTIFICATIONS to ::isPostNotificationPermissionGranted,
-            android.Manifest.permission.SYSTEM_ALERT_WINDOW to ::isDisplayOverOtherAppsPermissionGranted
+            android.Manifest.permission.READ_MEDIA_AUDIO to false,
+            android.Manifest.permission.POST_NOTIFICATIONS to false,
+            android.Manifest.permission.SYSTEM_ALERT_WINDOW to false,
+            android.Manifest.permission.WAKE_LOCK to false,
         )
 
         val permissionRequest = permissions.keys.filter { permission ->
             ActivityCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED
         }
 
-        permissionRequest.forEach { permission ->
-            permissions[permission]?.set(false)
-        }
-
-        if (permissionRequest.isNotEmpty()) {
-            permissionLauncher.launch(permissionRequest.toTypedArray())
-        }
+        permissionLauncher.launch(permissionRequest.toTypedArray())
     }
 
     private fun updateUIComponents() {

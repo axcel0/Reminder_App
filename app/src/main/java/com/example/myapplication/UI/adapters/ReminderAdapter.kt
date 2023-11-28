@@ -80,10 +80,11 @@ class ReminderAdapter(private val dataSet: List<ReminderEntity>, private val ite
         holder.timeAdded.text = timeStr
 
         if (isItemSelected(position)) {
-            holder.cardView.setCardBackgroundColor(holder.itemView.context.getColor(com.google.android.material.R.color.material_dynamic_primary60))
+            holder.cardView.setCardBackgroundColor(holder.itemView.context.getColor(com.google.android.material.R.color.material_deep_teal_200))
         } else {
-            holder.cardView.setCardBackgroundColor(holder.itemView.context.getColor(com.google.android.material.R.color.material_dynamic_primary30))
+            holder.cardView.setCardBackgroundColor(holder.itemView.context.getColor(com.google.android.material.R.color.material_deep_teal_500))
         }
+
     }
 
     override fun getItemCount(): Int {

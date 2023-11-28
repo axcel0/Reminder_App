@@ -120,7 +120,7 @@ class WakeupActivity : AppCompatActivity(){
         alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, totalTime, pendingIntent)
     }
 
-    //make function to cancel pending intent when activity is destroyed or reminder has been deleted
+    //cancel pending intent when activity is destroyed or reminder has been deleted
     private fun cancelPendingIntent() {
         val notificationId = intent.getIntExtra(Constants.NOTIFICATION_ID, 0)
         val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager

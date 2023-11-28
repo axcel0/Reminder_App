@@ -15,4 +15,6 @@
     <color name="material_dynamic_secondary_variant">#FF018786</color>
     <color name="material_dynamic_background">#FFFFFFFF</color>
     <color name="material_dynamic_surface">#FFFFFFFF</color>
+    <color name="material_primary_variant">#FF3700B3</color> <!-- A shade of blue -->
+    <color name="material_on_surface">#FFCFCFCF</color> <!-- A light grey -->
 </resources>
