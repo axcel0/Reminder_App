@@ -229,8 +229,7 @@ class CreateActivity : AppCompatActivity() {
             MediaStore.Audio.AudioColumns.TITLE,
         )
 
-        val cursor = contentResolver.query(uri, projection, null, null, null)
-        if (cursor != null) {
+        contentResolver.query(uri, projection, null, null, null)?.use { cursor ->
             while (cursor.moveToNext()) {
                 val path = cursor.getString(0)
                 val name = cursor.getString(1)
@@ -238,22 +237,19 @@ class CreateActivity : AppCompatActivity() {
                 Log.e("Path: $path", "Name: $name")
                 audioList.add(audioFiles)
             }
-            cursor.close()
         }
 
         val ringtoneManager = RingtoneManager(this)
         ringtoneManager.setType(RingtoneManager.TYPE_RINGTONE)
 
-        val cursor2 = ringtoneManager.cursor
-        if (cursor2 != null) {
-            while (cursor2.moveToNext()) {
-                val name = cursor2.getString(RingtoneManager.TITLE_COLUMN_INDEX)
-                val path = cursor2.getString(RingtoneManager.URI_COLUMN_INDEX) + "/" + cursor2.getString(RingtoneManager.ID_COLUMN_INDEX)
+        ringtoneManager.cursor?.use { cursor ->
+            while (cursor.moveToNext()) {
+                val name = cursor.getString(RingtoneManager.TITLE_COLUMN_INDEX)
+                val path = cursor.getString(RingtoneManager.URI_COLUMN_INDEX) + "/" + cursor.getString(RingtoneManager.ID_COLUMN_INDEX)
                 val audioFiles = AudioFiles(path, name)
                 Log.e("Path: $path", "Name: $name")
                 audioList.add(audioFiles)
             }
-            cursor2.close()
         }
         return audioList
     }
