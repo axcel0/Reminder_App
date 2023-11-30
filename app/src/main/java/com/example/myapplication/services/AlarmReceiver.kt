@@ -26,11 +26,13 @@ class AlarmReceiver : BroadcastReceiver() {
         context.startActivity(wakeupIntent)
     }
 
-    private fun showNotification(context: Context, notificationId: Int, intent: Intent) {
-        val pendingIntent = Intent(context, WakeupActivity::class.java).let { notificationIntent ->
-            PendingIntent.getActivity(context, notificationId, notificationIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
-        }
+    private fun createPendingIntent(context: Context, notificationId: Int): PendingIntent {
+        val intent = Intent(context, WakeupActivity::class.java)
+        return PendingIntent.getActivity(context, notificationId, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+    }
 
+    private fun showNotification(context: Context, notificationId: Int, intent: Intent) {
+        val pendingIntent = createPendingIntent(context, notificationId)
         val builder = createNotificationBuilder(context, intent, pendingIntent)
         val notificationManager = context.getSystemService(NotificationManager::class.java)
         notificationManager.notify(notificationId, builder.build())

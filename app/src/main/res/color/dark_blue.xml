@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- This is the default color for the button -->
+    <item android:color="#1565C0" android:state_enabled="true" />
+    <!-- This is the color for the button when it is pressed -->
+    <item android:color="#1565C0" android:state_pressed="true" />
+    <!-- This is the color for the button when it is disabled -->
+    <item android:color="#1565C0" android:state_enabled="false" />
+</selector>
