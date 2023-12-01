@@ -1,5 +1,4 @@
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
-
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
@@ -18,7 +17,33 @@ android {
         targetSdk 34
         versionCode 1
         versionName "工事中"
+        kotlin {
+            sourceSets.configureEach {
+                languageSettings {
+                    languageVersion = "2.0"
+                }
+            }
+
+            ksp {
+                arg("room.schemaLocation", "$projectDir/schemas".toString())
+                arg("room.incremental", "true")
+                arg("room.expandProjection", "true")
+            }
+
+            compilerOptions {
+                languageVersion.set(KotlinVersion.KOTLIN_1_9)
+                apiVersion.set(KotlinVersion.KOTLIN_1_9)
+            }
+
+            kotlinOptions {
+                jvmTarget = '17'
+            }
+        }
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        compileOptions {
+            sourceCompatibility JavaVersion.VERSION_17
+            targetCompatibility JavaVersion.VERSION_17
+        }
     }
 
     buildTypes {
@@ -32,33 +57,6 @@ android {
         viewBinding true
     }
 
-//        compileOptions {
-//            sourceCompatibility JavaVersion.VERSION_17
-//            targetCompatibility JavaVersion.VERSION_17
-//        }
-
-    kotlin {
-        sourceSets.configureEach {
-            languageSettings {
-                languageVersion = "2.0"
-            }
-        }
-
-        ksp {
-            arg("room.schemaLocation", "$projectDir/schemas".toString())
-            arg("room.incremental", "true")
-            arg("room.expandProjection", "true")
-        }
-
-        compilerOptions {
-            languageVersion.set(KotlinVersion.KOTLIN_1_9)
-            apiVersion.set(KotlinVersion.KOTLIN_1_9)
-        }
-
-        kotlinOptions {
-            jvmTarget = '17'
-        }
-    }
 }
 
 dependencies {
@@ -96,7 +94,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-database:20.3.0'
 
     // KSP
-    ksp 'com.google.devtools.ksp:symbol-processing:1.9.10-1.0.13'
+    ksp 'com.google.devtools.ksp:symbol-processing:1.9.21-1.0.15'
     ksp 'androidx.room:room-compiler:2.6.1'
 
     // Dokka
