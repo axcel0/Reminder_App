@@ -32,7 +32,7 @@ tasks.register('clean', Delete) {
 }
 //tasks dokka
 tasks.register('dokka', DokkaTask) {
-    outputDirectory.set(file("$buildDir/javadoc"))
+    outputDirectory.set(file("$buildDir/dokka"))
     outputFormat = 'html'
     dokkaSourceSets {
         main {

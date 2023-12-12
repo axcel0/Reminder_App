@@ -54,7 +54,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
     private lateinit var recyclerView: RecyclerView
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
     private lateinit var adapter: ReminderAdapter
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
+
     companion object {
         private var db: AppDatabase? = null
         fun getDatabase(context: Context): AppDatabase {
@@ -68,27 +68,58 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        toolbar = findViewById(R.id.toolbar)
-        setSupportActionBar(toolbar)
-//        window.statusBarColor = ContextCompat.getColor(this, R.color.material_dynamic_primary)
-        onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                finishAffinity()
-            }
-        })
-        permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-            permissions.entries.forEach {
-                when (it.key) {
-                    android.Manifest.permission.READ_MEDIA_AUDIO -> isReadMediaAudioPermissionGranted = it.value
-                    android.Manifest.permission.POST_NOTIFICATIONS -> isPostNotificationPermissionGranted = it.value
-                    android.Manifest.permission.SYSTEM_ALERT_WINDOW -> isDisplayOverOtherAppsPermissionGranted = it.value
-                }
+  /**
+ * This is the onCreate method of the MainActivity. It is called when the activity is starting.
+ * This method is where most initialization should go.
+ *
+ * @param savedInstanceState If the activity is being re-initialized after previously being shut down
+ * then this Bundle contains the data it most recently supplied in onSaveInstanceState(Bundle).
+ * Note: Otherwise it is null.
+ */
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
+override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    setContentView(R.layout.activity_main)
+
+    /**
+     * Toolbar for the activity.
+     */
+    toolbar = findViewById(R.id.toolbar)
+    setSupportActionBar(toolbar)
+
+    /**
+     * Callback for handling back press events.
+     */
+    onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            finishAffinity()
+        }
+    })
+
+    /**
+     * Launcher for the permission request activity.
+     */
+    permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+        permissions.entries.forEach {
+            when (it.key) {
+                /**
+                 * Flag indicating whether the read media audio permission is granted.
+                 */
+                android.Manifest.permission.READ_MEDIA_AUDIO -> isReadMediaAudioPermissionGranted = it.value
+
+                /**
+                 * Flag indicating whether the post notification permission is granted.
+                 */
+                android.Manifest.permission.POST_NOTIFICATIONS -> isPostNotificationPermissionGranted = it.value
+
+                /**
+                 * Flag indicating whether the display over other apps permission is granted.
+                 */
+                android.Manifest.permission.SYSTEM_ALERT_WINDOW -> isDisplayOverOtherAppsPermissionGranted = it.value
             }
         }
+    }
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
