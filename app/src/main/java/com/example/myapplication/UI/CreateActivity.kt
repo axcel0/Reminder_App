@@ -21,6 +21,8 @@ import com.example.myapplication.models.entities.ReminderEntity
 import java.time.LocalDateTime
 import java.time.ZoneId
 import android.media.RingtoneManager
+import android.os.Handler
+import android.os.Looper
 import android.view.GestureDetector
 import androidx.activity.addCallback
 import androidx.core.app.NotificationCompat
@@ -173,17 +175,25 @@ class CreateActivity : AppCompatActivity() {
             }
         }
     }
+    private val handler = Handler(Looper.getMainLooper())
+    private val updateDateTimeRunnable = object : Runnable {
+        override fun run() {
+            // Get the current date and time
+            val now = LocalDateTime.now()
+
+            // Set the current date and time to the DatePicker and TimePicker
+            binding.datePicker.updateDate(now.year, now.monthValue - 1, now.dayOfMonth)
+            binding.timePicker.hour = now.hour
+            binding.timePicker.minute = now.minute
+
+            // Schedule the next update in 1 second
+            handler.postDelayed(this, 1000)
+        }
+    }
+
     private fun setDateTimePicker() {
-        // Get the current date and time
-        val now = LocalDateTime.now()
-
         // Set the minimum date of the DatePicker to the current date
-        binding.datePicker.minDate = now.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
-
-        // Set the current date and time to the DatePicker and TimePicker
-        binding.datePicker.updateDate(now.year, now.monthValue - 1, now.dayOfMonth)
-        binding.timePicker.hour = now.hour
-        binding.timePicker.minute = now.minute
+        binding.datePicker.minDate = System.currentTimeMillis()
 
         // Disable past times in the TimePicker
         binding.timePicker.setOnTimeChangedListener { _, hourOfDay, minute ->
@@ -194,11 +204,31 @@ class CreateActivity : AppCompatActivity() {
                 hourOfDay,
                 minute
             )
+            val now = LocalDateTime.now()
             if (selectedTime.isBefore(now)) {
                 binding.timePicker.hour = now.hour
                 binding.timePicker.minute = now.minute
+                // Start updating the date and time
+                handler.post(updateDateTimeRunnable)
+            } else {
+                // Stop updating the date and time
+                handler.removeCallbacks(updateDateTimeRunnable)
             }
         }
+
+
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Start updating the date and time when the activity is resumed
+        handler.post(updateDateTimeRunnable)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        // Stop updating the date and time when the activity is paused
+        handler.removeCallbacks(updateDateTimeRunnable)
     }
 
     private fun epochToMillis(epochTime: Long): Long {
