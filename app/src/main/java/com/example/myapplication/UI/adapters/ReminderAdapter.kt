@@ -1,16 +1,13 @@
 package com.example.myapplication.UI.adapters
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
-import androidx.cardview.widget.CardView
-import androidx.recyclerview.widget.RecyclerView
-import com.example.myapplication.R
+import com.example.myapplication.databinding.CardViewTitleBinding
 import com.example.myapplication.models.entities.ReminderEntity
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import androidx.recyclerview.widget.RecyclerView
 
 class ReminderAdapter(private val dataSet: List<ReminderEntity>, private val itemClickListener: OnItemClickListener) : RecyclerView.Adapter<ReminderAdapter.ViewHolder>() {
 
@@ -18,18 +15,13 @@ class ReminderAdapter(private val dataSet: List<ReminderEntity>, private val ite
         fun onItemClick(reminder: ReminderEntity)
     }
 
-    inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val reminderName: TextView = view.findViewById(R.id.tv_title_name)
-        val dateAdded: TextView = view.findViewById(R.id.tv_date_added)
-        val timeAdded: TextView = view.findViewById(R.id.tv_time_added)
-        val cardView: CardView = view.findViewById(R.id.card_view_title)
-
+    inner class ViewHolder(private val binding: CardViewTitleBinding) : RecyclerView.ViewHolder(binding.root) {
         init {
-            itemView.setOnLongClickListener {
+            binding.root.setOnLongClickListener {
                 toggleSelection(bindingAdapterPosition)
                 true
             }
-            itemView.setOnClickListener {
+            binding.root.setOnClickListener {
                 if (isItemSelected(bindingAdapterPosition)) {
                     deselectItem(bindingAdapterPosition)
                 } else if (isAnyItemSelected()) {
@@ -37,6 +29,21 @@ class ReminderAdapter(private val dataSet: List<ReminderEntity>, private val ite
                 } else {
                     itemClickListener.onItemClick(dataSet[bindingAdapterPosition])
                 }
+            }
+        }
+
+        fun bind(reminder: ReminderEntity) {
+            binding.tvTitleName.text = reminder.reminderName
+            val date = reminder.dateAdded.let { LocalDateTime.ofEpochSecond(it, 0, ZoneId.systemDefault().rules.getOffset(java.time.Instant.now())) }
+            val dateStr = date?.format(DateTimeFormatter.ofPattern("EEEE, MMMM d \nyyyy"))
+            val timeStr = date?.format(DateTimeFormatter.ofPattern("hh:mm a"))
+            binding.tvDateAdded.text = dateStr
+            binding.tvTimeAdded.text = timeStr
+
+            if (isItemSelected(bindingAdapterPosition)) {
+                binding.cardViewTitle.setCardBackgroundColor(binding.root.context.getColor(com.google.android.material.R.color.material_blue_grey_800))
+            } else {
+                binding.cardViewTitle.setCardBackgroundColor(binding.root.context.getColor(com.google.android.material.R.color.material_deep_teal_200))
             }
         }
     }
@@ -67,29 +74,21 @@ class ReminderAdapter(private val dataSet: List<ReminderEntity>, private val ite
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.card_view_title, parent, false)
-        return ViewHolder(view)
+        val inflater = LayoutInflater.from(parent.context)
+        val binding = CardViewTitleBinding.inflate(inflater, parent, false)
+        return ViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.reminderName.text = dataSet[position].reminderName
-        val date = dataSet[position].dateAdded.let { LocalDateTime.ofEpochSecond(it, 0, ZoneId.systemDefault().rules.getOffset(java.time.Instant.now())) }
-        val dateStr = date?.format(DateTimeFormatter.ofPattern("EEEE, MMMM d \nyyyy"))
-        val timeStr = date?.format(DateTimeFormatter.ofPattern("hh:mm a"))
-        holder.dateAdded.text = dateStr
-        holder.timeAdded.text = timeStr
-
-        if (isItemSelected(position)) {
-            holder.cardView.setCardBackgroundColor(holder.itemView.context.getColor(com.google.android.material.R.color.material_blue_grey_800))
-        } else {
-            holder.cardView.setCardBackgroundColor(holder.itemView.context.getColor(com.google.android.material.R.color.material_deep_teal_200))
-        }
+        holder.bind(dataSet[position])
     }
 
     override fun getItemCount(): Int {
         return dataSet.size
     }
+
     fun getSelectedItems(): List<ReminderEntity> {
         return selectedItems.map { position -> dataSet[position] }
     }
+
 }

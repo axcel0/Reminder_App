@@ -6,6 +6,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.media.RingtoneManager
@@ -17,6 +18,7 @@ import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.myapplication.R
 import com.example.myapplication.databinding.ActivityWakeupBinding
@@ -59,7 +61,23 @@ class WakeupActivity : AppCompatActivity(){
         binding.snoozeButton.setOnClickListener{ onSnoozeButtonClicked() }
         binding.dismissButton.setOnClickListener{ onDismissButtonClicked() }
 
+        //bind alarm title to my alarm name
+        when (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
+            Configuration.UI_MODE_NIGHT_YES -> {
+                binding.alarmTitle.setTextColor(ContextCompat.getColor(this, R.color.white))
+                binding.alarmMessage.setTextColor(ContextCompat.getColor(this, R.color.white))
+            }
+            Configuration.UI_MODE_NIGHT_NO, Configuration.UI_MODE_NIGHT_UNDEFINED -> {
+                binding.alarmTitle.setTextColor(ContextCompat.getColor(this, R.color.black))
+                binding.alarmMessage.setTextColor(ContextCompat.getColor(this, R.color.black))
+            }
+        }
+        binding.alarmTitle.text = title
+        binding.alarmMessage.text = message
+
+
         playAudio(ringtonePath?.let { Uri.parse(it) } ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM))
+        startVibration()
     }
 
     private fun playAudio(audioUri: Uri) {
@@ -74,6 +92,8 @@ class WakeupActivity : AppCompatActivity(){
                     )
                     setDataSource(applicationContext, audioUri)
                     isLooping = true
+                    setVolume(1.0f, 1.0f)
+                    startVibration()
                     prepare()
                     start()
                 }
@@ -83,8 +103,8 @@ class WakeupActivity : AppCompatActivity(){
         }
     }
 
-    private fun snoozeAlarm(additionalTime: Long) {
-        val totalTime = time?.plus(additionalTime)
+    private fun snoozeAlarm() {
+        val totalTime = time?.plus(Constants.DEFAULT_SNOOZE_TIME)
         val notificationIntent = createNotificationIntent(totalTime)
 
         cancelVibration()
@@ -92,8 +112,7 @@ class WakeupActivity : AppCompatActivity(){
         if (notificationId != null && totalTime != null) {
             scheduleAlarm(notificationId!!, totalTime, notificationIntent)
         }
-
-        Toast.makeText(this, "Snoozed for ${additionalTime / 60_000} minutes", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "Snoozed for ${Constants.DEFAULT_SNOOZE_TIME / 60_000} minutes", Toast.LENGTH_SHORT).show()
     }
 
     private fun createNotificationIntent(totalTime: Long?): Intent {
@@ -111,6 +130,18 @@ class WakeupActivity : AppCompatActivity(){
         val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
         vibratorManager.defaultVibrator.cancel()
     }
+    private fun startVibration() {
+        val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+        val vibrator = vibratorManager.defaultVibrator
+        vibrator.vibrate(
+            //loop vibration pattern
+            VibrationEffect.createWaveform(
+                longArrayOf(0, 1000, 500, 1000, 500, 1000, 500, 1000, 500),
+                //repeat at index 0
+                0
+            )
+        )
+    }
 
     private fun scheduleAlarm(notificationId: Int, totalTime: Long, notificationIntent: Intent) {
         val pendingIntent = PendingIntent.getBroadcast(applicationContext, notificationId, notificationIntent,
@@ -118,6 +149,7 @@ class WakeupActivity : AppCompatActivity(){
 
         val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
         alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, totalTime, pendingIntent)
+        startVibration()
     }
 
     //cancel pending intent when activity is destroyed or reminder has been deleted
@@ -151,7 +183,7 @@ class WakeupActivity : AppCompatActivity(){
 
     private fun onSnoozeButtonClicked() {
         mediaPlayer?.stop()
-        snoozeAlarm(Constants.DEFAULT_SNOOZE_TIME)
+        snoozeAlarm()
 
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         for (notification in notificationManager.activeNotifications) {

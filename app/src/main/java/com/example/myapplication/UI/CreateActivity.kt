@@ -209,10 +209,10 @@ class CreateActivity : AppCompatActivity() {
                 binding.timePicker.hour = now.hour
                 binding.timePicker.minute = now.minute
                 // Start updating the date and time
-                handler.post(updateDateTimeRunnable)
+                onResume()
             } else {
                 // Stop updating the date and time
-                handler.removeCallbacks(updateDateTimeRunnable)
+                onPause()
             }
         }
 
