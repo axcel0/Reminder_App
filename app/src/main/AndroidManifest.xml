@@ -52,6 +52,7 @@
             </intent-filter>
         </activity>
 
+
         <service
             android:name=".services.FirebaseService"
             android:exported="false"
