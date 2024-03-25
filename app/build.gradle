@@ -103,7 +103,7 @@ dependencies {
     ksp 'androidx.room:room-compiler:2.6.1'
 
     // Dokka
-    dokkaPlugin("org.jetbrains.dokka:android-documentation-plugin:1.9.10")
+    dokkaPlugin("org.jetbrains.dokka:android-documentation-plugin:1.9.20")
 
     // Test
     testImplementation 'junit:junit:4.13.2'
