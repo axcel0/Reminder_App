@@ -1,4 +1,4 @@
-package com.example.myapplication.models.daos
+package com.example.myapplication.controllers.daos
 
 import androidx.lifecycle.LiveData
 import androidx.room.*
