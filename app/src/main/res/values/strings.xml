@@ -6,7 +6,7 @@
     <string name="select_date_and_time">Select Date and Time</string>
     <string name="title">Title</string>
     <string name="cancel">Cancel</string>
-    <string name="save" >Save</string>
+    <string name="save">Save</string>
     <string name="reminder">Reminder</string>
     <string name="delete_all">Delete All</string>
     <string name="search">Search</string>
@@ -17,4 +17,6 @@
     <string name="swipe_right_to_dismiss">swipe_right_to_dismiss</string>
     <string name="time_expired">time_expired</string>
     <string name="snooze">Snooze</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

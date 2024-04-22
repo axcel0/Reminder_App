@@ -21,6 +21,7 @@ import android.view.WindowManager
 import android.widget.Toast
 import com.example.myapplication.R
 import com.example.myapplication.UI.WakeupActivity
+import com.example.myapplication.UI.WakeupFragment
 import com.example.myapplication.databinding.ActivityWakeupBinding
 import com.example.myapplication.models.AppDatabase
 import com.example.myapplication.models.entities.ReminderEntity
@@ -43,25 +44,18 @@ class AlarmService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Log.d(TAG, "Service started")
-        val bundle = intent?.extras
-        val notificationId = bundle?.getInt(Constants.NOTIFICATION_ID)
-        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val wakeupIntent = Intent(this, WakeupActivity::class.java)
-        val pendingIntent =
-            notificationId?.let {
-                PendingIntent.getActivity(this,
-                    it, wakeupIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+        val notificationId = intent?.extras?.getInt(Constants.NOTIFICATION_ID)
+        notificationId?.let {
+            val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            val wakeupIntent = Intent(this, WakeupActivity::class.java).apply {
+                putExtras(intent) // Pass all extras from the received intent
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
-
-        if (pendingIntent != null) {
-            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), pendingIntent)
+            PendingIntent.getActivity(this, it, wakeupIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)?.let { pendingIntent ->
+                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), pendingIntent)
+                Toast.makeText(this, "Alarm $it", Toast.LENGTH_SHORT).show()
+            }
         }
-        //toast notification id
-        if (notificationId != null) {
-            Toast.makeText(this, "Alarm $notificationId", Toast.LENGTH_SHORT).show()
-        }
-        // Perform background tasks here
-
         // If the system kills the service, restart it
         return START_STICKY
     }
@@ -69,12 +63,10 @@ class AlarmService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         Log.d(TAG, "Service destroyed")
-        // Clean up resources or perform any necessary cleanup here
     }
 
-    override fun onBind(intent: Intent?): IBinder? {
+    override fun onBind(intent: Intent?): IBinder {
         Log.d(TAG, "Service bound")
-        // Return null because this service is not designed to bind to an activity
         return AlarmBinder()
     }
     inner class AlarmBinder : Binder() {

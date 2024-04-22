@@ -39,10 +39,8 @@ class WakeupActivity : AppCompatActivity(){
 
     private lateinit var binding: ActivityWakeupBinding
     private lateinit var db: AppDatabase
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //set onbackpressed dispatcher
         onBackPressedDispatcher.addCallback(this) {
             onSnoozeButtonClicked()
         }
@@ -141,6 +139,9 @@ class WakeupActivity : AppCompatActivity(){
                 0
             )
         )
+        fun onCancel() {
+            vibratorManager.defaultVibrator.cancel()
+        }
     }
 
     private fun scheduleAlarm(notificationId: Int, totalTime: Long, notificationIntent: Intent) {

@@ -8,6 +8,7 @@ import android.content.Intent
 import androidx.core.app.NotificationCompat
 import com.example.myapplication.R
 import com.example.myapplication.UI.WakeupActivity
+import com.example.myapplication.UI.WakeupFragment
 import com.example.myapplication.utils.Constants
 
 class AlarmReceiver : BroadcastReceiver() {
@@ -27,7 +28,7 @@ class AlarmReceiver : BroadcastReceiver() {
     }
 
     private fun createPendingIntent(context: Context, notificationId: Int): PendingIntent {
-        val intent = Intent(context, WakeupActivity::class.java)
+        val intent = Intent(context, WakeupFragment::class.java)
         return PendingIntent.getActivity(context, notificationId, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
     }
 
