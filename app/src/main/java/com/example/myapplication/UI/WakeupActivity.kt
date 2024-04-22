@@ -123,15 +123,14 @@ class WakeupActivity : AppCompatActivity(){
             snoozeCounter?.let { putExtra(Constants.SNOOZE_COUNTER, it - 1) }
         }
     }
-
+    private var vibrator: Vibrator? = null
     private fun cancelVibration() {
-        val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-        vibratorManager.defaultVibrator.cancel()
+        vibrator?.cancel()
     }
     private fun startVibration() {
         val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-        val vibrator = vibratorManager.defaultVibrator
-        vibrator.vibrate(
+        vibrator = vibratorManager.defaultVibrator
+        vibrator?.vibrate(
             //loop vibration pattern
             VibrationEffect.createWaveform(
                 longArrayOf(0, 1000, 500, 1000, 500, 1000, 500, 1000, 500),
@@ -139,9 +138,6 @@ class WakeupActivity : AppCompatActivity(){
                 0
             )
         )
-        fun onCancel() {
-            vibratorManager.defaultVibrator.cancel()
-        }
     }
 
     private fun scheduleAlarm(notificationId: Int, totalTime: Long, notificationIntent: Intent) {
@@ -162,7 +158,7 @@ class WakeupActivity : AppCompatActivity(){
         val pendingIntent = PendingIntent.getBroadcast(this, notificationId, intent, PendingIntent.FLAG_IMMUTABLE)
 
         alarmManager.cancel(pendingIntent)
-        vibratorManager.defaultVibrator.cancel()
+        vibrator?.cancel()
         finish()
     }
 
