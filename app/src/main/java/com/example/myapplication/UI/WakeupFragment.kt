@@ -33,16 +33,6 @@ import com.example.myapplication.utils.Constants
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [WakeupFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class WakeupFragment : Fragment() {
     private var mediaPlayer: MediaPlayer? = null
     private var ringtonePath: String? = null
@@ -162,7 +152,7 @@ class WakeupFragment : Fragment() {
 
     override fun onDestroy() {
         super.onDestroy()
-        // Stop and release the media player if it's not null
+
         mediaPlayer?.let {
             if (it.isPlaying) {
                 it.stop()
@@ -199,7 +189,7 @@ class WakeupFragment : Fragment() {
     private fun onSnoozeButtonClicked() {
         mediaPlayer?.stop()
         snoozeAlarm()
-        vibrator.cancel() // Cancel the vibration when snoozing the alarm
+        vibrator.cancel()
 
         val notificationManager = requireContext().getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         for (notification in notificationManager.activeNotifications) {

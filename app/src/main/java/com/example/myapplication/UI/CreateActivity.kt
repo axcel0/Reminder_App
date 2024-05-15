@@ -126,7 +126,7 @@ class CreateActivity : AppCompatActivity() {
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {
-                // Handle the case where nothing is selected if necessary
+
             }
         }
 
@@ -178,15 +178,12 @@ class CreateActivity : AppCompatActivity() {
     private val handler = Handler(Looper.getMainLooper())
     private val updateDateTimeRunnable = object : Runnable {
         override fun run() {
-            // Get the current date and time
             val now = LocalDateTime.now()
 
-            // Set the current date and time to the DatePicker and TimePicker
             binding.datePicker.updateDate(now.year, now.monthValue - 1, now.dayOfMonth)
             binding.timePicker.hour = now.hour
             binding.timePicker.minute = now.minute
 
-            // Schedule the next update in 1 second
             handler.postDelayed(this, 1000)
         }
     }
@@ -208,10 +205,8 @@ class CreateActivity : AppCompatActivity() {
             if (selectedTime.isBefore(now)) {
                 binding.timePicker.hour = now.hour
                 binding.timePicker.minute = now.minute
-                // Start updating the date and time
                 onResume()
             } else {
-                // Stop updating the date and time
                 onPause()
             }
         }
@@ -221,13 +216,11 @@ class CreateActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        // Start updating the date and time when the activity is resumed
         handler.post(updateDateTimeRunnable)
     }
 
     override fun onPause() {
         super.onPause()
-        // Stop updating the date and time when the activity is paused
         handler.removeCallbacks(updateDateTimeRunnable)
     }
 
@@ -366,10 +359,8 @@ class CreateActivity : AppCompatActivity() {
             putExtra(Constants.REMINDER_RINGTONE_PATH_EXTRA, reminderEntity.ringtonePath)
         }
 
-        //log id
         Log.e("OnCreate save button intent ID", reminderId.toString())
 
-        // Show a toast message
         Toast.makeText(this, "Reminder added", Toast.LENGTH_SHORT).show()
 
         // Create a new notification to notify the user that the reminder has been added
@@ -384,10 +375,8 @@ class CreateActivity : AppCompatActivity() {
             setAutoCancel(true)
         }
 
-        // Set the notification manager ID to the same value as the notification ID from the bundle
         notificationManager.notify(notificationId ?: 0, builder.build())
 
-        // Start the main activity
         startActivity(intent).also { finish() }
 
     }
@@ -437,12 +426,9 @@ class CreateActivity : AppCompatActivity() {
             setAutoCancel(true)
         }
 
-        //set notification manager id same as notificationId from bundle
         notificationManager.notify(0, builder.build())
-        // Show a toast message
         Toast.makeText(this, "Reminder updated", Toast.LENGTH_SHORT).show()
 
-        // Start the main activity
         startActivity(intent).also { finish() }
     }
 

@@ -59,7 +59,6 @@ class WakeupActivity : AppCompatActivity(){
         binding.snoozeButton.setOnClickListener{ onSnoozeButtonClicked() }
         binding.dismissButton.setOnClickListener{ onDismissButtonClicked() }
 
-        //bind alarm title to my alarm name
         when (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
             Configuration.UI_MODE_NIGHT_YES -> {
                 binding.alarmTitle.setTextColor(ContextCompat.getColor(this, R.color.white))
@@ -149,7 +148,6 @@ class WakeupActivity : AppCompatActivity(){
         startVibration()
     }
 
-    //cancel pending intent when activity is destroyed or reminder has been deleted
     private fun cancelPendingIntent() {
         val notificationId = intent.getIntExtra(Constants.NOTIFICATION_ID, 0)
         val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
@@ -171,7 +169,7 @@ class WakeupActivity : AppCompatActivity(){
         cancelPendingIntent()
 
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        // Use the correct notification ID to cancel the notification
+
         notificationId?.let {
             notificationManager.cancel(it)
         }
@@ -217,7 +215,7 @@ class WakeupActivity : AppCompatActivity(){
 
     override fun onDestroy() {
         super.onDestroy()
-        // Stop and release the media player if it's not null
+
         mediaPlayer?.let {
             if (it.isPlaying) {
                 it.stop()
